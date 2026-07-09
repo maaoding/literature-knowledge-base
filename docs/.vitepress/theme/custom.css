@@ -525,6 +525,18 @@ body {
 }
 
 @media (max-width: 640px) {
+  .VPNavBarTitle .title {
+    min-width: 0;
+  }
+
+  .VPNavBarTitle .title span {
+    display: block;
+    max-width: calc(100vw - 132px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .kb-home {
     width: min(1180px, calc(100% - 32px));
   }

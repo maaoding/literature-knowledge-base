@@ -967,13 +967,66 @@
       }
 
       @media (max-width: 720px) {
+        :root {
+          --topbar-height: 112px;
+        }
+
         .topbar-inner {
           width: min(100% - 20px, 1180px);
-          gap: 10px;
+          min-height: var(--topbar-height);
+          padding: 10px 0 12px;
+          gap: 8px;
+          align-items: stretch;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .brand {
+          width: 100%;
+          min-width: 0;
+          gap: 9px;
+          font-size: 17px;
+          line-height: 1.1;
+        }
+
+        .brand-mark {
+          flex: 0 0 34px;
+          width: 34px;
+          height: 34px;
+        }
+
+        .brand-mark img {
+          width: 29px;
+          height: 29px;
         }
 
         .brand span:last-child {
-          display: none;
+          display: inline;
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .nav {
+          width: 100%;
+          justify-content: flex-start;
+          padding-bottom: 2px;
+          scroll-snap-type: x proximity;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .nav::after {
+          flex: 0 0 4px;
+          content: "";
+        }
+
+        .nav-link {
+          flex: 0 0 auto;
+          min-height: 34px;
+          padding: 7px 10px;
+          font-size: 13px;
+          scroll-snap-align: start;
         }
 
         .shell {
