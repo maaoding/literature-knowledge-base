@@ -1854,7 +1854,7 @@
           <div>
             <h2 class="page-title" id="quizTitle">测试题</h2>
             <p class="page-copy">
-              每题按当前阅读直觉选择即可。题目只衡量你更容易进入哪类文本，不判断文学水平。
+              回想最近几次真实阅读，选择每句话有多像你。没有标准答案，也不判断文学水平。
             </p>
           </div>
           <div class="progress-wrap" aria-label="作答进度">
@@ -1879,7 +1879,7 @@
           <form class="quiz-form" id="quizForm"></form>
           <div class="quiz-actions">
             <button class="ghost-button" id="clearButton" type="button">清空答案</button>
-            <p class="hint" id="submitHint" aria-live="polite">选择最接近当前阅读直觉的一项。</p>
+            <p class="hint" id="submitHint" aria-live="polite">按真实阅读习惯选择，不必考虑哪一项更有品味。</p>
             <div class="action-row">
               <button class="ghost-button" id="prevButton" type="button">上一题</button>
               <button class="ghost-button" id="nextButton" type="button" disabled>下一题</button>
@@ -1992,7 +1992,7 @@
     </main>
 
     <script>
-      const storageKey = "literaryStyleTest.v3";
+      const storageKey = "literaryStyleTest.v4";
 
       const dimensions = [
         {
@@ -2053,44 +2053,44 @@
       ];
 
       const choices = [
-        { label: "很不同意", value: -2 },
-        { label: "不同意", value: -1 },
-        { label: "中立", value: 0 },
-        { label: "同意", value: 1 },
-        { label: "很同意", value: 2 }
+        { label: "非常不像我", value: -2 },
+        { label: "不太像我", value: -1 },
+        { label: "说不准", value: 0 },
+        { label: "比较像我", value: 1 },
+        { label: "非常像我", value: 2 }
       ];
 
       const questions = [
-        { text: "我喜欢作品在开头不久就把事件推起来，让我很快知道要追什么。", dimension: "pace", weights: { pace: 1 } },
-        { text: "如果场景、气氛和细节足够有质感，我不急着知道下一步发生什么。", dimension: "pace", weights: { pace: -1 } },
-        { text: "章节短、转折密、悬念连续的作品通常更容易让我一口气读下去。", dimension: "pace", weights: { pace: 1 } },
-        { text: "我愿意在一段缓慢铺开的室内、街道或风景描写里停留很久。", dimension: "pace", weights: { pace: -1 } },
-        { text: "若一个场景很久没有改变人物处境，我会开始失去耐心。", dimension: "pace", weights: { pace: 1 } },
-        { text: "我喜欢作品先让我熟悉声音和氛围，再慢慢显出故事方向。", dimension: "pace", weights: { pace: -1 } },
-        { text: "我最想知道人物心里怎样解释自己，而不只是他们做了什么。", dimension: "focus", weights: { focus: -1 } },
-        { text: "动作、对白和场面变化比大段心理描写更能抓住我。", dimension: "focus", weights: { focus: 1 } },
-        { text: "人物的一次犹豫、回忆或沉默，常比外部事件更让我在意。", dimension: "focus", weights: { focus: -1 } },
-        { text: "我喜欢看局面如何升级：误会、追赶、对峙、揭晓、反转。", dimension: "focus", weights: { focus: 1 } },
-        { text: "即使情节很少，只要人物的感受层次足够细，我也愿意读完。", dimension: "focus", weights: { focus: -1 } },
-        { text: "我更习惯通过人物的选择和行动来判断他们，而不是长时间听他们自述。", dimension: "focus", weights: { focus: 1 } },
-        { text: "我会主动寻找轻盈、机智、明亮，读完后让人透气的作品。", dimension: "mood", weights: { mood: -1 } },
-        { text: "我愿意进入忧郁、危险、压抑或心理压力很强的文本。", dimension: "mood", weights: { mood: 1 } },
-        { text: "日常里的温柔观察和微小幽默，会让我觉得一本书很耐读。", dimension: "mood", weights: { mood: -1 } },
-        { text: "带有阴影、噩梦感或不安气氛的作品，常让我更专注。", dimension: "mood", weights: { mood: 1 } },
-        { text: "我不总想被沉重情绪包围，清亮一点的文本更适合作为长期陪伴。", dimension: "mood", weights: { mood: -1 } },
-        { text: "人物的困境越幽暗、越难轻易化解，我越想继续读下去。", dimension: "mood", weights: { mood: 1 } },
-        { text: "我偏好清楚、节制、干净的句子，不希望语言本身挡住阅读。", dimension: "language", weights: { language: -1 } },
-        { text: "我喜欢浓密的句子、复杂比喻和需要慢慢拆解的语言层次。", dimension: "language", weights: { language: 1 } },
-        { text: "比起华丽修辞，我更信任准确、轻巧、一下就落到位的表达。", dimension: "language", weights: { language: -1 } },
-        { text: "复调声音、长句铺陈和细节堆叠，会增强我对作品的兴趣。", dimension: "language", weights: { language: 1 } },
-        { text: "如果一个意思可以少说几句，我通常更喜欢少说几句。", dimension: "language", weights: { language: -1 } },
-        { text: "我愿意反复读一段文字，只为了捕捉它的节奏、纹理和回声。", dimension: "language", weights: { language: 1 } },
-        { text: "我喜欢线索最后能回收，结尾让我看清整部作品怎样扣合。", dimension: "structure", weights: { structure: -1 } },
-        { text: "碎片、跳接、多重视角和没有完全解释的结尾，会让我觉得更有余味。", dimension: "structure", weights: { structure: 1 } },
-        { text: "我希望作品给出一条相对清楚的阅读路径，即使中途有复杂转折。", dimension: "structure", weights: { structure: -1 } },
-        { text: "当时间线被打散或叙述者不可靠时，我通常会觉得阅读更像探索。", dimension: "structure", weights: { structure: 1 } },
-        { text: "我会在意人物、意象和事件是否最终形成完整图案。", dimension: "structure", weights: { structure: -1 } },
-        { text: "如果作品故意留下缺口，让我读完后继续拼合，我会接受这种不确定。", dimension: "structure", weights: { structure: 1 } }
+        { text: "一本小说开篇几页就出现明确目标或冲突时，我更容易继续读下去。", dimension: "pace", weights: { pace: 1 } },
+        { text: "即使暂时没有明显事件，只要场景和气氛逐渐积累，我也愿意继续读。", dimension: "pace", weights: { pace: -1 } },
+        { text: "每章都带来新线索或局面变化，会明显提高我的阅读兴趣。", dimension: "pace", weights: { pace: 1 } },
+        { text: "作品用较长篇幅写一个地点或日常过程，我也能享受其中。", dimension: "pace", weights: { pace: -1 } },
+        { text: "连续几章都没有改变人物处境时，我通常会失去耐心。", dimension: "pace", weights: { pace: 1 } },
+        { text: "作品较晚才显出故事主线，对我来说不是阅读障碍。", dimension: "pace", weights: { pace: -1 } },
+        { text: "读完一个故事后，最留在我心里的通常是人物怎样感受和解释自己。", dimension: "focus", weights: { focus: -1 } },
+        { text: "人物通过行动显出性格，比叙述直接说明内心更吸引我。", dimension: "focus", weights: { focus: 1 } },
+        { text: "外部事件不多时，只要人物内在发生变化，我仍会觉得故事在前进。", dimension: "focus", weights: { focus: -1 } },
+        { text: "我更关心冲突如何升级和收束，而不是人物长时间反省。", dimension: "focus", weights: { focus: 1 } },
+        { text: "人物的一次犹豫或沉默，常比场面变化更值得我琢磨。", dimension: "focus", weights: { focus: -1 } },
+        { text: "判断人物时，我更信任他们实际做了什么。", dimension: "focus", weights: { focus: 1 } },
+        { text: "选择下一本书时，我常会优先考虑轻松、温暖的阅读感受。", dimension: "mood", weights: { mood: -1 } },
+        { text: "压抑或不安的气氛会让我更投入，而不是立刻想离开。", dimension: "mood", weights: { mood: 1 } },
+        { text: "读完后感到轻松和透气，是我评价阅读体验的重要部分。", dimension: "mood", weights: { mood: -1 } },
+        { text: "即使阅读过程不太舒服，只要情绪有深度，我也愿意继续。", dimension: "mood", weights: { mood: 1 } },
+        { text: "日常中的小趣味，足以支撑我读完一部作品。", dimension: "mood", weights: { mood: -1 } },
+        { text: "故事长期保持沉郁、看不到明显希望时，我通常仍愿意读下去。", dimension: "mood", weights: { mood: 1 } },
+        { text: "句意清楚、用词节制的文字，通常最容易让我投入。", dimension: "language", weights: { language: -1 } },
+        { text: "复杂长句需要停下来拆解时，我常把这种停顿当作阅读乐趣。", dimension: "language", weights: { language: 1 } },
+        { text: "修辞不多但表达准确的段落，往往更能打动我。", dimension: "language", weights: { language: -1 } },
+        { text: "同一段落交织多层意象时，会增加我的阅读兴趣。", dimension: "language", weights: { language: 1 } },
+        { text: "如果一个意思可以更简短地说清，我通常偏好较短的版本。", dimension: "language", weights: { language: -1 } },
+        { text: "我愿意重读一个段落，只为体会句子的节奏和层次。", dimension: "language", weights: { language: 1 } },
+        { text: "读到结尾时，我希望主要线索得到明确回应。", dimension: "structure", weights: { structure: -1 } },
+        { text: "结尾有意保留未解释部分，会让我觉得更有余味。", dimension: "structure", weights: { structure: 1 } },
+        { text: "即使过程复杂，我仍希望能辨认一条稳定的故事主线。", dimension: "structure", weights: { structure: -1 } },
+        { text: "时间顺序被打散时，我通常把阅读当作拼图，而不是障碍。", dimension: "structure", weights: { structure: 1 } },
+        { text: "我喜欢人物与事件在结尾形成可以回看的整体图案。", dimension: "structure", weights: { structure: -1 } },
+        { text: "作品不提供唯一解释时，我通常愿意保留自己的判断。", dimension: "structure", weights: { structure: 1 } }
       ];
 
       const questionsByDimension = Object.fromEntries(
@@ -2387,7 +2387,7 @@
       const methodNotes = [
         {
           title: "作答方式",
-          text: "按你现在最自然的阅读反应选择即可，不需要猜测标准答案，也不需要保持前后完全一致。"
+          text: "回想最近几次真实阅读，判断每句话有多像你；不要按理想中的自己作答，也不需要保持前后完全一致。"
         },
         {
           title: "本地保存",
@@ -2403,7 +2403,11 @@
         },
         {
           title: "题目设计",
-          text: "每题按 -2 到 2 计分，映射到五条文学倾向；每条倾向归一化到 -100 到 100，再用最强的两到三项生成标题、解释和风格推荐。"
+          text: "每条倾向包含 6 题，两个方向各 3 题，并按五个维度交错出现。每题只测一个主要偏好，组合结果比单题更重要。"
+        },
+        {
+          title: "计分方式",
+          text: "每题按 -2 到 2 计分，每条倾向归一化到 -100 到 100，再用最强的两到三项生成标题、解释和风格推荐。"
         },
         {
           title: "阅读闭环",
@@ -2918,7 +2922,7 @@
               <div class="question-number">${String(currentQuestion + 1).padStart(2, "0")}</div>
               <div><p class="question-text">${question.text}</p></div>
             </div>
-            <div class="choice-row" aria-label="同意程度">${options}</div>
+            <div class="choice-row" aria-label="符合程度">${options}</div>
           </article>
         `;
         prevButton.classList.remove("hidden");
@@ -2927,7 +2931,7 @@
         prevButton.disabled = currentQuestion === 0;
         nextButton.disabled = answers[questionIndexValue] === null;
         nextButton.textContent = currentQuestion === questionOrder.length - 1 ? "检查答案" : "下一题";
-        submitHint.textContent = answers[questionIndexValue] === null ? "选择最接近当前阅读直觉的一项。" : "已保存，可以继续或修改。";
+        submitHint.textContent = answers[questionIndexValue] === null ? "按真实阅读习惯选择，不必考虑哪一项更有品味。" : "已保存，可以继续或修改。";
       }
 
       function renderQuestionIndex() {
