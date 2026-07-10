@@ -7,9 +7,21 @@
       name="description"
       content="文学风格测试：用阅读题目、画像解释和风格知识库理解你的文本偏好。"
     />
+    <meta name="theme-color" content="#f6f1e8" />
     <title>文学风格测试</title>
     <link rel="icon" type="image/png" href="assets/literary-style-icon.png" />
     <link rel="apple-touch-icon" href="assets/literary-style-icon.png" />
+    <script>
+      (() => {
+        try {
+          const savedTheme = localStorage.getItem("literaryStyleTest.theme");
+          const theme = savedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          document.documentElement.dataset.theme = theme;
+        } catch (error) {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
     <style>
       :root {
         color-scheme: light;
@@ -300,6 +312,11 @@
         color: var(--ink);
         border: 1px solid var(--line-strong);
         background: rgba(255, 250, 241, 0.72);
+      }
+
+      .ghost-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.42;
       }
 
       .ghost-button:hover,
@@ -695,20 +712,6 @@
         line-height: 1.62;
       }
 
-      .chart-panel {
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
-        background: rgba(255, 250, 241, 0.72);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-      }
-
-      #radarCanvas {
-        display: block;
-        width: 100%;
-        height: 420px;
-      }
-
       .score-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         margin-top: 18px;
@@ -1083,6 +1086,693 @@
           font-size: 29px;
         }
       }
+
+      /* Refined test experience */
+      html[data-theme="dark"] {
+        color-scheme: dark;
+        --paper: #101619;
+        --paper-strong: #182126;
+        --ink: #edf1ef;
+        --muted: #abb7b5;
+        --line: rgba(225, 235, 232, 0.14);
+        --line-strong: rgba(225, 235, 232, 0.28);
+        --panel: rgba(24, 33, 38, 0.94);
+        --crimson: #e57970;
+        --teal: #69c2bc;
+        --ochre: #e0ae62;
+        --plum: #b89ac2;
+        --green: #84b789;
+        --shadow: 0 18px 46px rgba(0, 0, 0, 0.28);
+      }
+
+      body,
+      .topbar,
+      .quiz-actions,
+      .choice-row label,
+      .ghost-button,
+      .filter-button,
+      .meta-pill,
+      .search-input,
+      .method-list li {
+        transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+      }
+
+      body::before {
+        background:
+          linear-gradient(180deg, color-mix(in srgb, var(--paper-strong) 90%, transparent), color-mix(in srgb, var(--paper) 82%, transparent)),
+          repeating-linear-gradient(0deg, color-mix(in srgb, var(--crimson) 5%, transparent) 0 1px, transparent 1px 18px);
+      }
+
+      :focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--teal) 58%, transparent);
+        outline-offset: 3px;
+      }
+
+      .topbar {
+        background: color-mix(in srgb, var(--paper) 90%, transparent);
+      }
+
+      .topbar-actions {
+        position: relative;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-end;
+      }
+
+      .icon-button {
+        display: inline-grid;
+        flex: 0 0 38px;
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        place-items: center;
+        color: var(--ink);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: color-mix(in srgb, var(--paper-strong) 76%, transparent);
+        cursor: pointer;
+        font-size: 19px;
+        line-height: 1;
+      }
+
+      .icon-button:hover {
+        border-color: var(--teal);
+        color: var(--teal);
+      }
+
+      .menu-button {
+        display: none;
+      }
+
+      .lead,
+      .result-copy,
+      .question-text,
+      .module-card h3,
+      .axis-card h3,
+      .style-card h3,
+      .knowledge-card h3,
+      .situation-card h3,
+      .summary-card h3,
+      .path-card h3,
+      .score-card h3,
+      .recommendation-card h3,
+      .comparison-card h3 {
+        color: var(--ink);
+      }
+
+      .home-note {
+        max-width: 620px;
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .visual-stage {
+        min-height: 500px;
+        background: var(--paper-strong);
+      }
+
+      .visual-stage__image {
+        min-height: 500px;
+      }
+
+      html[data-theme="dark"] .visual-stage__image {
+        filter: brightness(0.66) saturate(0.82) contrast(1.05);
+      }
+
+      html[data-theme="dark"] .visual-stage::after {
+        background: linear-gradient(180deg, transparent, rgba(16, 22, 25, 0.9));
+      }
+
+      html[data-theme="dark"] .visual-caption {
+        color: var(--ink);
+        border-color: var(--line-strong);
+      }
+
+      .quiz-context {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .question-position {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      .text-button {
+        padding: 5px 0;
+        color: var(--teal);
+        background: transparent;
+        cursor: pointer;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      .question-index {
+        display: grid;
+        grid-template-columns: repeat(15, minmax(0, 1fr));
+        gap: 6px;
+        margin: 0 0 16px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: color-mix(in srgb, var(--panel) 88%, transparent);
+      }
+
+      .question-index button {
+        width: 100%;
+        height: 32px;
+      }
+
+      .question-index button.current {
+        color: var(--paper-strong);
+        border-color: var(--crimson);
+        background: var(--crimson);
+      }
+
+      .tool-panel {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .quiz-form {
+        min-height: 0;
+      }
+
+      .question {
+        max-width: 920px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 30px;
+      }
+
+      .question-top {
+        margin-bottom: 22px;
+      }
+
+      .question-text {
+        max-width: 760px;
+        margin-bottom: 0;
+        font-size: 21px;
+        line-height: 1.62;
+      }
+
+      .question-meta {
+        display: none;
+      }
+
+      .choice-row label {
+        min-height: 58px;
+        color: var(--muted);
+        border-color: var(--line);
+        background: color-mix(in srgb, var(--paper-strong) 78%, transparent);
+      }
+
+      .choice-row label:hover {
+        border-color: var(--teal);
+        color: var(--ink);
+      }
+
+      .choice-row label:has(input:checked) {
+        color: #ffffff;
+      }
+
+      .quiz-actions {
+        background: color-mix(in srgb, var(--paper) 94%, transparent);
+      }
+
+      .quiz-review {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 26px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .quiz-review h3 {
+        margin-bottom: 8px;
+        font-size: 24px;
+      }
+
+      .review-list {
+        display: grid;
+        gap: 1px;
+        margin-top: 20px;
+        border: 1px solid var(--line);
+        background: var(--line);
+      }
+
+      .review-row {
+        display: grid;
+        grid-template-columns: minmax(140px, 1fr) auto;
+        gap: 12px;
+        padding: 14px 16px;
+        align-items: center;
+        background: var(--paper-strong);
+      }
+
+      .review-row span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .profile-panel {
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .profile-panel h3 {
+        margin-bottom: 18px;
+        font-size: 18px;
+      }
+
+      .profile-bars {
+        display: grid;
+        gap: 18px;
+      }
+
+      .profile-row {
+        display: grid;
+        gap: 8px;
+      }
+
+      .profile-row__head,
+      .profile-row__poles {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .profile-row__head strong {
+        font-size: 14px;
+      }
+
+      .profile-row__head span {
+        color: var(--crimson);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .profile-row__poles {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .profile-track {
+        position: relative;
+        height: 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: linear-gradient(90deg, color-mix(in srgb, var(--plum) 24%, transparent), transparent 50%, color-mix(in srgb, var(--teal) 28%, transparent));
+      }
+
+      .profile-track::before {
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: 50%;
+        width: 1px;
+        content: "";
+        background: var(--line-strong);
+      }
+
+      .profile-dot {
+        position: absolute;
+        top: 50%;
+        width: 17px;
+        height: 17px;
+        border: 3px solid var(--paper-strong);
+        border-radius: 50%;
+        background: var(--crimson);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transform: translate(-50%, -50%);
+      }
+
+      .result-section,
+      .map-group {
+        margin-top: 34px;
+      }
+
+      .result-section > h3,
+      .map-group > h3 {
+        margin: 4px 0 16px;
+        font-size: 24px;
+      }
+
+      .section-kicker {
+        color: var(--crimson);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .summary-card {
+        box-shadow: none;
+      }
+
+      #resultContent > .summary-grid {
+        margin-top: 18px;
+      }
+
+      details.axis-card,
+      details.situation-card,
+      details.comparison-card,
+      details.knowledge-card,
+      details.style-card {
+        padding: 0;
+        overflow: hidden;
+      }
+
+      details > summary {
+        position: relative;
+        padding: 18px 46px 18px 18px;
+        cursor: pointer;
+        list-style: none;
+      }
+
+      details > summary::-webkit-details-marker {
+        display: none;
+      }
+
+      details > summary::after {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        color: var(--teal);
+        content: "+";
+        font-size: 22px;
+        line-height: 1;
+      }
+
+      details[open] > summary::after {
+        content: "−";
+      }
+
+      details > summary h3 {
+        margin: 0 0 8px;
+      }
+
+      details > summary p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .detail-body {
+        padding: 0 18px 18px;
+        border-top: 1px solid var(--line);
+      }
+
+      .library-grid {
+        align-items: start;
+      }
+
+      .library-count {
+        grid-column: 1 / -1;
+        width: 100%;
+        margin: -4px 0 14px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      html[data-theme="dark"] .ghost-button,
+      html[data-theme="dark"] .filter-button,
+      html[data-theme="dark"] .meta-pill,
+      html[data-theme="dark"] .search-input,
+      html[data-theme="dark"] .method-list li,
+      html[data-theme="dark"] .tag,
+      html[data-theme="dark"] .question-index button {
+        color: var(--ink);
+        background: color-mix(in srgb, var(--paper-strong) 86%, transparent);
+      }
+
+      html[data-theme="dark"] .button {
+        color: #ffffff;
+      }
+
+      html[data-theme="dark"] .ghost-button:hover,
+      html[data-theme="dark"] .filter-button:hover,
+      html[data-theme="dark"] .filter-button.active,
+      html[data-theme="dark"] .question-index button.answered,
+      html[data-theme="dark"] .question-index button.current {
+        color: #ffffff;
+      }
+
+      html[data-theme="dark"] .tag {
+        border-color: var(--line);
+      }
+
+      @media (max-width: 980px) {
+        .question-index {
+          grid-template-columns: repeat(10, minmax(0, 1fr));
+        }
+
+        .result-layout {
+          gap: 18px;
+        }
+      }
+
+      @media (max-width: 720px) {
+        :root {
+          --topbar-height: 58px;
+        }
+
+        .topbar-inner {
+          width: calc(100% - 20px);
+          min-height: var(--topbar-height);
+          padding: 8px 0;
+          gap: 10px;
+          align-items: center;
+          flex-direction: row;
+          justify-content: space-between;
+        }
+
+        .brand {
+          width: auto;
+          max-width: calc(100vw - 116px);
+          font-size: 16px;
+        }
+
+        .brand-mark {
+          flex-basis: 34px;
+        }
+
+        .topbar-actions {
+          gap: 6px;
+        }
+
+        .menu-button {
+          display: inline-grid;
+        }
+
+        .nav {
+          position: absolute;
+          top: calc(100% + 10px);
+          right: 0;
+          display: none;
+          width: min(250px, calc(100vw - 20px));
+          max-height: calc(100vh - 82px);
+          padding: 8px;
+          overflow-y: auto;
+          border: 1px solid var(--line);
+          border-radius: var(--radius);
+          background: var(--paper-strong);
+          box-shadow: var(--shadow);
+        }
+
+        .nav.open {
+          display: grid;
+          gap: 4px;
+        }
+
+        .nav::after {
+          display: none;
+        }
+
+        .nav-link {
+          width: 100%;
+          min-height: 40px;
+          padding: 8px 12px;
+          justify-content: flex-start;
+          border-radius: 6px;
+        }
+
+        .shell {
+          width: calc(100% - 24px);
+          padding-top: 18px;
+        }
+
+        .app-intro {
+          display: flex;
+          gap: 24px;
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        h1 {
+          margin-bottom: 14px;
+          font-size: 36px;
+        }
+
+        .lead {
+          margin-bottom: 18px;
+          line-height: 1.72;
+        }
+
+        .visual-stage,
+        .visual-stage__image {
+          min-height: 260px;
+          height: 260px;
+        }
+
+        .visual-caption {
+          right: 14px;
+          bottom: 14px;
+          left: 14px;
+        }
+
+        .visual-caption > span {
+          max-width: 112px;
+          text-align: right;
+        }
+
+        .page-head {
+          gap: 14px;
+          margin-bottom: 18px;
+        }
+
+        .progress-wrap {
+          min-width: 0;
+        }
+
+        .question-index {
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+          padding: 10px;
+        }
+
+        .quiz-form {
+          min-height: 0;
+        }
+
+        .question {
+          padding: 20px 16px;
+        }
+
+        .question-top {
+          display: grid;
+          grid-template-columns: 34px minmax(0, 1fr);
+          gap: 12px;
+          margin-bottom: 18px;
+        }
+
+        .question-number {
+          width: 34px;
+          height: 34px;
+        }
+
+        .question-text {
+          font-size: 18px;
+          line-height: 1.55;
+        }
+
+        .choice-row {
+          gap: 7px;
+        }
+
+        .choice-row label {
+          min-height: 46px;
+          padding: 10px 12px;
+        }
+
+        .quiz-actions {
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          padding-top: 12px;
+        }
+
+        .quiz-actions .hint {
+          grid-column: 1 / -1;
+        }
+
+        .quiz-actions > .action-row {
+          justify-content: flex-end;
+        }
+
+        .quiz-actions .button,
+        .quiz-actions .ghost-button {
+          min-height: 40px;
+          padding: 8px 12px;
+        }
+
+        .review-row {
+          grid-template-columns: 1fr;
+          gap: 4px;
+        }
+
+        .result-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .summary-grid,
+        .path-grid,
+        .recommendation-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .profile-panel {
+          padding: 18px 16px;
+        }
+
+        .result-section,
+        .map-group {
+          margin-top: 28px;
+        }
+
+        .library-tools {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .filter-row {
+          overflow-x: auto;
+          flex-wrap: nowrap;
+          padding-bottom: 4px;
+        }
+
+        .filter-button {
+          flex: 0 0 auto;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
     </style>
   </head>
   <body>
@@ -1094,14 +1784,30 @@
           </span>
           <span>文学风格测试</span>
         </a>
-        <nav class="nav" aria-label="站内导航">
-          <a class="nav-link" href="#home" data-route="home">入口</a>
-          <a class="nav-link" href="#quiz" data-route="quiz">测试</a>
-          <a class="nav-link" href="#result" data-route="result">结果</a>
-          <a class="nav-link" href="#map" data-route="map">阅读地图</a>
-          <a class="nav-link" href="#knowledge" data-route="knowledge">风格知识库</a>
-          <a class="nav-link" href="#method" data-route="method">方法来源</a>
-        </nav>
+        <div class="topbar-actions">
+          <nav class="nav" id="siteNav" aria-label="站内导航">
+            <a class="nav-link" href="#home" data-route="home">入口</a>
+            <a class="nav-link" href="#quiz" data-route="quiz">测试</a>
+            <a class="nav-link" href="#result" data-route="result">结果</a>
+            <a class="nav-link" href="#map" data-route="map">阅读地图</a>
+            <a class="nav-link" href="#knowledge" data-route="knowledge">风格知识库</a>
+            <a class="nav-link" href="#method" data-route="method">方法来源</a>
+          </nav>
+          <button class="icon-button" id="themeButton" type="button" aria-label="切换到深色模式" title="切换外观">
+            <span id="themeIcon" aria-hidden="true">☾</span>
+          </button>
+          <button
+            class="icon-button menu-button"
+            id="menuButton"
+            type="button"
+            aria-label="打开站内导航"
+            aria-controls="siteNav"
+            aria-expanded="false"
+            title="站内导航"
+          >
+            <span aria-hidden="true">☰</span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -1111,24 +1817,25 @@
           <div>
             <h1 id="homeTitle">文学风格测试</h1>
             <p class="lead">
-              这是一套本地运行的阅读画像测试，用题目把阅读偏好拆成叙事节奏、故事重心、情绪色温、语言纹理和结构预期五条倾向。它不把人贴成固定标签，而是给出你更容易进入的文本气质、作品类型和下一步试读方向。
+              用 30 道阅读情境题，辨认你更容易进入的叙事节奏、人物重心、情绪气氛、语言纹理和结构方式。
             </p>
             <div class="meta-row" aria-label="测试信息">
               <span class="meta-pill">30 道题</span>
               <span class="meta-pill">5 条文学倾向</span>
               <span class="meta-pill">约 5 分钟</span>
-              <span class="meta-pill">生成阅读画像</span>
             </div>
             <div class="action-row" style="margin-top: 22px">
-              <a class="button" href="#quiz" data-route-link="quiz">开始测试</a>
-              <a class="ghost-button" href="#knowledge" data-route-link="knowledge">先看风格知识库</a>
+              <a class="button" id="startButton" href="#quiz" data-route-link="quiz">开始测试</a>
+              <a class="ghost-button" href="#knowledge" data-route-link="knowledge">浏览风格档案</a>
             </div>
-            <div class="module-grid" id="moduleGrid"></div>
+            <p class="home-note">结果只描述阅读入口，不判断文学能力，也不会上传你的答案。</p>
           </div>
           <div class="visual-stage" aria-label="文学阅读地图可视化">
             <img
               class="visual-stage__image"
-              src="assets/literary-style-hero.png"
+              src="assets/literary-style-hero-768.webp"
+              srcset="assets/literary-style-hero-768.webp 768w, assets/literary-style-hero-1536.webp 1536w"
+              sizes="(max-width: 980px) 100vw, 50vw"
               alt="由书脊、纸卡和连接线构成的文学阅读地图插图"
             />
             <div class="visual-caption">
@@ -1161,14 +1868,22 @@
           </div>
         </div>
 
-        <nav class="question-index" id="questionIndex" aria-label="题目快速索引"></nav>
+        <div class="quiz-context">
+          <span class="question-position" id="questionPosition">第 1 / 30 题</span>
+          <button class="text-button" id="reviewToggle" type="button" aria-expanded="false" aria-controls="questionIndex">
+            查看作答
+          </button>
+        </div>
+        <nav class="question-index hidden" id="questionIndex" aria-label="题目快速索引"></nav>
         <div class="tool-panel">
           <form class="quiz-form" id="quizForm"></form>
           <div class="quiz-actions">
-            <p class="hint" id="submitHint">答完全部题目后，可以生成结果。</p>
+            <button class="ghost-button" id="clearButton" type="button">清空答案</button>
+            <p class="hint" id="submitHint" aria-live="polite">选择最接近当前阅读直觉的一项。</p>
             <div class="action-row">
-              <button class="ghost-button" id="clearButton" type="button">清空答案</button>
-              <button class="button" id="submitButton" type="button" disabled>生成结果</button>
+              <button class="ghost-button" id="prevButton" type="button">上一题</button>
+              <button class="ghost-button" id="nextButton" type="button" disabled>下一题</button>
+              <button class="button hidden" id="submitButton" type="button" disabled>生成结果</button>
             </div>
           </div>
         </div>
@@ -1178,7 +1893,7 @@
         <div class="page-head">
           <div>
             <h2 class="page-title">结果</h2>
-            <p class="page-copy">结果页根据五条文学倾向生成阅读画像、图表和试读建议。没有完成测试时，这里会保持空状态。</p>
+            <p class="page-copy">五条阅读倾向组成你的阅读画像，结果仅用于选择下一步试读入口。</p>
           </div>
           <div class="result-actions">
             <a class="ghost-button" href="#quiz" data-route-link="quiz">回到测试</a>
@@ -1197,15 +1912,23 @@
             <section>
               <h2 class="result-title" id="resultTitle">均衡漫游者</h2>
               <p class="result-copy" id="resultCopy"></p>
-              <div class="summary-grid" id="summaryGrid"></div>
             </section>
-            <aside class="chart-panel">
-              <canvas id="radarCanvas" width="640" height="520"></canvas>
+            <aside class="profile-panel" aria-labelledby="profileTitle">
+              <h3 id="profileTitle">五条阅读倾向</h3>
+              <div class="profile-bars" id="scoreGrid"></div>
             </aside>
           </div>
-          <div class="score-grid" id="scoreGrid"></div>
-          <div class="path-grid" id="pathGrid"></div>
-          <div class="recommendation-grid" id="recommendationGrid"></div>
+          <div class="summary-grid" id="summaryGrid"></div>
+          <section class="result-section">
+            <div class="section-kicker">从画像进入阅读</div>
+            <h3>下一步阅读路径</h3>
+            <div class="path-grid" id="pathGrid"></div>
+          </section>
+          <section class="result-section">
+            <div class="section-kicker">可先试读</div>
+            <h3>与你接近的风格</h3>
+            <div class="recommendation-grid" id="recommendationGrid"></div>
+          </section>
         </div>
       </section>
 
@@ -1218,9 +1941,21 @@
             </p>
           </div>
         </div>
-        <div class="axis-grid" id="axisGrid"></div>
-        <div class="situation-grid" id="situationGrid"></div>
-        <div class="comparison-grid" id="comparisonGrid"></div>
+        <section class="map-group">
+          <div class="section-kicker">五条倾向</div>
+          <h3>阅读维度</h3>
+          <div class="axis-grid" id="axisGrid"></div>
+        </section>
+        <section class="map-group">
+          <div class="section-kicker">按此刻需要选择</div>
+          <h3>阅读情境</h3>
+          <div class="situation-grid" id="situationGrid"></div>
+        </section>
+        <section class="map-group">
+          <div class="section-kicker">辨认相近入口</div>
+          <h3>风格对照</h3>
+          <div class="comparison-grid" id="comparisonGrid"></div>
+        </section>
       </section>
 
       <section class="page" id="page-knowledge" data-page="knowledge" aria-labelledby="knowledgeTitle">
@@ -1358,28 +2093,15 @@
         { text: "如果作品故意留下缺口，让我读完后继续拼合，我会接受这种不确定。", dimension: "structure", weights: { structure: 1 } }
       ];
 
-      const siteModules = [
-        {
-          title: "阅读测试",
-          copy: "题目从节奏、重心、色温、纹理和结构五条阅读倾向计算，不输出单一流派身份。",
-          route: "quiz"
-        },
-        {
-          title: "阅读画像",
-          copy: "生成分数条、雷达图、进入方式和下一步试读方向，便于继续探索。",
-          route: "result"
-        },
-        {
-          title: "阅读地图",
-          copy: "把阅读维度、阅读情境和易混风格放在同一层，帮助你从结果进入文本。",
-          route: "map"
-        },
-        {
-          title: "风格知识库",
-          copy: "收纳阅读维度、风格档案、阅读情境和风格对照，便于按结果继续探索。",
-          route: "knowledge"
-        }
-      ];
+      const questionsByDimension = Object.fromEntries(
+        dimensions.map((dimension) => [
+          dimension.id,
+          questions.map((question, index) => ({ question, index })).filter((item) => item.question.dimension === dimension.id)
+        ])
+      );
+      const questionOrder = Array.from({ length: 6 }, (_, round) =>
+        dimensions.map((dimension) => questionsByDimension[dimension.id][round].index)
+      ).flat();
 
       const appealFactors = [
         {
@@ -1716,14 +2438,22 @@
 
       const pages = [...document.querySelectorAll("[data-page]")];
       const navLinks = [...document.querySelectorAll("[data-route]")];
-      const moduleGrid = document.querySelector("#moduleGrid");
+      const startButton = document.querySelector("#startButton");
+      const siteNav = document.querySelector("#siteNav");
+      const themeButton = document.querySelector("#themeButton");
+      const themeIcon = document.querySelector("#themeIcon");
+      const menuButton = document.querySelector("#menuButton");
       const quizForm = document.querySelector("#quizForm");
       const questionIndex = document.querySelector("#questionIndex");
+      const questionPosition = document.querySelector("#questionPosition");
+      const reviewToggle = document.querySelector("#reviewToggle");
       const progressCopy = document.querySelector("#progressCopy");
       const progressPercent = document.querySelector("#progressPercent");
       const progressBar = document.querySelector("#progressBar");
       const submitButton = document.querySelector("#submitButton");
       const submitHint = document.querySelector("#submitHint");
+      const prevButton = document.querySelector("#prevButton");
+      const nextButton = document.querySelector("#nextButton");
       const clearButton = document.querySelector("#clearButton");
       const restartButton = document.querySelector("#restartButton");
       const emptyResult = document.querySelector("#emptyResult");
@@ -1742,11 +2472,13 @@
       const libraryGrid = document.querySelector("#libraryGrid");
       const methodList = document.querySelector("#methodList");
       const savedStateText = document.querySelector("#savedStateText");
-      const radarCanvas = document.querySelector("#radarCanvas");
 
       const answers = Array(questions.length).fill(null);
       let latestScores = null;
-      let activeLibraryType = "all";
+      let currentQuestion = 0;
+      let reviewMode = false;
+      let autoAdvanceTimer = null;
+      let activeLibraryType = "style";
       let pendingScrollTarget = null;
 
       function normalizeRoute(route) {
@@ -1764,19 +2496,31 @@
         const normalized = normalizeRoute(route);
         pages.forEach((page) => page.classList.toggle("active", page.dataset.page === normalized));
         navLinks.forEach((link) => link.classList.toggle("active", link.dataset.route === normalized));
+        closeMenu();
+        if (normalized === "quiz") {
+          renderQuiz();
+        }
         if (normalized === "result") {
           renderResultState();
-          drawRadar(latestScores);
+        }
+        if (normalized === "knowledge" && pendingScrollTarget) {
+          const entry = contentIndex.find((item) => item.anchor === pendingScrollTarget);
+          if (entry) {
+            activeLibraryType = entry.category;
+            renderLibraryFilters();
+            renderLibrary();
+          }
         }
         if (pendingScrollTarget) {
           const target = document.getElementById(pendingScrollTarget);
           pendingScrollTarget = null;
           if (target) {
-            requestAnimationFrame(() => target.scrollIntoView({ behavior: "smooth", block: "start" }));
+            if (target.tagName === "DETAILS") target.open = true;
+            requestAnimationFrame(() => target.scrollIntoView({ behavior: getScrollBehavior(), block: "start" }));
             return;
           }
         }
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({ top: 0, behavior: getScrollBehavior() });
       }
 
       function goToRoute(route, targetId = null) {
@@ -1787,6 +2531,16 @@
         } else {
           window.location.hash = normalized;
         }
+      }
+
+      function getScrollBehavior() {
+        return matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      }
+
+      function closeMenu() {
+        siteNav.classList.remove("open");
+        menuButton.setAttribute("aria-expanded", "false");
+        menuButton.setAttribute("aria-label", "打开站内导航");
       }
 
       function getDimension(id) {
@@ -2048,7 +2802,7 @@
 
       function saveState() {
         try {
-          localStorage.setItem(storageKey, JSON.stringify({ answers, latestScores, savedAt: Date.now() }));
+          localStorage.setItem(storageKey, JSON.stringify({ answers, latestScores, currentQuestion, savedAt: Date.now() }));
         } catch (error) {
           updateSavedStateText();
           return;
@@ -2066,14 +2820,25 @@
           if (saved.latestScores && typeof saved.latestScores === "object") {
             latestScores = saved.latestScores;
           }
+          if (Number.isInteger(saved.currentQuestion)) {
+            currentQuestion = Math.max(0, Math.min(questionOrder.length - 1, saved.currentQuestion));
+          } else {
+            const firstMissing = questionOrder.findIndex((index) => answers[index] === null);
+            currentQuestion = firstMissing >= 0 ? firstMissing : 0;
+          }
         } catch (error) {
           latestScores = null;
         }
       }
 
       function clearState() {
+        clearTimeout(autoAdvanceTimer);
         answers.fill(null);
         latestScores = null;
+        currentQuestion = 0;
+        reviewMode = false;
+        questionIndex.classList.add("hidden");
+        reviewToggle.setAttribute("aria-expanded", "false");
         try {
           localStorage.removeItem(storageKey);
         } catch (error) {
@@ -2087,70 +2852,96 @@
 
       function updateSavedStateText() {
         const answered = answers.filter((answer) => answer !== null).length;
-        savedStateText.textContent = answered
-          ? `已在本地保存 ${answered} 道题`
-          : "尚未保存作答";
-      }
-
-      function renderModules() {
-        moduleGrid.innerHTML = siteModules
-          .map(
-            (item) => `
-              <article class="module-card">
-                <h3>${item.title}</h3>
-                <p>${item.copy}</p>
-                <div class="link-row" style="margin-top: 14px">
-                  <a class="ghost-button" href="#${item.route}" data-route-link="${item.route}">进入</a>
-                </div>
-              </article>
-            `
-          )
-          .join("");
+        savedStateText.textContent = latestScores
+          ? "阅读画像已生成"
+          : answered
+            ? `已保存 ${answered} / ${questions.length}`
+            : "尚未保存作答";
+        startButton.textContent = latestScores ? "查看结果" : answered ? "继续测试" : "开始测试";
+        startButton.dataset.routeLink = latestScores ? "result" : "quiz";
+        startButton.setAttribute("href", latestScores ? "#result" : "#quiz");
       }
 
       function renderQuiz() {
-        quizForm.innerHTML = questions
-          .map((question, index) => {
-            const dimension = getDimension(question.dimension);
-            const options = choices
-              .map(
-                (choice) => `
-                  <label>
-                    <input
-                      type="radio"
-                      name="q${index}"
-                      value="${choice.value}"
-                      ${answers[index] === choice.value ? "checked" : ""}
-                    />
-                    <span>${choice.label}</span>
-                  </label>
-                `
-              )
-              .join("");
-
-            return `
-              <article class="question" data-question="${index}" tabindex="-1">
-                <div class="question-top">
-                  <div class="question-number">${String(index + 1).padStart(2, "0")}</div>
-                  <div>
-                    <p class="question-text">${question.text}</p>
-                    <div class="question-meta">${dimension.name}：${dimension.negative} ↔ ${dimension.positive}</div>
-                  </div>
-                </div>
-                <div class="choice-row">${options}</div>
-              </article>
-            `;
-          })
-          .join("");
         renderQuestionIndex();
+        const answered = answers.filter((answer) => answer !== null).length;
+        if (reviewMode) {
+          questionPosition.textContent = "作答检查";
+          reviewToggle.textContent = `返回第 ${currentQuestion + 1} 题`;
+          reviewToggle.setAttribute("aria-expanded", "true");
+          const reviewRows = dimensions
+            .map((dimension) => {
+              const indexes = questionsByDimension[dimension.id].map((item) => item.index);
+              const count = indexes.filter((index) => answers[index] !== null).length;
+              return `<div class="review-row"><strong>${dimension.name}</strong><span>${count} / ${indexes.length} 已回答</span></div>`;
+            })
+            .join("");
+          quizForm.innerHTML = `
+            <section class="quiz-review" aria-labelledby="reviewTitle">
+              <h3 id="reviewTitle">检查后生成阅读画像</h3>
+              <p class="page-copy">已完成 ${answered} / ${questions.length} 题。需要修改时，从上方“查看作答”选择题号。</p>
+              <div class="review-list">${reviewRows}</div>
+            </section>
+          `;
+          prevButton.classList.add("hidden");
+          nextButton.classList.add("hidden");
+          submitButton.classList.remove("hidden");
+          submitButton.disabled = answered !== questions.length;
+          submitHint.textContent = answered === questions.length ? "答案已完整，可以生成结果。" : `还差 ${questions.length - answered} 题。`;
+          return;
+        }
+
+        const questionIndexValue = questionOrder[currentQuestion];
+        const question = questions[questionIndexValue];
+        const options = choices
+          .map(
+            (choice) => `
+              <label>
+                <input
+                  type="radio"
+                  name="q${questionIndexValue}"
+                  value="${choice.value}"
+                  ${answers[questionIndexValue] === choice.value ? "checked" : ""}
+                />
+                <span>${choice.label}</span>
+              </label>
+            `
+          )
+          .join("");
+
+        questionPosition.textContent = `第 ${currentQuestion + 1} / ${questions.length} 题`;
+        reviewToggle.textContent = "查看作答";
+        reviewToggle.setAttribute("aria-expanded", String(!questionIndex.classList.contains("hidden")));
+        quizForm.innerHTML = `
+          <article class="question" data-question="${questionIndexValue}" tabindex="-1">
+            <div class="question-top">
+              <div class="question-number">${String(currentQuestion + 1).padStart(2, "0")}</div>
+              <div><p class="question-text">${question.text}</p></div>
+            </div>
+            <div class="choice-row" aria-label="同意程度">${options}</div>
+          </article>
+        `;
+        prevButton.classList.remove("hidden");
+        nextButton.classList.remove("hidden");
+        submitButton.classList.add("hidden");
+        prevButton.disabled = currentQuestion === 0;
+        nextButton.disabled = answers[questionIndexValue] === null;
+        nextButton.textContent = currentQuestion === questionOrder.length - 1 ? "检查答案" : "下一题";
+        submitHint.textContent = answers[questionIndexValue] === null ? "选择最接近当前阅读直觉的一项。" : "已保存，可以继续或修改。";
       }
 
       function renderQuestionIndex() {
-        questionIndex.innerHTML = questions
+        questionIndex.innerHTML = questionOrder
           .map(
-            (_, index) => `
-              <button type="button" data-question-jump="${index}" aria-label="跳到第 ${index + 1} 题">
-                ${index + 1}
+            (questionIndexValue, position) => `
+              <button
+                class="${answers[questionIndexValue] !== null ? "answered" : ""} ${position === currentQuestion && !reviewMode ? "current" : ""}"
+                type="button"
+                data-question-jump="${position}"
+                aria-label="跳到第 ${position + 1} 题${answers[questionIndexValue] !== null ? "，已回答" : ""}"
+                ${position === currentQuestion && !reviewMode ? 'aria-current="step"' : ""}
+              >
+                ${position + 1}
               </button>
             `
           )
@@ -2164,31 +2955,38 @@
         progressPercent.textContent = `${percent}%`;
         progressBar.style.width = `${percent}%`;
         submitButton.disabled = answered !== questions.length;
-        submitHint.textContent =
-          answered === questions.length ? "已答完，可以生成结果。" : `还差 ${questions.length - answered} 道题。`;
-        questionIndex.querySelectorAll("[data-question-jump]").forEach((button, index) => {
-          button.classList.toggle("answered", answers[index] !== null);
-        });
+        updateSavedStateText();
       }
 
-      function scrollToQuestion(index) {
-        const target = document.querySelector(`[data-question="${index}"]`);
-        if (!target) return;
-        target.scrollIntoView({ behavior: "smooth", block: "center" });
-        target.focus({ preventScroll: true });
+      function showQuestion(position, focus = true) {
+        clearTimeout(autoAdvanceTimer);
+        currentQuestion = Math.max(0, Math.min(questionOrder.length - 1, position));
+        reviewMode = false;
+        renderQuiz();
+        updateProgress();
+        saveState();
+        if (focus) {
+          requestAnimationFrame(() => document.querySelector(".question")?.focus({ preventScroll: true }));
+        }
+      }
+
+      function advanceQuestion() {
+        const questionIndexValue = questionOrder[currentQuestion];
+        if (answers[questionIndexValue] === null) return;
+        if (currentQuestion === questionOrder.length - 1) {
+          reviewMode = true;
+          renderQuiz();
+          updateProgress();
+          return;
+        }
+        showQuestion(currentQuestion + 1);
       }
 
       function showResults() {
-        const firstMissing = answers.findIndex((answer) => answer === null);
-        document.querySelectorAll(".question").forEach((element) => element.classList.remove("missing"));
-        questionIndex.querySelectorAll("[data-question-jump]").forEach((button) => button.classList.remove("missing"));
-
-        if (firstMissing >= 0) {
-          const question = document.querySelector(`[data-question="${firstMissing}"]`);
-          question?.classList.add("missing");
-          questionIndex.querySelector(`[data-question-jump="${firstMissing}"]`)?.classList.add("missing");
+        const firstMissingPosition = questionOrder.findIndex((index) => answers[index] === null);
+        if (firstMissingPosition >= 0) {
+          showQuestion(firstMissingPosition);
           submitHint.textContent = "还有题目没有回答，先补完再生成结果。";
-          scrollToQuestion(firstMissing);
           return;
         }
 
@@ -2238,28 +3036,17 @@
           .map((dimension) => {
             const score = Math.round(scores[dimension.id] || 0);
             const left = ((score + 100) / 200) * 100;
-            const side = sideForScore(score);
-            const note =
-              side === "positive"
-                ? dimension.positiveMeaning
-                : side === "negative"
-                  ? dimension.negativeMeaning
-                  : "这一倾向接近平衡，说明你能在两种阅读入口之间切换。";
             return `
-              <article class="score-card">
-                <header>
+              <div class="profile-row" aria-label="${dimension.name}：${score > 0 ? "+" : ""}${score}，${dimension.negative}到${dimension.positive}">
+                <div class="profile-row__head">
                   <strong>${dimension.name}</strong>
-                  <span>${dimension.negative} ↔ ${dimension.positive}</span>
                   <span>${score > 0 ? "+" : ""}${score}</span>
-                </header>
-                <div class="score-line" aria-hidden="true">
-                  <span class="score-dot" style="left:${left}%"></span>
                 </div>
-                <p class="score-note">${note}</p>
-                <div class="link-row">
-                  <a class="ghost-button" href="#map" data-route-link="map" data-scroll-target="factor-${dimension.id}">查看维度</a>
+                <div class="profile-track" aria-hidden="true">
+                  <span class="profile-dot" style="left:${left}%"></span>
                 </div>
-              </article>
+                <div class="profile-row__poles"><span>${dimension.negative}</span><span>${dimension.positive}</span></div>
+              </div>
             `;
           })
           .join("");
@@ -2284,6 +3071,10 @@
 
       function getRecommendations(scores) {
         const ranked = getRankedDimensions(scores).filter((dimension) => dimension.side !== "center");
+        if (!ranked.length) {
+          const balancedIds = ["light-daily", "dramatic-collision", "modern-fragment"];
+          return balancedIds.map((id) => styleFamilies.find((style) => style.id === id)).filter(Boolean);
+        }
         const signatures = ranked.slice(0, 4).map((dimension) => `${dimension.id}:${dimension.side}`);
         const scored = styleFamilies.map((style) => {
           const matchCount = style.fit.filter((fit) => signatures.includes(fit)).length;
@@ -2299,7 +3090,9 @@
 
       function renderRecommendations(scores) {
         const recommendations = getRecommendations(scores);
-        const fallback = styleFamilies.slice(0, 3);
+        const fallback = ["light-daily", "dramatic-collision", "modern-fragment"]
+          .map((id) => styleFamilies.find((style) => style.id === id))
+          .filter(Boolean);
         recommendationGrid.innerHTML = (recommendations.length ? recommendations : fallback)
           .map(
             (style) => `
@@ -2308,7 +3101,6 @@
                 <p>${style.summary}</p>
                 <div class="tag-row">${style.tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
                 <p><strong>适合入口：</strong>${style.entry}</p>
-                <p><strong>避坑提示：</strong>${style.caution}</p>
                 <p><strong>参考作品：</strong>${style.works.join("、")}</p>
                 <div class="link-row" style="margin-top: 14px">
                   <a class="ghost-button" href="#knowledge" data-route-link="knowledge" data-scroll-target="style-${style.id}">查看条目</a>
@@ -2325,18 +3117,21 @@
             (factor) => {
               const dimension = getDimension(factor.dimension);
               return `
-              <article class="axis-card" id="${factor.id}">
-                <h3>${factor.title}</h3>
-                <div class="axis-scale">
-                  <span>${dimension.negative}</span>
-                  <b>vs</b>
-                  <span>${dimension.positive}</span>
+              <details class="axis-card" id="${factor.id}">
+                <summary>
+                  <h3>${factor.title}</h3>
+                  <p>${dimension.negative} ↔ ${dimension.positive}</p>
+                </summary>
+                <div class="detail-body">
+                  <div class="axis-scale">
+                    <span>${dimension.negative}</span>
+                    <b>vs</b>
+                    <span>${dimension.positive}</span>
+                  </div>
+                  <p>${factor.summary}</p>
+                  <div class="tag-row">${factor.examples.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
                 </div>
-                <p>${factor.summary}</p>
-                <div class="tag-row">
-                  ${factor.examples.map((tag) => `<span class="tag">${tag}</span>`).join("")}
-                </div>
-              </article>
+              </details>
             `;
             }
           )
@@ -2345,12 +3140,13 @@
         situationGrid.innerHTML = readingSituations
           .map(
             (item) => `
-              <article class="situation-card" id="situation-${item.id}">
-                <h3>${item.title}</h3>
-                <p>${item.summary}</p>
-                <div class="tag-row">${item.tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
-                <p><strong>进入方式：</strong>${item.entry}</p>
-              </article>
+              <details class="situation-card" id="situation-${item.id}">
+                <summary><h3>${item.title}</h3><p>${item.summary}</p></summary>
+                <div class="detail-body">
+                  <div class="tag-row">${item.tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
+                  <p><strong>进入方式：</strong>${item.entry}</p>
+                </div>
+              </details>
             `
           )
           .join("");
@@ -2358,11 +3154,13 @@
         comparisonGrid.innerHTML = comparisons
           .map(
             (item) => `
-              <article class="comparison-card" id="comparison-${item.id}">
-                <h3>${item.title}</h3>
-                <p><strong>左侧：</strong>${item.left}</p>
-                <p><strong>右侧：</strong>${item.right}</p>
-              </article>
+              <details class="comparison-card" id="comparison-${item.id}">
+                <summary><h3>${item.title}</h3><p>展开查看两种风格的区别</p></summary>
+                <div class="detail-body">
+                  <p><strong>左侧：</strong>${item.left}</p>
+                  <p><strong>右侧：</strong>${item.right}</p>
+                </div>
+              </details>
             `
           )
           .join("");
@@ -2373,13 +3171,17 @@
       }
 
       function renderLibraryFilters() {
+        const searching = Boolean(normalizeSearch(librarySearch.value));
         libraryFilters.innerHTML = libraryTypes
           .map(
-            (type) => `
-              <button class="filter-button ${type.id === activeLibraryType ? "active" : ""}" type="button" data-library-type="${type.id}">
-                ${type.label}
+            (type) => {
+              const count = type.id === "all" ? contentIndex.length : contentIndex.filter((entry) => entry.category === type.id).length;
+              return `
+              <button class="filter-button ${type.id === (searching ? "all" : activeLibraryType) ? "active" : ""}" type="button" data-library-type="${type.id}">
+                ${type.label} ${count}
               </button>
-            `
+            `;
+            }
           )
           .join("");
       }
@@ -2387,27 +3189,26 @@
       function renderLibrary() {
         const query = normalizeSearch(librarySearch.value);
         const filtered = contentIndex.filter((entry) => {
-          const matchType = activeLibraryType === "all" || entry.category === activeLibraryType;
+          const matchType = Boolean(query) || activeLibraryType === "all" || entry.category === activeLibraryType;
           const haystack = normalizeSearch([entry.title, entry.summary, ...entry.tags, ...entry.details].join(" "));
           return matchType && (!query || haystack.includes(query));
         });
 
         libraryGrid.innerHTML = filtered.length
-          ? filtered
+          ? `<p class="library-count">显示 ${filtered.length} 个条目${query ? `，搜索“${librarySearch.value.trim()}”` : ""}</p>` + filtered
               .map(
                 (entry) => `
-                  <article class="${entry.category === "style" ? "style-card" : "knowledge-card"}" id="${entry.category === "style" ? entry.anchor : `knowledge-${entry.anchor}`}">
-                    <span class="knowledge-meta">${entry.label}</span>
-                    <h3>${entry.title}</h3>
-                    <p>${entry.summary}</p>
-                    <div class="tag-row">${entry.tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
-                    <div class="detail-list">
-                      ${entry.details.map((detail) => `<p>${detail}</p>`).join("")}
+                  <details class="${entry.category === "style" ? "style-card" : "knowledge-card"}" id="${entry.category === "style" ? entry.anchor : `knowledge-${entry.anchor}`}">
+                    <summary>
+                      <span class="knowledge-meta">${entry.label}</span>
+                      <h3>${entry.title}</h3>
+                      <p>${entry.summary}</p>
+                    </summary>
+                    <div class="detail-body">
+                      <div class="tag-row">${entry.tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
+                      <div class="detail-list">${entry.details.map((detail) => `<p>${detail}</p>`).join("")}</div>
                     </div>
-                    <div class="link-row" style="margin-top: 14px">
-                      <a class="ghost-button" href="#${entry.route}" data-route-link="${entry.route}" data-scroll-target="${entry.anchor}">定位条目</a>
-                    </div>
-                  </article>
+                  </details>
                 `
               )
               .join("")
@@ -2435,95 +3236,31 @@
         methodList.innerHTML = [...notes, ...sources].join("");
       }
 
-      function setupCanvas(canvas) {
-        const rect = canvas.getBoundingClientRect();
-        const ratio = window.devicePixelRatio || 1;
-        const width = Math.max(320, Math.floor(rect.width || canvas.clientWidth || canvas.width));
-        const height = Math.max(300, Math.floor(rect.height || canvas.clientHeight || canvas.height));
-        canvas.width = Math.floor(width * ratio);
-        canvas.height = Math.floor(height * ratio);
-        const context = canvas.getContext("2d");
-        context.setTransform(ratio, 0, 0, ratio, 0, 0);
-        return { context, width, height };
+      function applyTheme(theme, persist = true) {
+        const nextTheme = theme === "dark" ? "dark" : "light";
+        document.documentElement.dataset.theme = nextTheme;
+        themeIcon.textContent = nextTheme === "dark" ? "☀" : "☾";
+        themeButton.setAttribute("aria-label", nextTheme === "dark" ? "切换到浅色模式" : "切换到深色模式");
+        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", nextTheme === "dark" ? "#101619" : "#f6f1e8");
+        if (persist) {
+          try {
+            localStorage.setItem("literaryStyleTest.theme", nextTheme);
+          } catch (error) {
+            return;
+          }
+        }
       }
 
-      function drawRadar(scores) {
-        if (!scores || !radarCanvas.offsetParent) return;
-        const { context, width, height } = setupCanvas(radarCanvas);
-        context.clearRect(0, 0, width, height);
-        context.fillStyle = "#fffaf1";
-        context.fillRect(0, 0, width, height);
-
-        const centerX = width / 2;
-        const centerY = height / 2 + 14;
-        const radius = Math.max(92, Math.min(width, height) * 0.28);
-        const count = dimensions.length;
-
-        context.strokeStyle = "rgba(29,37,40,0.14)";
-        context.lineWidth = 1;
-        [0.25, 0.5, 0.75, 1].forEach((scale) => {
-          context.beginPath();
-          dimensions.forEach((_, index) => {
-            const angle = -Math.PI / 2 + (index * Math.PI * 2) / count;
-            const x = centerX + Math.cos(angle) * radius * scale;
-            const y = centerY + Math.sin(angle) * radius * scale;
-            if (index === 0) context.moveTo(x, y);
-            else context.lineTo(x, y);
-          });
-          context.closePath();
-          context.stroke();
+      function setupTheme() {
+        applyTheme(document.documentElement.dataset.theme || "light", false);
+        const media = matchMedia("(prefers-color-scheme: dark)");
+        media.addEventListener?.("change", (event) => {
+          try {
+            if (!localStorage.getItem("literaryStyleTest.theme")) applyTheme(event.matches ? "dark" : "light", false);
+          } catch (error) {
+            applyTheme(event.matches ? "dark" : "light", false);
+          }
         });
-
-        dimensions.forEach((dimension, index) => {
-          const angle = -Math.PI / 2 + (index * Math.PI * 2) / count;
-          const axisX = centerX + Math.cos(angle) * radius;
-          const axisY = centerY + Math.sin(angle) * radius;
-          context.beginPath();
-          context.moveTo(centerX, centerY);
-          context.lineTo(axisX, axisY);
-          context.stroke();
-
-          const labelX = centerX + Math.cos(angle) * (radius + 32);
-          const labelY = centerY + Math.sin(angle) * (radius + 32);
-          context.fillStyle = "#334144";
-          context.font = "700 13px Microsoft YaHei, sans-serif";
-          context.textAlign = labelX < centerX - 8 ? "right" : labelX > centerX + 8 ? "left" : "center";
-          context.fillText(dimension.name, labelX, labelY + 4);
-        });
-
-        const points = dimensions.map((dimension, index) => {
-          const angle = -Math.PI / 2 + (index * Math.PI * 2) / count;
-          const value = Math.max(0.08, Math.min(1, (Math.abs(scores[dimension.id]) || 0) / 100));
-          return {
-            x: centerX + Math.cos(angle) * radius * value,
-            y: centerY + Math.sin(angle) * radius * value,
-            score: scores[dimension.id]
-          };
-        });
-
-        context.beginPath();
-        points.forEach((point, index) => {
-          if (index === 0) context.moveTo(point.x, point.y);
-          else context.lineTo(point.x, point.y);
-        });
-        context.closePath();
-        context.fillStyle = "rgba(31,122,118,0.2)";
-        context.strokeStyle = "#1f7a76";
-        context.lineWidth = 2;
-        context.fill();
-        context.stroke();
-
-        points.forEach((point) => {
-          context.fillStyle = point.score >= 0 ? "#a73a35" : "#6f5278";
-          context.beginPath();
-          context.arc(point.x, point.y, 5, 0, Math.PI * 2);
-          context.fill();
-        });
-
-        context.fillStyle = "#1d2528";
-        context.font = "700 15px Microsoft YaHei, sans-serif";
-        context.textAlign = "center";
-        context.fillText("离中心越远，偏向越明显", centerX, 28);
       }
 
       quizForm.addEventListener("change", (event) => {
@@ -2531,31 +3268,49 @@
         if (!input) return;
         const index = Number(input.name.replace("q", ""));
         answers[index] = Number(input.value);
-        document.querySelector(`[data-question="${index}"]`)?.classList.remove("missing");
-        questionIndex.querySelector(`[data-question-jump="${index}"]`)?.classList.remove("missing");
         if (latestScores) {
           latestScores = answers.every((answer) => answer !== null) ? calculateScores() : null;
           renderResultState();
-          drawRadar(latestScores);
         }
         updateProgress();
+        renderQuestionIndex();
+        nextButton.disabled = false;
+        submitHint.textContent = "已保存，正在进入下一题。";
         saveState();
+        clearTimeout(autoAdvanceTimer);
+        autoAdvanceTimer = setTimeout(advanceQuestion, 200);
       });
 
       questionIndex.addEventListener("click", (event) => {
         const button = event.target.closest("[data-question-jump]");
         if (!button) return;
-        scrollToQuestion(Number(button.dataset.questionJump));
+        questionIndex.classList.add("hidden");
+        reviewToggle.setAttribute("aria-expanded", "false");
+        showQuestion(Number(button.dataset.questionJump));
       });
 
       document.addEventListener("click", (event) => {
         const routeLink = event.target.closest("[data-route-link]");
-        if (!routeLink) return;
-        event.preventDefault();
-        goToRoute(routeLink.dataset.routeLink, routeLink.dataset.scrollTarget || null);
+        if (routeLink) {
+          event.preventDefault();
+          goToRoute(routeLink.dataset.routeLink, routeLink.dataset.scrollTarget || null);
+          return;
+        }
+        if (!event.target.closest(".topbar-actions")) closeMenu();
       });
 
       submitButton.addEventListener("click", showResults);
+      prevButton.addEventListener("click", () => showQuestion(currentQuestion - 1));
+      nextButton.addEventListener("click", advanceQuestion);
+      reviewToggle.addEventListener("click", () => {
+        if (reviewMode) {
+          showQuestion(currentQuestion);
+          return;
+        }
+        const willOpen = questionIndex.classList.contains("hidden");
+        questionIndex.classList.toggle("hidden", !willOpen);
+        reviewToggle.setAttribute("aria-expanded", String(willOpen));
+      });
       clearButton.addEventListener("click", clearState);
       restartButton.addEventListener("click", () => {
         clearState();
@@ -2566,19 +3321,30 @@
         const button = event.target.closest("[data-library-type]");
         if (!button) return;
         activeLibraryType = button.dataset.libraryType;
+        librarySearch.value = "";
         renderLibraryFilters();
         renderLibrary();
       });
 
-      librarySearch.addEventListener("input", renderLibrary);
-
-      window.addEventListener("hashchange", () => routeTo(getRoute()));
-      window.addEventListener("resize", () => {
-        drawRadar(latestScores);
+      librarySearch.addEventListener("input", () => {
+        renderLibraryFilters();
+        renderLibrary();
       });
 
+      themeButton.addEventListener("click", () => {
+        applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+      });
+
+      menuButton.addEventListener("click", () => {
+        const isOpen = siteNav.classList.toggle("open");
+        menuButton.setAttribute("aria-expanded", String(isOpen));
+        menuButton.setAttribute("aria-label", isOpen ? "关闭站内导航" : "打开站内导航");
+      });
+
+      window.addEventListener("hashchange", () => routeTo(getRoute()));
+
       loadState();
-      renderModules();
+      setupTheme();
       renderQuiz();
       updateProgress();
       renderAxes();
