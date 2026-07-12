@@ -1538,6 +1538,223 @@
         border-color: var(--line);
       }
 
+      /* Index-led report layout, shared with the site's reading-map structure. */
+      .app-intro {
+        min-height: 0;
+        padding: 30px 0 22px;
+      }
+
+      .visual-stage,
+      .visual-stage__image {
+        min-height: 460px;
+        height: 460px;
+      }
+
+      .home-index {
+        margin-top: 26px;
+        padding-top: 34px;
+        border-top: 1px solid var(--line);
+      }
+
+      .home-index > h2 {
+        margin: 5px 0 8px;
+        font-size: 28px;
+        line-height: 1.3;
+      }
+
+      .home-index > p {
+        max-width: 760px;
+        margin: 0 0 20px;
+        color: var(--muted);
+        line-height: 1.72;
+      }
+
+      .route-list {
+        border-top: 1px solid var(--line);
+      }
+
+      .route-row {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr) auto;
+        gap: 20px;
+        padding: 18px 0;
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .route-number {
+        align-self: start;
+        color: var(--crimson);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 15px;
+        font-weight: 900;
+      }
+
+      .route-row h3 {
+        margin: 0 0 5px;
+        font-size: 17px;
+      }
+
+      .route-row p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.68;
+      }
+
+      .route-row .ghost-button {
+        min-height: 38px;
+        padding: 8px 12px;
+      }
+
+      .result-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(300px, 350px);
+        gap: 42px;
+      }
+
+      .result-heading {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr);
+        gap: 14px;
+        align-items: start;
+      }
+
+      .result-mark {
+        display: block;
+        width: 52px;
+        height: 52px;
+        padding: 3px;
+        object-fit: contain;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius);
+        background: #fffaf1;
+      }
+
+      .result-badge {
+        display: inline-flex;
+        margin-bottom: 7px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .result-title {
+        margin: 0;
+        max-width: 720px;
+        font-size: clamp(34px, 4.2vw, 54px);
+        line-height: 1.08;
+        overflow-wrap: anywhere;
+      }
+
+      .result-copy {
+        max-width: 720px;
+        margin: 18px 0 0;
+      }
+
+      .result-report {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0;
+        margin: 24px 0 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .result-report .summary-card {
+        display: grid;
+        grid-template-columns: minmax(112px, 0.25fr) minmax(0, 1fr);
+        gap: 18px;
+        padding: 18px 0;
+        border: 0;
+        border-bottom: 1px solid var(--line);
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .result-report .summary-card strong {
+        margin: 0;
+        color: var(--crimson);
+        font-size: 13px;
+      }
+
+      .result-report .summary-card span {
+        color: var(--muted);
+        line-height: 1.72;
+      }
+
+      .profile-panel {
+        padding: 4px 0 4px 26px;
+        border: 0;
+        border-left: 1px solid var(--line);
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .profile-panel h3 {
+        margin: 0 0 22px;
+      }
+
+      .dimension-note-list {
+        border-top: 1px solid var(--line);
+      }
+
+      .dimension-note {
+        display: grid;
+        grid-template-columns: minmax(132px, 0.25fr) minmax(0, 1fr);
+        gap: 20px;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .dimension-note > span {
+        color: var(--crimson);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .dimension-note strong {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--ink);
+      }
+
+      .dimension-note p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.72;
+      }
+
+      .path-grid,
+      .recommendation-grid {
+        gap: 24px;
+      }
+
+      .path-card,
+      .recommendation-card {
+        padding: 18px 0 0;
+        border: 0;
+        border-top: 2px solid var(--ink);
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .path-card .knowledge-meta,
+      .recommendation-card .knowledge-meta {
+        color: var(--crimson);
+        background: transparent;
+        padding: 0;
+      }
+
+      details.axis-card,
+      details.situation-card,
+      details.comparison-card,
+      details.knowledge-card,
+      details.style-card {
+        box-shadow: none;
+      }
+
       @media (max-width: 980px) {
         .question-index {
           grid-template-columns: repeat(10, minmax(0, 1fr));
@@ -1758,6 +1975,59 @@
         .filter-button {
           flex: 0 0 auto;
         }
+
+        .home-index {
+          margin-top: 24px;
+          padding-top: 26px;
+        }
+
+        .home-index > h2 {
+          font-size: 23px;
+        }
+
+        .route-row {
+          grid-template-columns: 36px minmax(0, 1fr);
+          gap: 12px;
+          padding: 16px 0;
+        }
+
+        .route-row .ghost-button {
+          grid-column: 2;
+          justify-self: start;
+        }
+
+        .result-heading {
+          grid-template-columns: 44px minmax(0, 1fr);
+          gap: 12px;
+        }
+
+        .result-mark {
+          width: 44px;
+          height: 44px;
+        }
+
+        .result-title {
+          font-size: 32px;
+          line-height: 1.12;
+        }
+
+        .result-report .summary-card,
+        .dimension-note {
+          grid-template-columns: 1fr;
+          gap: 7px;
+          padding: 16px 0;
+        }
+
+        .profile-panel {
+          padding: 20px 0 0;
+          border-left: 0;
+          border-top: 1px solid var(--line);
+        }
+
+        .path-grid,
+        .recommendation-grid {
+          gap: 20px;
+        }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -1847,6 +2117,37 @@
             </div>
           </div>
         </div>
+        <section class="home-index" aria-labelledby="homeIndexTitle">
+          <div class="section-kicker">阅读路线</div>
+          <h2 id="homeIndexTitle">从一次测试进入三条阅读路线</h2>
+          <p>不必按顺序读完整个站点。你可以先完成画像，也可以先看阅读地图，再回到测试验证自己的直觉。</p>
+          <div class="route-list">
+            <article class="route-row">
+              <span class="route-number">01</span>
+              <div>
+                <h3>先完成阅读画像</h3>
+                <p>用 30 道具体阅读情境辨认五条倾向，得到最容易进入的文本气质。</p>
+              </div>
+              <a class="ghost-button" href="#quiz" data-route-link="quiz">开始测试</a>
+            </article>
+            <article class="route-row">
+              <span class="route-number">02</span>
+              <div>
+                <h3>按结果继续试读</h3>
+                <p>从亲缘风格、相反方向和阅读情境中各选一个入口，避免把画像当成固定标签。</p>
+              </div>
+              <a class="ghost-button" href="#map" data-route-link="map">查看地图</a>
+            </article>
+            <article class="route-row">
+              <span class="route-number">03</span>
+              <div>
+                <h3>直接查风格档案</h3>
+                <p>按节奏、人物、情绪、语言或结构搜索条目，带着观察问题进入具体作品。</p>
+              </div>
+              <a class="ghost-button" href="#knowledge" data-route-link="knowledge">进入知识库</a>
+            </article>
+          </div>
+        </section>
       </section>
 
       <section class="page" id="page-quiz" data-page="quiz" aria-labelledby="quizTitle">
@@ -1909,24 +2210,35 @@
 
         <div id="resultContent" class="hidden">
           <div class="result-layout">
-            <section>
-              <h2 class="result-title" id="resultTitle">均衡漫游者</h2>
+            <section class="result-narrative">
+              <div class="result-heading">
+                <img class="result-mark" src="assets/literary-style-icon.png?v=3" alt="" aria-hidden="true" />
+                <div>
+                  <span class="result-badge">你的阅读画像</span>
+                  <h2 class="result-title" id="resultTitle">均衡漫游者</h2>
+                </div>
+              </div>
               <p class="result-copy" id="resultCopy"></p>
+              <div class="summary-grid result-report" id="summaryGrid"></div>
             </section>
             <aside class="profile-panel" aria-labelledby="profileTitle">
               <h3 id="profileTitle">五条阅读倾向</h3>
               <div class="profile-bars" id="scoreGrid"></div>
             </aside>
           </div>
-          <div class="summary-grid" id="summaryGrid"></div>
+          <section class="result-section">
+            <div class="section-kicker">逐项解读</div>
+            <h3>五条倾向怎么读</h3>
+            <div class="dimension-note-list" id="dimensionNotes"></div>
+          </section>
           <section class="result-section">
             <div class="section-kicker">从画像进入阅读</div>
             <h3>下一步阅读路径</h3>
             <div class="path-grid" id="pathGrid"></div>
           </section>
           <section class="result-section">
-            <div class="section-kicker">可先试读</div>
-            <h3>与你接近的风格</h3>
+            <div class="section-kicker">亲缘与对照</div>
+            <h3>三种试读入口</h3>
             <div class="recommendation-grid" id="recommendationGrid"></div>
           </section>
         </div>
@@ -2151,6 +2463,8 @@
           entry: "从结构清楚的长篇、婚恋小说和群像叙事进入，边读边画人物关系和线索回环。",
           caution: "如果只追完整图案，可能会低估开放结尾和断裂结构的余味。",
           works: ["傲慢与偏见", "米德尔马契", "战争与和平"],
+          signals: ["伏笔再次出现的位置", "配角如何进入主线", "结尾回收的前文细节"],
+          question: "作品怎样把分散的人物和事件收束成一个整体？",
           fit: ["structure:negative", "pace:negative"]
         },
         {
@@ -2162,6 +2476,8 @@
           entry: "适合慢读细节密集的小说，记录人物如何在日常往来中显出性格。",
           caution: "容易把强情节文本读得太慢，可以偶尔用场面变化校准节奏。",
           works: ["包法利夫人", "傲慢与偏见", "米德尔马契"],
+          signals: ["称呼和礼节的变化", "房间与物件的分配", "小动作暴露的关系距离"],
+          question: "人物没有直说的处境，是怎样被日常细节写出来的？",
           fit: ["focus:negative", "pace:negative"]
         },
         {
@@ -2173,6 +2489,8 @@
           entry: "从诗歌、短篇和散文化小说进入，关注停顿、重复和意象的回声。",
           caution: "留白不等于信息缺失，读的时候要留意重复意象和叙述节奏。",
           works: ["雪国", "都柏林人", "到灯塔去"],
+          signals: ["句子停下来的地方", "反复出现的意象", "被省略的因果和情绪"],
+          question: "文本没有说尽的部分，如何改变了已经写出的句子？",
           fit: ["language:negative", "structure:positive"]
         },
         {
@@ -2184,6 +2502,8 @@
           entry: "适合读心理小说、意识流作品和第一人称叙事，标出语气变化处。",
           caution: "如果只盯着心理活动，可能会错过场面调度和外部行动的提示。",
           works: ["到灯塔去", "追忆似水年华", "地下室手记"],
+          signals: ["记忆突然闯入的时刻", "自我解释里的矛盾", "叙述语气的细小偏移"],
+          question: "人物如何在一次想法尚未结束时，被另一种感受改变？",
           fit: ["focus:negative", "pace:negative"]
         },
         {
@@ -2195,6 +2515,8 @@
           entry: "从戏剧、短篇和情节清楚的小说进入，重点看场景如何推动人物暴露。",
           caution: "强冲突很抓人，但也要给沉默、延宕和内心转折留一点空间。",
           works: ["哈姆雷特", "麦克白", "推销员之死"],
+          signals: ["目标发生冲突的场面", "对白中的攻防转换", "行动造成的不可逆后果"],
+          question: "人物在压力下做出的哪一步选择，真正改变了局面？",
           fit: ["focus:positive", "pace:positive"]
         },
         {
@@ -2206,6 +2528,8 @@
           entry: "适合从神话性诗歌、寓言小说和象征性文本进入，追踪重复意象。",
           caution: "不要急着把每个意象翻译成单一答案，先看它在文本里如何反复出现。",
           works: ["神曲", "荒原", "俄耳甫斯十四行诗"],
+          signals: ["反复变形的母题", "仪式与禁忌", "自然景象承担的情绪重量"],
+          question: "同一个象征每次出现时，意义发生了什么变化？",
           fit: ["structure:positive", "language:positive"]
         },
         {
@@ -2217,6 +2541,8 @@
           entry: "适合读魔幻叙事和家族长篇，留意重复名字、循环场景和传闻。",
           caution: "别只把奇异当作设定，它常常在组织记忆、时间和家族回声。",
           works: ["百年孤独", "佩德罗·巴拉莫", "午夜之子"],
+          signals: ["奇异事件的平静语气", "名字与命运的重复", "传闻如何替代正式记忆"],
+          question: "不可能发生的事，为什么在这个世界里显得完全自然？",
           fit: ["structure:positive", "mood:positive"]
         },
         {
@@ -2228,6 +2554,8 @@
           entry: "适合从短篇现代小说开始，再进入长篇实验文本，先抓语气而非情节。",
           caution: "读断片文本时不必一开始就拼完整情节，可以先标出声音和时间变化。",
           works: ["变形记", "尤利西斯", "达洛维夫人"],
+          signals: ["视角切换的边界", "时间突然跳开的地方", "互不衔接却彼此照亮的片段"],
+          question: "这些碎片如果不被拼成唯一故事，还能形成怎样的经验？",
           fit: ["structure:positive", "focus:negative"]
         },
         {
@@ -2239,6 +2567,8 @@
           entry: "适合读讽刺小说和机智对白，关注叙述者怎样不直接下判断。",
           caution: "讽刺不只是好笑，它常常靠语气差异和场面误读发生。",
           works: ["堂吉诃德", "傲慢与偏见", "第二十二条军规"],
+          signals: ["人物自信与事实的反差", "过分平静的叙述语气", "对白里没有被承认的尴尬"],
+          question: "叙述者没有直接批评谁，却让谁的盲点变得可见？",
           fit: ["language:negative", "focus:positive"]
         },
         {
@@ -2250,6 +2580,8 @@
           entry: "适合读长篇和长诗，先把主要人物、场景和叙述层次分开。",
           caution: "大体量作品需要阶段性回看，别用短篇的速度要求它。",
           works: ["战争与和平", "神曲", "悲惨世界"],
+          signals: ["个体命运与大场面的切换", "反复返回的地点", "不同声音形成的复调"],
+          question: "作品怎样让一个人的选择与更大的时间尺度互相照见？",
           fit: ["language:positive", "pace:negative"]
         },
         {
@@ -2261,6 +2593,8 @@
           entry: "适合从散文、日常小说和短篇集进入，记录一个细节如何改变气氛。",
           caution: "轻盈不等于简单，留意它怎样用低音量处理情绪变化。",
           works: ["小妇人", "芒果街上的小屋", "灯塔看守人"],
+          signals: ["日常动作里的心情变化", "轻松语气下的迟疑", "普通物件积累出的亲密感"],
+          question: "作品如何用很小的变化，让人物关系向前走了一步？",
           fit: ["mood:negative", "language:negative"]
         },
         {
@@ -2272,6 +2606,8 @@
           entry: "适合读寓言、迷宫式短篇和哲思小说，追踪一个设定如何改变理解。",
           caution: "寓言的关键不在结论，而在设定如何一步步改变你的判断。",
           works: ["小王子", "看不见的城市", "小径分岔的花园"],
+          signals: ["规则被改变的瞬间", "具体物象承载的抽象问题", "结尾反过来改写的开头"],
+          question: "如果接受作品最初的设定，我们原有的判断会被迫改变什么？",
           fit: ["structure:positive", "language:negative"]
         }
       ];
@@ -2381,6 +2717,30 @@
           title: "轻盈日常与暗色心理",
           left: "轻盈日常用低音量、清亮语气和细小变化建立陪伴感。",
           right: "暗色心理把注意力推向不安、压力、困境和自我解释。"
+        },
+        {
+          id: "irony-daily",
+          title: "讽刺机锋与轻盈日常",
+          left: "讽刺机锋依靠叙述距离和反差，让人物没有察觉的盲点显形。",
+          right: "轻盈日常缩短叙述距离，用温和观察保存人物的可亲与复杂。"
+        },
+        {
+          id: "magic-myth",
+          title: "魔幻记忆与神话象征",
+          left: "魔幻记忆让奇异进入日常，用循环、传闻和家族时间组织经验。",
+          right: "神话象征让意象离开日常尺度，用母题、仪式和变形扩展意义。"
+        },
+        {
+          id: "conflict-loop",
+          title: "戏剧冲突与古典回环",
+          left: "戏剧冲突把力量集中在当下场面，看选择怎样立刻改变局面。",
+          right: "古典回环把力量分布到全篇，看伏笔和人物网络怎样逐步收束。"
+        },
+        {
+          id: "fable-white-space",
+          title: "哲思寓言与诗性留白",
+          left: "哲思寓言先建立一个清楚设定，再用它推动观念发生变化。",
+          right: "诗性留白不急着建立结论，让停顿、意象和未说尽之处保留余味。"
         }
       ];
 
@@ -2399,7 +2759,7 @@
         },
         {
           title: "结果怎么看",
-          text: "阅读画像会显示你更容易进入的文本气质，也会提示相反方向；先看维度，再看情境和风格对照，比只记住一个标签更有用。"
+          text: "先读画像速读，再看五条倾向的逐项解释；亲缘风格用于确认熟悉入口，对照试读用于观察相反方向，不要只记住标题标签。"
         },
         {
           title: "题目设计",
@@ -2412,6 +2772,10 @@
         {
           title: "阅读闭环",
           text: "测试结果会把你带回阅读地图和风格知识库：结果用于继续阅读，不用于给自己划定固定范围。"
+        },
+        {
+          title: "如何验证结果",
+          text: "从亲缘风格和对照风格各选一篇短文本，在相近时间与阅读环境下试读；记录自己停下、加速或回读的位置，比单纯判断喜欢与否更能检验画像。"
         }
       ];
 
@@ -2466,6 +2830,7 @@
       const resultCopy = document.querySelector("#resultCopy");
       const summaryGrid = document.querySelector("#summaryGrid");
       const scoreGrid = document.querySelector("#scoreGrid");
+      const dimensionNotes = document.querySelector("#dimensionNotes");
       const pathGrid = document.querySelector("#pathGrid");
       const recommendationGrid = document.querySelector("#recommendationGrid");
       const axisGrid = document.querySelector("#axisGrid");
@@ -2581,6 +2946,8 @@
           anchor: `style-${style.id}`,
           details: [
             `适合入口：${style.entry}`,
+            `阅读时留意：${style.signals.join("、")}`,
+            `带着问题读：${style.question}`,
             `避坑提示：${style.caution}`,
             `参考作品：${style.works.join("、")}`
           ]
@@ -2661,21 +3028,27 @@
           return {
             title: "均衡漫游者",
             text:
-              "你的五条文学倾向都比较平衡，说明你更像在不同文本之间切换入口：有时看章法，有时看语言，有时看人物心绪。适合从风格知识库中按当下兴趣选择阅读路线。",
+              "你的五条倾向都靠近中线，说明你会随作品和阅读状态切换入口：有时追踪章法，有时停在语言，也能在人物与行动之间调整注意力。与其认领一种风格，不如从短篇对照开始，观察自己今天更需要什么。",
             leading: ranked.slice(0, 3),
             cards: getResultCards(scores, ranked.slice(0, 3))
           };
         }
         const title = leading.slice(0, 2).map((item) => item.trait).join(" · ");
-        const focus = leading.map((item) => `${item.name}偏向「${item.pole}」`).join("，");
-        const text = `你的结果显示：${focus}。这不代表你只能读某一种文学，而是说明你更容易通过这些入口理解作品。建议先看下方三个风格亲缘，再回到阅读地图观察相反方向能补充什么。`;
+        const strongest = leading[0];
+        const secondary = leading[1];
+        const combination = secondary
+          ? `当作品同时呈现「${strongest.pole}」与「${secondary.pole}」时，你通常更快找到抓手。`
+          : `「${strongest.pole}」是这次结果里最清楚的入口。`;
+        const text = `${combination} 这不是作品范围，也不是审美等级；它只说明你更习惯把注意力先放在哪里。下方会同时给出亲缘风格和相反方向，方便你把结果变成下一次真实试读。`;
         return { title, text, leading, cards: getResultCards(scores, leading) };
       }
 
       function getResultCards(scores, leading) {
         const strongest = leading[0] || getRankedDimensions(scores)[0];
+        const secondary = leading[1];
         const recommendations = getRecommendations(scores);
         const firstRecommendation = recommendations[0] || styleFamilies[0];
+        const contrastRecommendation = getContrastRecommendation(scores) || styleFamilies[1];
         const opposite =
           strongest.side === "positive"
             ? { pole: strongest.negative, meaning: strongest.negativeMeaning }
@@ -2685,18 +3058,18 @@
 
         return [
           {
-            title: "你的进入方式",
+            title: "最容易进入",
             text: strongest
-              ? `你最容易从「${strongest.pole}」进入文本：${strongest.side === "negative" ? strongest.negativeMeaning : strongest.side === "positive" ? strongest.positiveMeaning : strongest.note}`
+              ? `你通常先抓住「${strongest.pole}」${secondary ? `，再借助「${secondary.pole}」` : ""}。${strongest.side === "negative" ? strongest.negativeMeaning : strongest.side === "positive" ? strongest.positiveMeaning : strongest.note}`
               : "你适合按作品当下的语气和节奏切换阅读入口。"
           },
           {
-            title: "容易错过的文本",
-            text: `可以偶尔试读「${opposite.pole}」方向：${opposite.meaning}`
+            title: "可能卡住",
+            text: `「${opposite.pole}」方向可能需要更长适应时间：${opposite.meaning} 这类卡顿不等于作品不适合，只表示需要换一种读法。`
           },
           {
-            title: "下一步试读方向",
-            text: `${firstRecommendation.title}：${firstRecommendation.entry}`
+            title: "建议做一次对照",
+            text: `先从「${firstRecommendation.title}」确认熟悉入口，再试「${contrastRecommendation.title}」。对照时只观察一个问题：${contrastRecommendation.question}`
           }
         ];
       }
@@ -3007,6 +3380,7 @@
         if (!hasResult) {
           summaryGrid.innerHTML = "";
           scoreGrid.innerHTML = "";
+          dimensionNotes.innerHTML = "";
           pathGrid.innerHTML = "";
           recommendationGrid.innerHTML = "";
           return;
@@ -3017,6 +3391,7 @@
         resultCopy.textContent = description.text;
         renderSummary(description.cards);
         renderScores(latestScores);
+        renderDimensionNotes(latestScores);
         renderResultPaths(latestScores);
         renderRecommendations(latestScores);
       }
@@ -3051,6 +3426,37 @@
                 </div>
                 <div class="profile-row__poles"><span>${dimension.negative}</span><span>${dimension.positive}</span></div>
               </div>
+            `;
+          })
+          .join("");
+      }
+
+      function renderDimensionNotes(scores) {
+        dimensionNotes.innerHTML = dimensions
+          .map((dimension) => {
+            const score = Math.round(scores[dimension.id] || 0);
+            const side = sideForScore(score);
+            const strength = getStrengthText(Math.abs(score));
+            const pole = side === "positive" ? dimension.positive : side === "negative" ? dimension.negative : "两端可切换";
+            const meaning =
+              side === "positive"
+                ? dimension.positiveMeaning
+                : side === "negative"
+                  ? dimension.negativeMeaning
+                  : dimension.note;
+            const counterPole = side === "positive" ? dimension.negative : side === "negative" ? dimension.positive : "任一鲜明方向";
+            const counterText =
+              side === "center"
+                ? `可以按作品和当下状态切换，不必强行确定一端；下一次可用「${counterPole}」做短篇试读。`
+                : `需要拓宽时，可从「${counterPole}」方向选一篇短文本，只改变一个阅读条件。`;
+            return `
+              <article class="dimension-note">
+                <span>${dimension.name}</span>
+                <div>
+                  <strong>${strength} · ${pole}</strong>
+                  <p>${meaning} ${counterText}</p>
+                </div>
+              </article>
             `;
           })
           .join("");
@@ -3092,19 +3498,54 @@
           .map((item) => item.style);
       }
 
+      function getContrastRecommendation(scores) {
+        const ranked = getRankedDimensions(scores);
+        const strongest = ranked[0];
+        if (!strongest || strongest.side === "center") {
+          return styleFamilies.find((style) => style.id === "classic-loop") || styleFamilies[0];
+        }
+        const oppositeSide = strongest.side === "positive" ? "negative" : "positive";
+        const oppositeSignature = `${strongest.id}:${oppositeSide}`;
+        const affinityIds = new Set(getRecommendations(scores).slice(0, 2).map((style) => style.id));
+        const rankedCandidates = styleFamilies
+          .filter((style) => !affinityIds.has(style.id))
+          .map((style) => ({
+            style,
+            score: style.fit.includes(oppositeSignature)
+              ? 200 + style.fit.length
+              : style.fit.filter((fit) => ranked.some((dimension) => `${dimension.id}:${dimension.side}` === fit)).length
+          }))
+          .sort((a, b) => b.score - a.score);
+        return rankedCandidates[0]?.style || styleFamilies[0];
+      }
+
       function renderRecommendations(scores) {
-        const recommendations = getRecommendations(scores);
+        const recommendations = getRecommendations(scores).slice(0, 2);
+        const contrast = getContrastRecommendation(scores);
         const fallback = ["light-daily", "dramatic-collision", "modern-fragment"]
           .map((id) => styleFamilies.find((style) => style.id === id))
           .filter(Boolean);
-        recommendationGrid.innerHTML = (recommendations.length ? recommendations : fallback)
+        const cards = recommendations.map((style, index) => ({ style, label: `亲缘 0${index + 1}` }));
+        if (contrast && !cards.some((item) => item.style.id === contrast.id)) {
+          cards.push({ style: contrast, label: "对照试读" });
+        }
+        fallback.forEach((style) => {
+          if (cards.length < 3 && !cards.some((item) => item.style.id === style.id)) {
+            cards.push({ style, label: cards.length < 2 ? `亲缘 0${cards.length + 1}` : "对照试读" });
+          }
+        });
+        recommendationGrid.innerHTML = cards
+          .slice(0, 3)
           .map(
-            (style) => `
+            ({ style, label }) => `
               <article class="recommendation-card">
+                <span class="knowledge-meta">${label}</span>
                 <h3>${style.title}</h3>
                 <p>${style.summary}</p>
                 <div class="tag-row">${style.tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
                 <p><strong>适合入口：</strong>${style.entry}</p>
+                <p><strong>阅读时留意：</strong>${style.signals.join("、")}</p>
+                <p><strong>带着问题读：</strong>${style.question}</p>
                 <p><strong>参考作品：</strong>${style.works.join("、")}</p>
                 <div class="link-row" style="margin-top: 14px">
                   <a class="ghost-button" href="#knowledge" data-route-link="knowledge" data-scroll-target="style-${style.id}">查看条目</a>
