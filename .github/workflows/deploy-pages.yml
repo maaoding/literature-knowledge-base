@@ -34,9 +34,11 @@ jobs:
       - name: Build VitePress
         run: npm run docs:build
 
-      - name: Add standalone style test
+      - name: Validate content and build output
+        run: npm run docs:check
+
+      - name: Add Pages metadata
         run: |
-          cp -R style-test docs/.vitepress/dist/style-test
           cp CNAME docs/.vitepress/dist/CNAME
           touch docs/.vitepress/dist/.nojekyll
 

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { authors } from '../data/literature'
+import { data as catalog } from '../data/catalog.data'
+
+const { authors } = catalog
 
 const selectedCountry = ref('全部')
 const countries = computed(() => ['全部', ...Array.from(new Set(authors.map((author) => author.country)))])
@@ -35,7 +37,7 @@ const filteredAuthors = computed(() =>
         </div>
         <h3><a :href="author.link">{{ author.name }}</a></h3>
         <p>{{ author.summary }}</p>
-        <p class="kb-card__meta">代表作品：{{ author.works.join(' / ') }}</p>
+        <p v-if="author.works.length" class="kb-card__meta">代表作品：{{ author.works.join(' / ') }}</p>
         <div class="kb-tags">
           <span v-for="tag in author.tags" :key="tag">{{ tag }}</span>
         </div>

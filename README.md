@@ -18,9 +18,22 @@
 npm ci
 npm run docs:dev
 npm run docs:build
+npm run docs:check
 ```
 
-文学风格测试是独立静态页面，位于 `style-test/index.html`。
+文学风格测试保持为独立单文件应用，源码位于 `docs/public/style-test/index.html`，由 VitePress 开发服务器和构建流程直接提供。
+
+## 内容维护
+
+作家、作品、文学史、阅读路径和专题都使用实体 Markdown。文件路径决定公开 URL，frontmatter 是索引、关系和侧栏的唯一数据来源：
+
+- `docs/history/*.md`：文学史时间线、时代总览和跨期导读。
+- `docs/authors/*.md`：作家条目及其文学史关联。
+- `docs/works/*.md`：作品、作者与文学史关联。
+- `docs/paths/*.md`：结构化作品步骤。
+- `docs/topics/*.md`：主题阅读入口。
+
+构建期使用 Zod 校验 frontmatter，并从关系字段派生作家作品、时期节点和阅读路径索引。`npm run docs:check` 还会检查数量、引用、旧 URL、搜索关键词、公共资源和构建产物。
 
 ## 在线地址
 

@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { authors, historyEntries, readingPaths, works } from '../data/literature'
+import { data as catalog } from '../data/catalog.data'
 
-const featuredWorkTitles = ['红楼梦', '伊利亚特', '哈姆雷特', '百年孤独']
-const featuredWorks = featuredWorkTitles
-  .map((title) => works.find((work) => work.title === title))
-  .filter((work): work is (typeof works)[number] => Boolean(work))
-const featuredAuthors = authors.slice(0, 6)
-const featuredPaths = readingPaths.slice(0, 3)
-const eras = historyEntries.filter((entry) => entry.featured).slice(0, 8)
+const { authors, historyEntries, readingPaths, works } = catalog
+const byHomeOrder = <T extends { homeOrder: number | null }>(entries: T[]) => entries
+  .filter((entry): entry is T & { homeOrder: number } => entry.homeOrder !== null)
+  .sort((a, b) => a.homeOrder - b.homeOrder)
+
+const featuredWorks = byHomeOrder(works)
+const featuredAuthors = byHomeOrder(authors)
+const featuredPaths = byHomeOrder(readingPaths)
+const eras = byHomeOrder(historyEntries)
 </script>
 
 <template>
@@ -85,7 +87,7 @@ const eras = historyEntries.filter((entry) => entry.featured).slice(0, 8)
           <h2>文学史线索</h2>
         </div>
         <div class="kb-list">
-          <a v-for="era in eras" :key="era.period" class="kb-list-row" :href="era.link">
+          <a v-for="era in eras" :key="era.slug" class="kb-list-row" :href="era.link">
             <span>{{ era.timeLabel }}</span>
             <strong>{{ era.title }}</strong>
             <p>{{ era.summary }}</p>

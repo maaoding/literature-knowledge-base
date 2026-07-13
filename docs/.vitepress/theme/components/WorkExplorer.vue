@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { allTags, works, type Difficulty } from '../data/literature'
+import type { Difficulty } from '../../content/schema'
+import { data as catalog } from '../data/catalog.data'
+
+const { allTags, works } = catalog
 
 const query = ref('')
 const selectedTag = ref('全部')

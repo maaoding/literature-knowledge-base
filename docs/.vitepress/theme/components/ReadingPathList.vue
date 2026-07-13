@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { readingPaths } from '../data/literature'
+import { data as catalog } from '../data/catalog.data'
+
+const { readingPaths } = catalog
 </script>
 
 <template>

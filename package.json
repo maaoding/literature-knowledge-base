@@ -10,8 +10,11 @@
     "docs:check": "node scripts/validate-knowledge-base.mjs"
   },
   "devDependencies": {
+    "esbuild": "^0.28.1",
+    "gray-matter": "^4.0.3",
     "vitepress": "^1.6.4",
-    "vue": "^3.5.39"
+    "vue": "^3.5.39",
+    "zod": "^4.4.3"
   },
   "overrides": {
     "vite": "6.4.3"

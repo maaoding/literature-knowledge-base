@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { historyEntries, type EraGroup, type HistoryTrack } from '../data/literature'
+import type { EraGroup, HistoryTrack } from '../../content/schema'
+import { data as catalog } from '../data/catalog.data'
+
+const { historyEntries } = catalog
 
 type TimelineFilter = '全部' | HistoryTrack
 
