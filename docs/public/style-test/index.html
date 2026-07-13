@@ -1211,6 +1211,24 @@
         border-color: var(--line-strong);
       }
 
+      #page-quiz .page-head {
+        align-items: center;
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+      }
+
+      .quiz-workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 286px;
+        min-height: calc(100vh - var(--topbar-height) - 210px);
+        gap: 32px;
+        align-items: stretch;
+      }
+
+      .quiz-primary {
+        min-width: 0;
+      }
+
       .quiz-context {
         display: flex;
         gap: 14px;
@@ -1237,7 +1255,7 @@
 
       .question-index {
         display: grid;
-        grid-template-columns: repeat(15, minmax(0, 1fr));
+        grid-template-columns: repeat(10, minmax(0, 1fr));
         gap: 6px;
         margin: 0 0 16px;
         padding: 14px;
@@ -1264,19 +1282,31 @@
         box-shadow: none;
       }
 
+      .quiz-surface {
+        width: 100%;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        box-shadow: 0 12px 30px rgba(31, 38, 39, 0.09);
+      }
+
       .quiz-form {
         min-height: 0;
       }
 
       .question {
-        max-width: 920px;
         width: 100%;
-        margin: 0 auto;
-        padding: 30px;
+        margin: 0;
+        padding: 30px 30px 28px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
       }
 
       .question-top {
-        margin-bottom: 22px;
+        margin-bottom: 24px;
       }
 
       .question-text {
@@ -1287,7 +1317,11 @@
       }
 
       .question-meta {
-        display: none;
+        display: block;
+        margin-top: 7px;
+        color: var(--crimson);
+        font-size: 12px;
+        font-weight: 900;
       }
 
       .choice-row label {
@@ -1307,17 +1341,20 @@
       }
 
       .quiz-actions {
-        background: color-mix(in srgb, var(--paper) 94%, transparent);
+        position: static;
+        margin: 0;
+        padding: 16px 30px 22px;
+        background: color-mix(in srgb, var(--paper-strong) 36%, transparent);
       }
 
       .quiz-review {
-        max-width: 920px;
-        margin: 0 auto;
-        padding: 26px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
-        background: var(--panel);
-        box-shadow: var(--shadow);
+        width: 100%;
+        margin: 0;
+        padding: 30px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
       }
 
       .quiz-review h3 {
@@ -1345,6 +1382,121 @@
       .review-row span {
         color: var(--muted);
         font-size: 14px;
+      }
+
+      .quiz-overview {
+        position: sticky;
+        top: calc(var(--topbar-height) + 22px);
+        display: flex;
+        min-width: 0;
+        min-height: 472px;
+        padding-left: 28px;
+        flex-direction: column;
+        border-left: 1px solid var(--line);
+      }
+
+      .overview-head h3 {
+        margin: 5px 0 7px;
+        font-size: 21px;
+        line-height: 1.35;
+      }
+
+      .overview-head p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.62;
+      }
+
+      .dimension-progress-list {
+        margin-top: 18px;
+        border-top: 1px solid var(--line);
+      }
+
+      .dimension-progress-item {
+        display: grid;
+        width: 100%;
+        gap: 8px;
+        padding: 13px 0;
+        text-align: left;
+        color: var(--muted);
+        border-bottom: 1px solid var(--line);
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .dimension-progress-item:hover,
+      .dimension-progress-item.current {
+        color: var(--ink);
+      }
+
+      .dimension-progress-item.current .dimension-progress-name {
+        color: var(--crimson);
+      }
+
+      .dimension-progress-head {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .dimension-progress-name,
+      .dimension-progress-count {
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .dimension-progress-poles {
+        overflow: hidden;
+        font-size: 11px;
+        font-weight: 750;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .dimension-mini-track {
+        width: 100%;
+        height: 5px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--line-strong) 62%, transparent);
+      }
+
+      .dimension-mini-bar {
+        display: block;
+        width: 0;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--teal);
+        transition: width 0.22s ease;
+      }
+
+      .dimension-progress-item.current .dimension-mini-bar {
+        background: var(--crimson);
+      }
+
+      .overview-finish {
+        margin-top: auto;
+        padding-top: 18px;
+      }
+
+      .overview-finish strong {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--ink);
+        font-size: 15px;
+      }
+
+      .overview-finish p {
+        margin: 0 0 13px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.62;
+      }
+
+      .overview-action {
+        width: 100%;
       }
 
       .profile-panel {
@@ -1756,6 +1908,76 @@
       }
 
       @media (max-width: 980px) {
+        .quiz-workspace {
+          grid-template-columns: 1fr;
+          min-height: 0;
+          gap: 18px;
+        }
+
+        .quiz-primary {
+          grid-row: 2;
+        }
+
+        .quiz-overview {
+          position: static;
+          grid-row: 1;
+          display: grid;
+          min-height: 0;
+          padding: 14px 0;
+          grid-template-columns: minmax(180px, 0.8fr) minmax(0, 2fr);
+          gap: 14px 20px;
+          border-top: 1px solid var(--line);
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+          border-left: 0;
+        }
+
+        .overview-head h3 {
+          margin-bottom: 4px;
+          font-size: 18px;
+        }
+
+        .dimension-progress-list {
+          display: grid;
+          margin: 0;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          border-top: 0;
+        }
+
+        .dimension-progress-item {
+          padding: 4px 10px;
+          border-bottom: 0;
+          border-left: 1px solid var(--line);
+        }
+
+        .dimension-progress-poles {
+          display: none;
+        }
+
+        .overview-finish {
+          display: flex;
+          grid-column: 1 / -1;
+          margin: 0;
+          padding-top: 12px;
+          gap: 14px;
+          align-items: center;
+          border-top: 1px solid var(--line);
+        }
+
+        .overview-finish strong {
+          margin: 0;
+        }
+
+        .overview-finish p {
+          margin: 0;
+          flex: 1;
+        }
+
+        .overview-action {
+          width: auto;
+          min-width: 136px;
+        }
+
         .question-index {
           grid-template-columns: repeat(10, minmax(0, 1fr));
         }
@@ -1878,6 +2100,75 @@
           min-width: 0;
         }
 
+        #page-quiz .page-head {
+          margin-bottom: 14px;
+        }
+
+        .quiz-overview {
+          display: block;
+          padding: 12px 0;
+        }
+
+        .overview-head {
+          display: flex;
+          gap: 10px;
+          align-items: baseline;
+          justify-content: space-between;
+        }
+
+        .overview-head .section-kicker,
+        .overview-head p {
+          display: none;
+        }
+
+        .overview-head h3 {
+          margin: 0 0 10px;
+          font-size: 16px;
+        }
+
+        .dimension-progress-list {
+          display: flex;
+          gap: 0;
+          overflow-x: auto;
+          scroll-snap-type: x proximity;
+          scrollbar-width: none;
+        }
+
+        .dimension-progress-list::-webkit-scrollbar {
+          display: none;
+        }
+
+        .dimension-progress-item {
+          flex: 0 0 142px;
+          padding: 7px 10px;
+          scroll-snap-align: start;
+        }
+
+        .dimension-progress-item:first-child {
+          border-left: 0;
+        }
+
+        .overview-finish {
+          display: grid;
+          margin-top: 10px;
+          padding-top: 10px;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 4px 10px;
+        }
+
+        .overview-finish p {
+          display: none;
+        }
+
+        .overview-action {
+          grid-row: 1;
+          grid-column: 2;
+          min-width: 0;
+          min-height: 38px;
+          padding: 7px 10px;
+          font-size: 13px;
+        }
+
         .question-index {
           grid-template-columns: repeat(6, minmax(0, 1fr));
           padding: 10px;
@@ -1889,6 +2180,10 @@
 
         .question {
           padding: 20px 16px;
+        }
+
+        .quiz-surface {
+          box-shadow: 0 8px 22px rgba(31, 38, 39, 0.08);
         }
 
         .question-top {
@@ -1920,7 +2215,7 @@
         .quiz-actions {
           display: grid;
           grid-template-columns: auto minmax(0, 1fr);
-          padding-top: 12px;
+          padding: 12px 16px 16px;
         }
 
         .quiz-actions .hint {
@@ -2169,24 +2464,44 @@
           </div>
         </div>
 
-        <div class="quiz-context">
-          <span class="question-position" id="questionPosition">第 1 / 30 题</span>
-          <button class="text-button" id="reviewToggle" type="button" aria-expanded="false" aria-controls="questionIndex">
-            查看作答
-          </button>
-        </div>
-        <nav class="question-index hidden" id="questionIndex" aria-label="题目快速索引"></nav>
-        <div class="tool-panel">
-          <form class="quiz-form" id="quizForm"></form>
-          <div class="quiz-actions">
-            <button class="ghost-button" id="clearButton" type="button">清空答案</button>
-            <p class="hint" id="submitHint" aria-live="polite">按真实阅读习惯选择，不必考虑哪一项更有品味。</p>
-            <div class="action-row">
-              <button class="ghost-button" id="prevButton" type="button">上一题</button>
-              <button class="ghost-button" id="nextButton" type="button" disabled>下一题</button>
-              <button class="button hidden" id="submitButton" type="button" disabled>生成结果</button>
+        <div class="quiz-workspace">
+          <div class="quiz-primary">
+            <div class="quiz-context">
+              <span class="question-position" id="questionPosition">第 1 / 30 题</span>
+              <button class="text-button" id="reviewToggle" type="button" aria-expanded="false" aria-controls="questionIndex">
+                查看作答
+              </button>
+            </div>
+            <nav class="question-index hidden" id="questionIndex" aria-label="题目快速索引"></nav>
+            <div class="tool-panel">
+              <div class="quiz-surface">
+                <form class="quiz-form" id="quizForm"></form>
+                <div class="quiz-actions">
+                  <button class="ghost-button" id="clearButton" type="button">清空答案</button>
+                  <p class="hint" id="submitHint" aria-live="polite">按真实阅读习惯选择，不必考虑哪一项更有品味。</p>
+                  <div class="action-row">
+                    <button class="ghost-button" id="prevButton" type="button">上一题</button>
+                    <button class="ghost-button" id="nextButton" type="button" disabled>下一题</button>
+                    <button class="button hidden" id="submitButton" type="button" disabled>生成结果</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          <aside class="quiz-overview" aria-labelledby="overviewTitle">
+            <div class="overview-head">
+              <span class="section-kicker">作答概览</span>
+              <h3 id="overviewTitle">五条阅读倾向</h3>
+              <p id="overviewCurrent">当前从叙事节奏进入。</p>
+            </div>
+            <div class="dimension-progress-list" id="dimensionOverview"></div>
+            <div class="overview-finish">
+              <strong id="overviewStatus">还剩 30 题</strong>
+              <p id="overviewStatusCopy">完成后即可生成阅读画像。</p>
+              <button class="button overview-action" id="overviewAction" type="button">定位未答题</button>
+            </div>
+          </aside>
         </div>
       </section>
 
@@ -2823,6 +3138,11 @@
       const prevButton = document.querySelector("#prevButton");
       const nextButton = document.querySelector("#nextButton");
       const clearButton = document.querySelector("#clearButton");
+      const dimensionOverview = document.querySelector("#dimensionOverview");
+      const overviewCurrent = document.querySelector("#overviewCurrent");
+      const overviewStatus = document.querySelector("#overviewStatus");
+      const overviewStatusCopy = document.querySelector("#overviewStatusCopy");
+      const overviewAction = document.querySelector("#overviewAction");
       const restartButton = document.querySelector("#restartButton");
       const emptyResult = document.querySelector("#emptyResult");
       const resultContent = document.querySelector("#resultContent");
@@ -3243,6 +3563,7 @@
         renderQuestionIndex();
         const answered = answers.filter((answer) => answer !== null).length;
         if (reviewMode) {
+          questionIndex.classList.remove("hidden");
           questionPosition.textContent = "作答检查";
           reviewToggle.textContent = `返回第 ${currentQuestion + 1} 题`;
           reviewToggle.setAttribute("aria-expanded", "true");
@@ -3256,7 +3577,7 @@
           quizForm.innerHTML = `
             <section class="quiz-review" aria-labelledby="reviewTitle">
               <h3 id="reviewTitle">检查后生成阅读画像</h3>
-              <p class="page-copy">已完成 ${answered} / ${questions.length} 题。需要修改时，从上方“查看作答”选择题号。</p>
+              <p class="page-copy">已完成 ${answered} / ${questions.length} 题。需要修改时，从题号索引或维度概览进入对应题目。</p>
               <div class="review-list">${reviewRows}</div>
             </section>
           `;
@@ -3270,6 +3591,8 @@
 
         const questionIndexValue = questionOrder[currentQuestion];
         const question = questions[questionIndexValue];
+        const dimension = dimensions.find((item) => item.id === question.dimension);
+        const dimensionRound = questionsByDimension[question.dimension].findIndex((item) => item.index === questionIndexValue) + 1;
         const options = choices
           .map(
             (choice) => `
@@ -3293,7 +3616,10 @@
           <article class="question" data-question="${questionIndexValue}" tabindex="-1">
             <div class="question-top">
               <div class="question-number">${String(currentQuestion + 1).padStart(2, "0")}</div>
-              <div><p class="question-text">${question.text}</p></div>
+              <div>
+                <p class="question-text">${question.text}</p>
+                <p class="question-meta">${dimension.name} · 本维第 ${dimensionRound} / 6 题</p>
+              </div>
             </div>
             <div class="choice-row" aria-label="符合程度">${options}</div>
           </article>
@@ -3325,6 +3651,53 @@
           .join("");
       }
 
+      function renderDimensionOverview() {
+        const answered = answers.filter((answer) => answer !== null).length;
+        const remaining = questions.length - answered;
+        const currentQuestionIndex = questionOrder[currentQuestion];
+        const currentItem = questions[currentQuestionIndex];
+        const currentDimension = dimensions.find((dimension) => dimension.id === currentItem.dimension);
+        const currentRound = questionsByDimension[currentItem.dimension].findIndex((item) => item.index === currentQuestionIndex) + 1;
+
+        overviewCurrent.textContent = reviewMode
+          ? "正在检查全部作答。"
+          : `当前：${currentDimension.name} · 本维第 ${currentRound} / 6 题`;
+
+        dimensionOverview.innerHTML = dimensions
+          .map((dimension) => {
+            const dimensionQuestions = questionsByDimension[dimension.id];
+            const count = dimensionQuestions.filter((item) => answers[item.index] !== null).length;
+            const firstMissing = dimensionQuestions.find((item) => answers[item.index] === null);
+            const target = firstMissing || dimensionQuestions[dimensionQuestions.length - 1];
+            const targetPosition = questionOrder.indexOf(target.index);
+            const isCurrent = !reviewMode && currentItem.dimension === dimension.id;
+            const percent = Math.round((count / dimensionQuestions.length) * 100);
+            return `
+              <button
+                class="dimension-progress-item ${isCurrent ? "current" : ""}"
+                type="button"
+                data-dimension-jump="${targetPosition}"
+                aria-label="${dimension.name}，已回答 ${count} / ${dimensionQuestions.length} 题"
+                ${isCurrent ? 'aria-current="step"' : ""}
+              >
+                <span class="dimension-progress-head">
+                  <span class="dimension-progress-name">${dimension.name}</span>
+                  <span class="dimension-progress-count">${count}/${dimensionQuestions.length}</span>
+                </span>
+                <span class="dimension-mini-track" aria-hidden="true"><span class="dimension-mini-bar" style="width: ${percent}%"></span></span>
+                <span class="dimension-progress-poles">${dimension.negative} ↔ ${dimension.positive}</span>
+              </button>
+            `;
+          })
+          .join("");
+
+        overviewStatus.textContent = remaining ? `${answered} / ${questions.length} 已回答` : `${questions.length} / ${questions.length} 已完成`;
+        overviewStatusCopy.textContent = remaining
+          ? `还剩 ${remaining} 题，完成后即可生成阅读画像。`
+          : "可以直接生成阅读画像，也可以返回任意题修改。";
+        overviewAction.textContent = remaining ? "定位未答题" : "生成阅读画像";
+      }
+
       function updateProgress() {
         const answered = answers.filter((answer) => answer !== null).length;
         const percent = Math.round((answered / questions.length) * 100);
@@ -3332,6 +3705,7 @@
         progressPercent.textContent = `${percent}%`;
         progressBar.style.width = `${percent}%`;
         submitButton.disabled = answered !== questions.length;
+        renderDimensionOverview();
         updateSavedStateText();
       }
 
@@ -3732,6 +4106,21 @@
         questionIndex.classList.add("hidden");
         reviewToggle.setAttribute("aria-expanded", "false");
         showQuestion(Number(button.dataset.questionJump));
+      });
+
+      dimensionOverview.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-dimension-jump]");
+        if (!button) return;
+        showQuestion(Number(button.dataset.dimensionJump));
+      });
+
+      overviewAction.addEventListener("click", () => {
+        const firstMissingPosition = questionOrder.findIndex((index) => answers[index] === null);
+        if (firstMissingPosition >= 0) {
+          showQuestion(firstMissingPosition);
+          return;
+        }
+        showResults();
       });
 
       document.addEventListener("click", (event) => {
