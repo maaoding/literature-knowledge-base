@@ -6,3 +6,6 @@ Thumbs.db
 npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
+content-sources/*.pdf
+content-sources/*.json
+content-sources/extracted/

@@ -4,8 +4,13 @@ import { allTags, works, type Difficulty } from '../data/literature'
 
 const query = ref('')
 const selectedTag = ref('全部')
+const selectedCountry = ref('全部')
 const selectedDifficulty = ref<Difficulty | '全部'>('全部')
 const difficultyOptions: Array<Difficulty | '全部'> = ['全部', '入门', '进阶', '挑战']
+
+const countryOptions = computed(() =>
+  ['全部', ...Array.from(new Set(works.map((work) => work.country))).sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))]
+)
 
 const visibleTags = computed(() =>
   allTags.filter((tag) => works.some((work) => work.tags.includes(tag))).slice(0, 18)
@@ -22,10 +27,11 @@ const filteredWorks = computed(() => {
         .toLowerCase()
         .includes(keyword)
     const matchesTag = selectedTag.value === '全部' || work.tags.includes(selectedTag.value)
+    const matchesCountry = selectedCountry.value === '全部' || work.country === selectedCountry.value
     const matchesDifficulty =
       selectedDifficulty.value === '全部' || work.difficulty === selectedDifficulty.value
 
-    return matchesKeyword && matchesTag && matchesDifficulty
+    return matchesKeyword && matchesTag && matchesCountry && matchesDifficulty
   })
 })
 </script>
@@ -50,6 +56,19 @@ const filteredWorks = computed(() => {
           {{ option }}
         </button>
       </div>
+    </div>
+
+    <div class="kb-filter-group kb-filter-group--wrap" aria-label="国别筛选">
+      <span>国别</span>
+      <button
+        v-for="country in countryOptions"
+        :key="country"
+        type="button"
+        :class="{ 'is-active': selectedCountry === country }"
+        @click="selectedCountry = country"
+      >
+        {{ country }}
+      </button>
     </div>
 
     <div class="kb-filter-group kb-filter-group--wrap" aria-label="主题标签">

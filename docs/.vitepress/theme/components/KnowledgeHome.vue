@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { authors, readingPaths, timeline, works } from '../data/literature'
+import { authors, historyEntries, readingPaths, works } from '../data/literature'
 
-const featuredWorks = works.slice(0, 4)
+const featuredWorkTitles = ['红楼梦', '伊利亚特', '哈姆雷特', '百年孤独']
+const featuredWorks = featuredWorkTitles
+  .map((title) => works.find((work) => work.title === title))
+  .filter((work): work is (typeof works)[number] => Boolean(work))
 const featuredAuthors = authors.slice(0, 6)
 const featuredPaths = readingPaths.slice(0, 3)
-const eras = timeline.slice(0, 3)
+const eras = historyEntries.filter((entry) => entry.featured).slice(0, 8)
 </script>
 
 <template>
@@ -28,7 +31,7 @@ const eras = timeline.slice(0, 3)
 
     <section class="kb-band kb-snapshot" aria-label="知识库规模">
       <div class="kb-stat">
-        <strong>{{ timeline.length }}</strong>
+        <strong>{{ historyEntries.length }}</strong>
         <span>段文学史线索</span>
       </div>
       <div class="kb-stat">
@@ -83,8 +86,8 @@ const eras = timeline.slice(0, 3)
         </div>
         <div class="kb-list">
           <a v-for="era in eras" :key="era.period" class="kb-list-row" :href="era.link">
-            <span>{{ era.time }}</span>
-            <strong>{{ era.period }}</strong>
+            <span>{{ era.timeLabel }}</span>
+            <strong>{{ era.title }}</strong>
             <p>{{ era.summary }}</p>
           </a>
         </div>
