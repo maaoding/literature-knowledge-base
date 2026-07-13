@@ -64,9 +64,6 @@ const entriesFor = (era: EraGroup) => visibleEntries.value.filter((entry) => ent
           </div>
           <h3>{{ entry.title }}</h3>
           <p>{{ entry.summary }}</p>
-          <div class="kb-tags">
-            <span v-for="tag in entry.tags.slice(0, 3)" :key="tag">{{ tag }}</span>
-          </div>
         </a>
       </div>
     </section>

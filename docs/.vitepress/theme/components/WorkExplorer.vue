@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import type { Difficulty } from '../../content/schema'
 import { data as catalog } from '../data/catalog.data'
 
-const { allTags, works } = catalog
+const { works } = catalog
 
 const query = ref('')
 const selectedTag = ref('全部')
@@ -15,8 +15,8 @@ const countryOptions = computed(() =>
   ['全部', ...Array.from(new Set(works.map((work) => work.country))).sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))]
 )
 
-const visibleTags = computed(() =>
-  allTags.filter((tag) => works.some((work) => work.tags.includes(tag))).slice(0, 18)
+const tagOptions = computed(() =>
+  ['全部', ...Array.from(new Set(works.flatMap((work) => work.tags))).sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))]
 )
 
 const filteredWorks = computed(() => {
@@ -41,62 +41,38 @@ const filteredWorks = computed(() => {
 
 <template>
   <section class="kb-explorer" aria-label="名著筛选">
-    <div class="kb-filterbar">
+    <div class="kb-index-toolbar">
       <label class="kb-search-field">
-        <span>搜索名著、作家、主题</span>
-        <input v-model="query" type="search" placeholder="例如：现实主义、鲁迅、红楼梦" />
+        <span>搜索名著</span>
+        <input v-model="query" type="search" placeholder="书名、作家或主题" />
       </label>
 
-      <div class="kb-filter-group" aria-label="阅读难度">
-        <span>难度</span>
-        <button
-          v-for="option in difficultyOptions"
-          :key="option"
-          type="button"
-          :class="{ 'is-active': selectedDifficulty === option }"
-          @click="selectedDifficulty = option"
-        >
-          {{ option }}
-        </button>
+      <div class="kb-select-grid">
+        <label class="kb-select-field">
+          <span>难度</span>
+          <select v-model="selectedDifficulty">
+            <option v-for="option in difficultyOptions" :key="option" :value="option">{{ option }}</option>
+          </select>
+        </label>
+        <label class="kb-select-field">
+          <span>国别</span>
+          <select v-model="selectedCountry">
+            <option v-for="country in countryOptions" :key="country" :value="country">{{ country }}</option>
+          </select>
+        </label>
+        <label class="kb-select-field">
+          <span>主题</span>
+          <select v-model="selectedTag">
+            <option v-for="tag in tagOptions" :key="tag" :value="tag">{{ tag }}</option>
+          </select>
+        </label>
       </div>
-    </div>
-
-    <div class="kb-filter-group kb-filter-group--wrap" aria-label="国别筛选">
-      <span>国别</span>
-      <button
-        v-for="country in countryOptions"
-        :key="country"
-        type="button"
-        :class="{ 'is-active': selectedCountry === country }"
-        @click="selectedCountry = country"
-      >
-        {{ country }}
-      </button>
-    </div>
-
-    <div class="kb-filter-group kb-filter-group--wrap" aria-label="主题标签">
-      <span>标签</span>
-      <button
-        type="button"
-        :class="{ 'is-active': selectedTag === '全部' }"
-        @click="selectedTag = '全部'"
-      >
-        全部
-      </button>
-      <button
-        v-for="tag in visibleTags"
-        :key="tag"
-        type="button"
-        :class="{ 'is-active': selectedTag === tag }"
-        @click="selectedTag = tag"
-      >
-        {{ tag }}
-      </button>
     </div>
 
     <p class="kb-result-count">共 {{ filteredWorks.length }} 部作品</p>
 
-    <div class="kb-grid kb-grid--two">
+    <p v-if="!filteredWorks.length" class="kb-empty-state">没有符合当前条件的作品。</p>
+    <div class="kb-grid kb-grid--catalog">
       <article v-for="work in filteredWorks" :key="work.slug" class="kb-card">
         <div class="kb-card__topline">
           <span class="kb-pill">{{ work.difficulty }}</span>
@@ -109,9 +85,6 @@ const filteredWorks = computed(() => {
           <a v-if="work.authorLink" :href="work.authorLink">{{ work.author }}</a>
           <span v-else>{{ work.author }}</span>
         </p>
-        <div class="kb-tags">
-          <span v-for="tag in work.tags" :key="tag">{{ tag }}</span>
-        </div>
       </article>
     </div>
   </section>

@@ -7,6 +7,9 @@ genres: [专题]
 tags: [专题, 主题阅读, 推荐]
 difficulty: 入门
 recommendedFor: [主题阅读, 拓展阅读]
+outline: false
+aside: false
+pageClass: kb-index-page
 ---
 
 # 专题
