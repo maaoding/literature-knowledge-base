@@ -188,17 +188,50 @@ assert(styleTestSource.includes('class="brand" href="#home" data-route-link="hom
 assert(configSource.includes("link: '/style-test/', target: '_self'"), 'top navigation can route the standalone style test through VitePress')
 assert(homeSource.includes('href="/style-test/" target="_self"'), 'home page can route the standalone style test through VitePress')
 assert(styleTestSource.includes('href="#home" data-route="home">入口</a>'), 'style test internal home route changed')
+assert(styleTestSource.includes('const routeAliases = { library: "map", knowledge: "map" }'), 'legacy style-test library routes no longer resolve to the reading map')
+assert(!styleTestSource.includes('data-page="knowledge"'), 'style test still contains a duplicate knowledge page')
+assert((styleTestSource.match(/data-page="[^"]+"/g) ?? []).length === 5, 'style test must keep exactly five primary pages')
 assert(styleTestSource.includes('literaryStyleTest.v4'), 'style test result localStorage key changed')
 assert(styleTestSource.includes('literaryStyleTest.theme'), 'style test theme localStorage key changed')
 assert(!styleTestSource.includes('literary-style-icon.png'), 'style test still references its duplicate icon')
 const questionBlock = styleTestSource.match(/const questions = \[([\s\S]*?)\n\s*\];/)?.[1] ?? ''
 assert((questionBlock.match(/\{ text:/g) ?? []).length === 30, 'style test must keep all 30 questions')
 
+const styleTestArrays = {
+  dimensions: 5,
+  appealFactors: 5,
+  styleFamilies: 12,
+  readingSituations: 8,
+  comparisons: 9
+}
+for (const [name, expectedCount] of Object.entries(styleTestArrays)) {
+  const block = styleTestSource.match(new RegExp(`const ${name} = \\[([\\s\\S]*?)\\n\\s*\\];`))?.[1] ?? ''
+  const actualCount = (block.match(/\bid:\s*"[^"]+"/g) ?? []).length
+  assert(actualCount === expectedCount, `style test expected ${expectedCount} ${name}, found ${actualCount}`)
+}
+assert(styleTestArrays.appealFactors + styleTestArrays.styleFamilies + styleTestArrays.readingSituations + styleTestArrays.comparisons === 34, 'reading map index must keep 34 entries')
+assert(styleTestSource.includes('id="readingPlanGrid"'), 'style test result is missing the unified three-step reading plan')
+assert(!styleTestSource.includes('id="pathGrid"') && !styleTestSource.includes('id="recommendationGrid"'), 'style test still contains duplicate result recommendation grids')
+const readingPlanBlock = styleTestSource.match(/function renderReadingPlan\(scores\) \{([\s\S]*?)\n\s*function normalizeSearch/)?.[1] ?? ''
+for (const label of ['01 · 熟悉入口', '02 · 对照入口', '03 · 当前情境']) {
+  assert(readingPlanBlock.includes(label), `three-step reading plan missing: ${label}`)
+}
+assert((readingPlanBlock.match(/label:\s*"0[1-3] ·/g) ?? []).length === 3, 'three-step reading plan must contain exactly three entries')
+assert(styleTestSource.includes('getRankedDimensions(scores)\n          .map((dimension, index)'), 'dimension details are not sorted by preference strength')
+assert(styleTestSource.includes('index < 2 ? "open" : ""'), 'top two dimension details must open by default')
+assert(styleTestSource.includes('const methodGroups = ['), 'style test method content is not grouped')
+assert(!styleTestSource.includes('const methodNotes = ['), 'style test still contains the flat method notes structure')
+for (const title of ['作答与隐私', '计分与生成', '解读与验证']) {
+  assert(styleTestSource.includes(`title: "${title}"`), `method group missing: ${title}`)
+}
+assert(!styleTestSource.includes('风格知识库'), 'style test still contains legacy knowledge-base wording')
+
 const iconPath = path.join(docsDir, 'public', 'images', 'literary-icon.png')
 const icon = fs.readFileSync(iconPath)
 assert(icon.readUInt32BE(16) === 512 && icon.readUInt32BE(20) === 512, 'brand icon must be the 512px simplified version')
 assert(!fs.existsSync(path.join(docsDir, 'public', 'style-test', 'assets', 'literary-style-icon.png')), 'duplicate style-test icon still exists')
-assert((styleTestSource.match(/\/images\/literary-icon\.png\?v=4/g) ?? []).length === 4, 'style test icon references are not unified')
+assert((styleTestSource.match(/\/images\/literary-icon\.png\?v=4/g) ?? []).length === 3, 'style test icon references are not unified')
+assert(!styleTestSource.includes('class="result-mark"'), 'style test result heading still contains the brand icon')
 
 const sourceText = sourceFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n')
 assert(!sourceText.includes('literary-style-icon.png'), 'legacy icon reference remains in source')

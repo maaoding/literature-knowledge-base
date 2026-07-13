@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="文学风格测试：用阅读题目、画像解释和风格知识库理解你的文本偏好。"
+      content="文学风格测试：用阅读题目、画像解释和阅读地图理解你的文本偏好。"
     />
     <meta name="theme-color" content="#f6f1e8" />
     <title>文学风格测试</title>
@@ -390,8 +390,7 @@
       .situation-grid,
       .summary-grid,
       .score-grid,
-      .path-grid,
-      .recommendation-grid,
+      .reading-plan-grid,
       .comparison-grid {
         display: grid;
         gap: 14px;
@@ -780,7 +779,7 @@
         line-height: 1.6;
       }
 
-      .path-grid {
+      .reading-plan-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         margin-top: 18px;
       }
@@ -792,11 +791,6 @@
 
       .path-card .knowledge-meta {
         margin-bottom: 0;
-      }
-
-      .recommendation-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        margin-top: 18px;
       }
 
       .tag-row {
@@ -844,6 +838,23 @@
 
       .library-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .map-directory {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+
+      .map-directory .route-row {
+        padding: 22px 0;
+      }
+
+      .map-route-meta {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--crimson);
+        font-size: 12px;
+        font-weight: 900;
       }
 
       .axis-grid {
@@ -913,36 +924,78 @@
         margin: 0;
       }
 
-      .method-list {
-        display: grid;
-        gap: 12px;
+      .method-groups,
+      .reference-list {
+        border-top: 1px solid var(--line);
+      }
+
+      .method-group,
+      .reference-row {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .method-group > summary {
+        padding: 20px 46px 20px 0;
+      }
+
+      .method-group > summary h3 {
+        margin: 0 0 6px;
+        font-size: 20px;
+      }
+
+      .method-group > summary p,
+      .method-item p,
+      .reference-row span {
         margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-
-      .method-list li {
-        padding: 16px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
-        background: rgba(255, 250, 241, 0.76);
-      }
-
-      .method-list strong {
-        display: block;
-        margin-bottom: 6px;
-      }
-
-      .method-list span {
         color: var(--muted);
         line-height: 1.7;
       }
 
-      .method-list a {
+      .method-group > .detail-body {
+        padding: 0 0 18px;
+        border-top: 0;
+      }
+
+      .method-item-list {
+        border-top: 1px solid var(--line);
+      }
+
+      .method-item {
+        display: grid;
+        grid-template-columns: minmax(132px, 0.25fr) minmax(0, 1fr);
+        gap: 20px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .method-item:last-child {
+        border-bottom: 0;
+      }
+
+      .method-item strong {
+        color: var(--crimson);
+        font-size: 13px;
+      }
+
+      .method-sources {
+        margin-top: 34px;
+      }
+
+      .method-sources h3 {
+        margin: 4px 0 16px;
+        font-size: 24px;
+      }
+
+      .reference-row {
+        display: grid;
+        grid-template-columns: minmax(180px, 0.35fr) minmax(0, 1fr);
+        gap: 20px;
+        padding: 16px 0;
+        text-decoration: none;
+      }
+
+      .reference-row strong {
         color: var(--teal);
-        font-weight: 850;
-        text-decoration-thickness: 2px;
-        text-underline-offset: 3px;
       }
 
       @media (max-width: 980px) {
@@ -958,8 +1011,7 @@
         .module-grid,
         .library-grid,
         .situation-grid,
-        .path-grid,
-        .recommendation-grid {
+        .reading-plan-grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
@@ -1056,8 +1108,7 @@
         .situation-grid,
         .summary-grid,
         .score-grid,
-        .path-grid,
-        .recommendation-grid,
+        .reading-plan-grid,
         .comparison-grid {
           grid-template-columns: 1fr;
         }
@@ -1113,7 +1164,8 @@
       .filter-button,
       .meta-pill,
       .search-input,
-      .method-list li {
+      .method-group > summary,
+      .reference-row {
         transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
       }
 
@@ -1667,7 +1719,6 @@
       html[data-theme="dark"] .filter-button,
       html[data-theme="dark"] .meta-pill,
       html[data-theme="dark"] .search-input,
-      html[data-theme="dark"] .method-list li,
       html[data-theme="dark"] .tag,
       html[data-theme="dark"] .question-index button {
         color: var(--ink);
@@ -1765,21 +1816,7 @@
       }
 
       .result-heading {
-        display: grid;
-        grid-template-columns: 52px minmax(0, 1fr);
-        gap: 14px;
-        align-items: start;
-      }
-
-      .result-mark {
         display: block;
-        width: 52px;
-        height: 52px;
-        padding: 3px;
-        object-fit: contain;
-        border: 1px solid var(--line-strong);
-        border-radius: var(--radius);
-        background: #fffaf1;
       }
 
       .result-badge {
@@ -1852,33 +1889,52 @@
       }
 
       .dimension-note {
-        display: grid;
-        grid-template-columns: minmax(132px, 0.25fr) minmax(0, 1fr);
-        gap: 20px;
-        padding: 18px 0;
         border-bottom: 1px solid var(--line);
       }
 
-      .dimension-note > span {
+      .dimension-note > summary {
+        display: grid;
+        grid-template-columns: minmax(132px, 0.25fr) minmax(0, 1fr);
+        gap: 20px;
+        padding: 18px 46px 18px 0;
+      }
+
+      .dimension-note__label {
         color: var(--crimson);
         font-size: 13px;
         font-weight: 900;
       }
 
-      .dimension-note strong {
+      .dimension-note__summary strong {
         display: block;
         margin-bottom: 6px;
         color: var(--ink);
       }
 
-      .dimension-note p {
+      .dimension-note__summary p,
+      .dimension-note__body p {
         margin: 0;
         color: var(--muted);
         line-height: 1.72;
       }
 
-      .path-grid,
-      .recommendation-grid {
+      .dimension-note__body {
+        display: grid;
+        grid-template-columns: minmax(132px, 0.25fr) minmax(0, 1fr);
+        gap: 20px;
+        padding: 0 0 18px;
+        border-top: 0;
+      }
+
+      .dimension-note__body > div {
+        grid-column: 2;
+      }
+
+      .dimension-note__body .link-row {
+        margin-top: 12px;
+      }
+
+      .reading-plan-grid {
         gap: 24px;
       }
 
@@ -2242,8 +2298,7 @@
         }
 
         .summary-grid,
-        .path-grid,
-        .recommendation-grid {
+        .reading-plan-grid {
           grid-template-columns: 1fr;
         }
 
@@ -2265,10 +2320,17 @@
           overflow-x: auto;
           flex-wrap: nowrap;
           padding-bottom: 4px;
+          scroll-snap-type: x proximity;
+          scrollbar-width: none;
+        }
+
+        .filter-row::-webkit-scrollbar {
+          display: none;
         }
 
         .filter-button {
           flex: 0 0 auto;
+          scroll-snap-align: start;
         }
 
         .home-index {
@@ -2291,26 +2353,23 @@
           justify-self: start;
         }
 
-        .result-heading {
-          grid-template-columns: 44px minmax(0, 1fr);
-          gap: 12px;
-        }
-
-        .result-mark {
-          width: 44px;
-          height: 44px;
-        }
-
         .result-title {
           font-size: 32px;
           line-height: 1.12;
         }
 
         .result-report .summary-card,
-        .dimension-note {
+        .dimension-note > summary,
+        .dimension-note__body,
+        .method-item,
+        .reference-row {
           grid-template-columns: 1fr;
           gap: 7px;
           padding: 16px 0;
+        }
+
+        .dimension-note__body > div {
+          grid-column: auto;
         }
 
         .profile-panel {
@@ -2319,8 +2378,7 @@
           border-top: 1px solid var(--line);
         }
 
-        .path-grid,
-        .recommendation-grid {
+        .reading-plan-grid {
           gap: 20px;
         }
       }
@@ -2355,7 +2413,6 @@
             <a class="nav-link" href="#quiz" data-route="quiz">测试</a>
             <a class="nav-link" href="#result" data-route="result">结果</a>
             <a class="nav-link" href="#map" data-route="map">阅读地图</a>
-            <a class="nav-link" href="#knowledge" data-route="knowledge">风格知识库</a>
             <a class="nav-link" href="#method" data-route="method">方法来源</a>
           </nav>
           <button class="icon-button" id="themeButton" type="button" aria-label="切换到深色模式" title="切换外观">
@@ -2391,7 +2448,7 @@
             </div>
             <div class="action-row" style="margin-top: 22px">
               <a class="button" id="startButton" href="#quiz" data-route-link="quiz">开始测试</a>
-              <a class="ghost-button" href="#knowledge" data-route-link="knowledge">浏览风格档案</a>
+              <a class="ghost-button" href="#map" data-route-link="map">浏览阅读地图</a>
             </div>
             <p class="home-note">结果只描述阅读入口，不判断文学能力，也不会上传你的答案。</p>
           </div>
@@ -2406,7 +2463,7 @@
             <div class="visual-caption">
               <div>
                 <strong>5</strong>
-                <span>个维度组织结果，不输出唯一答案。</span>
+                <span>条倾向组合成一份可以继续验证的阅读画像。</span>
               </div>
               <span id="savedStateText">尚未保存作答</span>
             </div>
@@ -2428,18 +2485,18 @@
             <article class="route-row">
               <span class="route-number">02</span>
               <div>
-                <h3>按结果继续试读</h3>
-                <p>从亲缘风格、相反方向和阅读情境中各选一个入口，避免把画像当成固定标签。</p>
+                <h3>按结果探索地图</h3>
+                <p>把五条倾向连接到风格档案、阅读情境和对照试读，找到下一篇文本的入口。</p>
               </div>
               <a class="ghost-button" href="#map" data-route-link="map">查看地图</a>
             </article>
             <article class="route-row">
               <span class="route-number">03</span>
               <div>
-                <h3>直接查风格档案</h3>
-                <p>按节奏、人物、情绪、语言或结构搜索条目，带着观察问题进入具体作品。</p>
+                <h3>看懂并验证结果</h3>
+                <p>了解分数怎样生成，再用熟悉入口和对照入口各试一篇短文本。</p>
               </div>
-              <a class="ghost-button" href="#knowledge" data-route-link="knowledge">进入知识库</a>
+              <a class="ghost-button" href="#method" data-route-link="method">查看方法</a>
             </article>
           </div>
         </section>
@@ -2450,7 +2507,7 @@
           <div>
             <h2 class="page-title" id="quizTitle">测试题</h2>
             <p class="page-copy">
-              回想最近几次真实阅读，选择每句话有多像你。没有标准答案，也不判断文学水平。
+              回想最近几次真实阅读，按第一反应选择每句话有多像你；拿不准时可以选“说不准”。
             </p>
           </div>
           <div class="progress-wrap" aria-label="作答进度">
@@ -2478,7 +2535,7 @@
                 <form class="quiz-form" id="quizForm"></form>
                 <div class="quiz-actions">
                   <button class="ghost-button" id="clearButton" type="button">清空答案</button>
-                  <p class="hint" id="submitHint" aria-live="polite">按真实阅读习惯选择，不必考虑哪一项更有品味。</p>
+                  <p class="hint" id="submitHint" aria-live="polite">按真实阅读经验选择，答案可以随时返回修改。</p>
                   <div class="action-row">
                     <button class="ghost-button" id="prevButton" type="button">上一题</button>
                     <button class="ghost-button" id="nextButton" type="button" disabled>下一题</button>
@@ -2509,7 +2566,7 @@
         <div class="page-head">
           <div>
             <h2 class="page-title">结果</h2>
-            <p class="page-copy">五条阅读倾向组成你的阅读画像，结果仅用于选择下一步试读入口。</p>
+            <p class="page-copy">先读三条速览，再从熟悉、对照和当前情境中选一个试读入口。</p>
           </div>
           <div class="result-actions">
             <a class="ghost-button" href="#quiz" data-route-link="quiz">回到测试</a>
@@ -2518,8 +2575,8 @@
         </div>
 
         <div class="empty-state" id="emptyResult">
-          <h3>还没有可展示的文学风格结果</h3>
-          <p>先完成 30 道题，页面会在本地计算你的阅读倾向，并生成画像解释、阅读线索和风格知识库入口。</p>
+          <h3>还没有阅读画像</h3>
+          <p>完成 30 道题后，这里会显示五条阅读倾向和三步试读建议。</p>
           <a class="button" href="#quiz" data-route-link="quiz">去答题</a>
         </div>
 
@@ -2527,11 +2584,8 @@
           <div class="result-layout">
             <section class="result-narrative">
               <div class="result-heading">
-                <img class="result-mark" src="/images/literary-icon.png?v=4" alt="" aria-hidden="true" />
-                <div>
-                  <span class="result-badge">你的阅读画像</span>
-                  <h2 class="result-title" id="resultTitle">均衡漫游者</h2>
-                </div>
+                <span class="result-badge">你的阅读画像</span>
+                <h2 class="result-title" id="resultTitle">均衡漫游者</h2>
               </div>
               <p class="result-copy" id="resultCopy"></p>
               <div class="summary-grid result-report" id="summaryGrid"></div>
@@ -2542,19 +2596,14 @@
             </aside>
           </div>
           <section class="result-section">
-            <div class="section-kicker">逐项解读</div>
+            <div class="section-kicker">从画像进入阅读</div>
+            <h3>三步试读</h3>
+            <div class="reading-plan-grid" id="readingPlanGrid"></div>
+          </section>
+          <section class="result-section">
+            <div class="section-kicker">深入理解</div>
             <h3>五条倾向怎么读</h3>
             <div class="dimension-note-list" id="dimensionNotes"></div>
-          </section>
-          <section class="result-section">
-            <div class="section-kicker">从画像进入阅读</div>
-            <h3>下一步阅读路径</h3>
-            <div class="path-grid" id="pathGrid"></div>
-          </section>
-          <section class="result-section">
-            <div class="section-kicker">亲缘与对照</div>
-            <h3>三种试读入口</h3>
-            <div class="recommendation-grid" id="recommendationGrid"></div>
           </section>
         </div>
       </section>
@@ -2564,33 +2613,7 @@
           <div>
             <h2 class="page-title" id="mapTitle">阅读地图</h2>
             <p class="page-copy">
-              阅读地图把五条倾向、常见阅读情境和易混风格放在同一层里。它只用于说明文本入口之间的张力，不输出固定身份结论。
-            </p>
-          </div>
-        </div>
-        <section class="map-group">
-          <div class="section-kicker">五条倾向</div>
-          <h3>阅读维度</h3>
-          <div class="axis-grid" id="axisGrid"></div>
-        </section>
-        <section class="map-group">
-          <div class="section-kicker">按此刻需要选择</div>
-          <h3>阅读情境</h3>
-          <div class="situation-grid" id="situationGrid"></div>
-        </section>
-        <section class="map-group">
-          <div class="section-kicker">辨认相近入口</div>
-          <h3>风格对照</h3>
-          <div class="comparison-grid" id="comparisonGrid"></div>
-        </section>
-      </section>
-
-      <section class="page" id="page-knowledge" data-page="knowledge" aria-labelledby="knowledgeTitle">
-        <div class="page-head">
-          <div>
-            <h2 class="page-title" id="knowledgeTitle">风格知识库</h2>
-            <p class="page-copy">
-              这里收纳测试会用到的阅读维度、风格档案、阅读情境和风格对照。你可以先搜索感兴趣的词，也可以做完测试后按结果回来查看。
+              从五条阅读倾向出发，继续查看风格档案、阅读情境和风格对照。先从总览选择入口，也可以直接搜索你关心的阅读感受。
             </p>
           </div>
         </div>
@@ -2600,9 +2623,9 @@
             id="librarySearch"
             type="search"
             placeholder="搜索：节奏、人物、魔幻记忆、复杂结构..."
-            aria-label="搜索风格知识库"
+            aria-label="搜索阅读地图"
           />
-          <div class="filter-row" id="libraryFilters" aria-label="知识库类型筛选"></div>
+          <div class="filter-row" id="libraryFilters" aria-label="阅读地图类型筛选"></div>
         </div>
         <div class="library-grid" id="libraryGrid"></div>
       </section>
@@ -2611,10 +2634,10 @@
         <div class="page-head">
           <div>
             <h2 class="page-title" id="methodTitle">方法来源</h2>
-            <p class="page-copy">这里说明如何作答、如何解读结果，以及这些题目参考了哪些读者推荐方法。</p>
+            <p class="page-copy">查看答案怎样保存在本地、分数怎样生成，以及如何用真实阅读验证结果。</p>
           </div>
         </div>
-        <ul class="method-list" id="methodList"></ul>
+        <div id="methodList"></div>
       </section>
     </main>
 
@@ -2628,7 +2651,7 @@
           negative: "缓慢沉浸",
           positive: "快速推进",
           negativeTrait: "慢读沉浸者",
-          positiveTrait: "推进追踪者",
+          positiveTrait: "情节追踪者",
           negativeMeaning: "更愿意让场景、气氛和细节慢慢积累，读得不急。",
           positiveMeaning: "更容易被短章节、转折、悬念和连续事件牵引。",
           note: "它衡量你在阅读中更想停留、环顾，还是更想被故事向前带走。"
@@ -2638,8 +2661,8 @@
           name: "故事重心",
           negative: "人物内在",
           positive: "情节行动",
-          negativeTrait: "内在细读者",
-          positiveTrait: "行动观看者",
+          negativeTrait: "内心细读者",
+          positiveTrait: "行动观察者",
           negativeMeaning: "更关注人物的感受、犹疑、记忆和自我解释。",
           positiveMeaning: "更关注人物做了什么、局面如何变化、冲突怎样升级。",
           note: "它衡量你更从人物内在进入作品，还是从行动与场面进入作品。"
@@ -2649,7 +2672,7 @@
           name: "情绪色温",
           negative: "明亮轻盈",
           positive: "阴影沉郁",
-          negativeTrait: "轻盈日常者",
+          negativeTrait: "轻盈寻味者",
           positiveTrait: "暗色潜读者",
           negativeMeaning: "更适合机智、温柔、清亮、带有日常暖意的文本。",
           positiveMeaning: "更愿意进入忧郁、危险、压抑、带有心理暗涌的文本。",
@@ -2660,8 +2683,8 @@
           name: "语言纹理",
           negative: "清澈简洁",
           positive: "浓密复杂",
-          negativeTrait: "清澈句读者",
-          positiveTrait: "纹理捕捉者",
+          negativeTrait: "清简偏爱者",
+          positiveTrait: "繁复品读者",
           negativeMeaning: "更偏好透明、节制、留白、读起来干净利落的句子。",
           positiveMeaning: "更享受长句、修辞、复调声音和层层展开的语言密度。",
           note: "它衡量你更希望语言成为清晰通道，还是成为可以细读的复杂材质。"
@@ -2671,7 +2694,7 @@
           name: "结构预期",
           negative: "清晰闭合",
           positive: "开放实验",
-          negativeTrait: "闭合寻路者",
+          negativeTrait: "闭环寻路者",
           positiveTrait: "开放探路者",
           negativeMeaning: "更偏好线索可追、结尾有回收、整体路径清楚的作品。",
           positiveMeaning: "更能接受碎片、跳接、多重视角和不完全解释的结尾。",
@@ -2691,7 +2714,7 @@
         { text: "一本小说开篇几页就出现明确目标或冲突时，我更容易继续读下去。", dimension: "pace", weights: { pace: 1 } },
         { text: "即使暂时没有明显事件，只要场景和气氛逐渐积累，我也愿意继续读。", dimension: "pace", weights: { pace: -1 } },
         { text: "每章都带来新线索或局面变化，会明显提高我的阅读兴趣。", dimension: "pace", weights: { pace: 1 } },
-        { text: "作品用较长篇幅写一个地点或日常过程，我也能享受其中。", dimension: "pace", weights: { pace: -1 } },
+        { text: "作品花较长篇幅描写一个地点或日常过程时，我仍能享受阅读。", dimension: "pace", weights: { pace: -1 } },
         { text: "连续几章都没有改变人物处境时，我通常会失去耐心。", dimension: "pace", weights: { pace: 1 } },
         { text: "作品较晚才显出故事主线，对我来说不是阅读障碍。", dimension: "pace", weights: { pace: -1 } },
         { text: "读完一个故事后，最留在我心里的通常是人物怎样感受和解释自己。", dimension: "focus", weights: { focus: -1 } },
@@ -2703,19 +2726,19 @@
         { text: "选择下一本书时，我常会优先考虑轻松、温暖的阅读感受。", dimension: "mood", weights: { mood: -1 } },
         { text: "压抑或不安的气氛会让我更投入，而不是立刻想离开。", dimension: "mood", weights: { mood: 1 } },
         { text: "读完后感到轻松和透气，是我评价阅读体验的重要部分。", dimension: "mood", weights: { mood: -1 } },
-        { text: "即使阅读过程不太舒服，只要情绪有深度，我也愿意继续。", dimension: "mood", weights: { mood: 1 } },
-        { text: "日常中的小趣味，足以支撑我读完一部作品。", dimension: "mood", weights: { mood: -1 } },
+        { text: "即使阅读过程不轻松，只要情绪足够深，我仍愿意继续。", dimension: "mood", weights: { mood: 1 } },
+        { text: "日常里的小趣味和温暖，会明显增加我继续读下去的意愿。", dimension: "mood", weights: { mood: -1 } },
         { text: "故事长期保持沉郁、看不到明显希望时，我通常仍愿意读下去。", dimension: "mood", weights: { mood: 1 } },
         { text: "句意清楚、用词节制的文字，通常最容易让我投入。", dimension: "language", weights: { language: -1 } },
-        { text: "复杂长句需要停下来拆解时，我常把这种停顿当作阅读乐趣。", dimension: "language", weights: { language: 1 } },
+        { text: "遇到需要停下来拆解的复杂长句，我通常把这种停顿当作阅读乐趣。", dimension: "language", weights: { language: 1 } },
         { text: "修辞不多但表达准确的段落，往往更能打动我。", dimension: "language", weights: { language: -1 } },
         { text: "同一段落交织多层意象时，会增加我的阅读兴趣。", dimension: "language", weights: { language: 1 } },
-        { text: "如果一个意思可以更简短地说清，我通常偏好较短的版本。", dimension: "language", weights: { language: -1 } },
+        { text: "同样的意思，我更喜欢作品用短句和直接表达写出来。", dimension: "language", weights: { language: -1 } },
         { text: "我愿意重读一个段落，只为体会句子的节奏和层次。", dimension: "language", weights: { language: 1 } },
         { text: "读到结尾时，我希望主要线索得到明确回应。", dimension: "structure", weights: { structure: -1 } },
         { text: "结尾有意保留未解释部分，会让我觉得更有余味。", dimension: "structure", weights: { structure: 1 } },
         { text: "即使过程复杂，我仍希望能辨认一条稳定的故事主线。", dimension: "structure", weights: { structure: -1 } },
-        { text: "时间顺序被打散时，我通常把阅读当作拼图，而不是障碍。", dimension: "structure", weights: { structure: 1 } },
+        { text: "时间顺序被打散时，我愿意像拼图一样重新组织故事。", dimension: "structure", weights: { structure: 1 } },
         { text: "我喜欢人物与事件在结尾形成可以回看的整体图案。", dimension: "structure", weights: { structure: -1 } },
         { text: "作品不提供唯一解释时，我通常愿意保留自己的判断。", dimension: "structure", weights: { structure: 1 } }
       ];
@@ -2928,11 +2951,12 @@
       ];
 
       const libraryTypes = [
-        { id: "all", label: "全部" },
+        { id: "overview", label: "总览" },
         { id: "style", label: "风格档案" },
         { id: "factor", label: "阅读维度" },
         { id: "situation", label: "阅读情境" },
-        { id: "comparison", label: "风格对照" }
+        { id: "comparison", label: "风格对照" },
+        { id: "all", label: "全部" }
       ];
 
       const readingSituations = [
@@ -3059,60 +3083,81 @@
         }
       ];
 
-      const methodNotes = [
+      const methodGroups = [
         {
-          title: "作答方式",
-          text: "回想最近几次真实阅读，判断每句话有多像你；不要按理想中的自己作答，也不需要保持前后完全一致。"
+          id: "answer",
+          title: "作答与隐私",
+          summary: "按真实阅读经验作答，记录只留在当前浏览器。",
+          items: [
+            {
+              title: "作答方式",
+              text: "回想最近几次真实阅读，判断每句话有多像你；不要按理想中的自己作答，也不需要保持前后完全一致。"
+            },
+            {
+              title: "本地保存",
+              text: "作答记录只保存在当前浏览器，用于刷新后继续答题；你可以随时点击清空答案。"
+            }
+          ]
         },
         {
-          title: "本地保存",
-          text: "作答记录只保存在当前浏览器，用于刷新后继续答题；你可以随时点击清空答案。"
+          id: "scoring",
+          title: "计分与生成",
+          summary: "五组题目分别计分，再由组合倾向生成阅读画像。",
+          items: [
+            {
+              title: "题目设计",
+              text: "每条倾向包含 6 题，两个方向各 3 题，并按五个维度交错出现。每题只测一个主要偏好，组合结果比单题更重要。"
+            },
+            {
+              title: "计分方式",
+              text: "每题按 -2 到 2 计分，每条倾向归一化到 -100 到 100，再用最强的两到三项生成标题、解释和试读入口。"
+            }
+          ]
         },
         {
-          title: "不是文学能力测验",
-          text: "分数只说明阅读入口和风格亲缘，不代表文学水平、审美高低或固定身份。"
-        },
-        {
-          title: "结果怎么看",
-          text: "先读画像速读，再看五条倾向的逐项解释；亲缘风格用于确认熟悉入口，对照试读用于观察相反方向，不要只记住标题标签。"
-        },
-        {
-          title: "题目设计",
-          text: "每条倾向包含 6 题，两个方向各 3 题，并按五个维度交错出现。每题只测一个主要偏好，组合结果比单题更重要。"
-        },
-        {
-          title: "计分方式",
-          text: "每题按 -2 到 2 计分，每条倾向归一化到 -100 到 100，再用最强的两到三项生成标题、解释和风格推荐。"
-        },
-        {
-          title: "阅读闭环",
-          text: "测试结果会把你带回阅读地图和风格知识库：结果用于继续阅读，不用于给自己划定固定范围。"
-        },
-        {
-          title: "如何验证结果",
-          text: "从亲缘风格和对照风格各选一篇短文本，在相近时间与阅读环境下试读；记录自己停下、加速或回读的位置，比单纯判断喜欢与否更能检验画像。"
+          id: "interpretation",
+          title: "解读与验证",
+          summary: "把结果当作下一次试读的起点，并用真实文本校正。",
+          items: [
+            {
+              title: "能力边界",
+              text: "分数只表示你更容易从哪里进入文本，不用于判断文学水平，也不会给你划定固定风格。"
+            },
+            {
+              title: "结果解读",
+              text: "先看三条速览，再按强度展开五维详情；三步试读分别提供熟悉方向、相反方向和当前阅读情境。"
+            },
+            {
+              title: "阅读闭环",
+              text: "结果会连接到阅读地图中的风格档案和阅读情境，让一次画像自然回到具体文本。"
+            },
+            {
+              title: "验证方式",
+              text: "从熟悉入口和对照入口各选一篇短文本，在相近时间与环境下试读；记录停下、加速或回读的位置，再判断画像是否贴近你。"
+            }
+          ]
         }
       ];
 
       const referenceSources = [
         {
           title: "NoveList Story Elements",
-          text: "用于拆分 pace、tone、character、storyline、writing style 等读者推荐维度。",
+          text: "参考其对节奏、语气、人物、故事线和语言风格的拆分方式。",
           url: "https://about.ebsco.com/sites/g/files/nabnos191/files/acquiadam-assets/NoveList-Guide-to-Story-Elements.pdf"
         },
         {
           title: "Whichbook",
-          text: "参考它用情绪滑杆和阅读感受做推荐入口的方式。",
+          text: "参考其从情绪和阅读感受出发选择作品的方式。",
           url: "https://www.whichbook.net/about/"
         },
         {
           title: "The StoryGraph",
-          text: "参考 mood、pace、plot/character driven 等阅读筛选方式。",
+          text: "参考其按情绪、节奏以及人物或情节重心筛选作品的方式。",
           url: "https://thestorygraph.com/"
         },
         {
           title: "类型测验题目设计说明",
-          text: "只借鉴多题组合辨型和题目区分度的说明，不使用其题材内容。",
+          text: "参考多道题组合生成结果和提高题目区分度的方法。",
           url: "https://www.pewresearch.org/short-reads/2014/06/27/why-the-typology-quiz-questions-are-asked-the-way-they-are/"
         }
       ];
@@ -3151,11 +3196,7 @@
       const summaryGrid = document.querySelector("#summaryGrid");
       const scoreGrid = document.querySelector("#scoreGrid");
       const dimensionNotes = document.querySelector("#dimensionNotes");
-      const pathGrid = document.querySelector("#pathGrid");
-      const recommendationGrid = document.querySelector("#recommendationGrid");
-      const axisGrid = document.querySelector("#axisGrid");
-      const situationGrid = document.querySelector("#situationGrid");
-      const comparisonGrid = document.querySelector("#comparisonGrid");
+      const readingPlanGrid = document.querySelector("#readingPlanGrid");
       const librarySearch = document.querySelector("#librarySearch");
       const libraryFilters = document.querySelector("#libraryFilters");
       const libraryGrid = document.querySelector("#libraryGrid");
@@ -3167,11 +3208,11 @@
       let currentQuestion = 0;
       let reviewMode = false;
       let autoAdvanceTimer = null;
-      let activeLibraryType = "style";
+      let activeLibraryType = "overview";
       let pendingScrollTarget = null;
 
       function normalizeRoute(route) {
-        const routeAliases = { library: "knowledge" };
+        const routeAliases = { library: "map", knowledge: "map" };
         const raw = String(route || "home").replace(/^#/, "");
         const clean = routeAliases[raw] || raw;
         return pages.some((page) => page.dataset.page === clean) ? clean : "home";
@@ -3192,7 +3233,7 @@
         if (normalized === "result") {
           renderResultState();
         }
-        if (normalized === "knowledge" && pendingScrollTarget) {
+        if (normalized === "map" && pendingScrollTarget) {
           const entry = contentIndex.find((item) => item.anchor === pendingScrollTarget);
           if (entry) {
             activeLibraryType = entry.category;
@@ -3262,7 +3303,7 @@
           title: style.title,
           summary: style.summary,
           tags: style.tags,
-          route: "knowledge",
+            route: "map",
           anchor: `style-${style.id}`,
           details: [
             `适合入口：${style.entry}`,
@@ -3359,7 +3400,7 @@
         const combination = secondary
           ? `当作品同时呈现「${strongest.pole}」与「${secondary.pole}」时，你通常更快找到抓手。`
           : `「${strongest.pole}」是这次结果里最清楚的入口。`;
-        const text = `${combination} 这不是作品范围，也不是审美等级；它只说明你更习惯把注意力先放在哪里。下方会同时给出亲缘风格和相反方向，方便你把结果变成下一次真实试读。`;
+        const text = `${combination} 它说明你更习惯先把注意力放在哪里。下方给出熟悉入口、对照入口和当前情境，方便把画像变成下一次试读。`;
         return { title, text, leading, cards: getResultCards(scores, leading) };
       }
 
@@ -3369,12 +3410,28 @@
         const recommendations = getRecommendations(scores);
         const firstRecommendation = recommendations[0] || styleFamilies[0];
         const contrastRecommendation = getContrastRecommendation(scores) || styleFamilies[1];
+        if (!strongest || strongest.strength < 18) {
+          return [
+            {
+              title: "最容易进入",
+              text: "你能按作品调整入口：情节鲜明时跟随推进，语言或人物更突出时也愿意放慢速度。"
+            },
+            {
+              title: "可能卡住",
+              text: "真正的阻力更可能来自当下精力与文本要求不匹配。遇到卡顿时，先换篇幅或阅读时段，再判断作品是否适合。"
+            },
+            {
+              title: "建议做一次对照",
+              text: `先试「${firstRecommendation.title}」，再读「${contrastRecommendation.title}」。只比较自己在哪些段落停下、加速或回读。`
+            }
+          ];
+        }
         const opposite =
           strongest.side === "positive"
             ? { pole: strongest.negative, meaning: strongest.negativeMeaning }
             : strongest.side === "negative"
               ? { pole: strongest.positive, meaning: strongest.positiveMeaning }
-              : { pole: "鲜明偏向", meaning: "任选一个风格知识库条目，观察它怎样改变你的阅读节奏。" };
+              : { pole: "鲜明偏向", meaning: "任选一个阅读地图条目，观察它怎样改变你的阅读节奏。" };
 
         return [
           {
@@ -3407,74 +3464,6 @@
           return { item, score: matchScore };
         });
         return scored.sort((a, b) => b.score - a.score)[0]?.score > 0 ? scored[0].item : fallback;
-      }
-
-      function getComparisonForDimension(dimension) {
-        const map = {
-          pace: "dense-clear",
-          focus: "scene-interior",
-          mood: "bright-dark",
-          language: "dense-clear",
-          structure: "loop-fragment"
-        };
-        return comparisons.find((item) => item.id === map[dimension.id]) || comparisons[0];
-      }
-
-      function getResultPaths(scores) {
-        const ranked = getRankedDimensions(scores);
-        const strongest = ranked[0];
-        if (!strongest || strongest.strength < 18) {
-          return [
-            {
-              label: "先扫全图",
-              title: "五条阅读维度",
-              text: "你的结果接近平衡，适合先从阅读地图总览五条维度，而不是急着认领某个方向。",
-              route: "map",
-              anchor: "factor-pace"
-            },
-            {
-              label: "再短篇试水",
-              title: "想短篇试水",
-              text: "用短篇或短章节测试自己当下更想停在哪里，再决定下一本书的入口。",
-              route: "map",
-              anchor: "situation-short-form"
-            },
-            {
-              label: "最后做对照",
-              title: "古典回环与现代断片",
-              text: "从结构清楚和开放实验两端各试一点，观察自己今天更需要完成感还是余味。",
-              route: "map",
-              anchor: "comparison-loop-fragment"
-            }
-          ];
-        }
-        const factor = appealFactors.find((item) => item.dimension === strongest.id) || appealFactors[0];
-        const situation = findBestByFit(readingSituations, ranked, readingSituations[0]);
-        const comparison = getComparisonForDimension(strongest);
-
-        return [
-          {
-            label: "先看维度",
-            title: factor.title,
-            text: `理解「${strongest.name}」为什么会影响你的阅读入口，再看相反方向能补充什么。`,
-            route: "map",
-            anchor: factor.id
-          },
-          {
-            label: "再选情境",
-            title: situation.title,
-            text: situation.entry,
-            route: "map",
-            anchor: `situation-${situation.id}`
-          },
-          {
-            label: "最后做对照",
-            title: comparison.title,
-            text: "用一组容易混淆的风格对照，避免把偏好误读成固定范围。",
-            route: "map",
-            anchor: `comparison-${comparison.id}`
-          }
-        ];
       }
 
       function calculateScores() {
@@ -3630,7 +3619,7 @@
         prevButton.disabled = currentQuestion === 0;
         nextButton.disabled = answers[questionIndexValue] === null;
         nextButton.textContent = currentQuestion === questionOrder.length - 1 ? "检查答案" : "下一题";
-        submitHint.textContent = answers[questionIndexValue] === null ? "按真实阅读习惯选择，不必考虑哪一项更有品味。" : "已保存，可以继续或修改。";
+        submitHint.textContent = answers[questionIndexValue] === null ? "按真实阅读经验选择，答案可以随时返回修改。" : "已保存，可以继续或修改。";
       }
 
       function renderQuestionIndex() {
@@ -3755,8 +3744,7 @@
           summaryGrid.innerHTML = "";
           scoreGrid.innerHTML = "";
           dimensionNotes.innerHTML = "";
-          pathGrid.innerHTML = "";
-          recommendationGrid.innerHTML = "";
+          readingPlanGrid.innerHTML = "";
           return;
         }
 
@@ -3765,9 +3753,8 @@
         resultCopy.textContent = description.text;
         renderSummary(description.cards);
         renderScores(latestScores);
+        renderReadingPlan(latestScores);
         renderDimensionNotes(latestScores);
-        renderResultPaths(latestScores);
-        renderRecommendations(latestScores);
       }
 
       function renderSummary(cards) {
@@ -3806,50 +3793,42 @@
       }
 
       function renderDimensionNotes(scores) {
-        dimensionNotes.innerHTML = dimensions
-          .map((dimension) => {
-            const score = Math.round(scores[dimension.id] || 0);
-            const side = sideForScore(score);
-            const strength = getStrengthText(Math.abs(score));
-            const pole = side === "positive" ? dimension.positive : side === "negative" ? dimension.negative : "两端可切换";
+        dimensionNotes.innerHTML = getRankedDimensions(scores)
+          .map((dimension, index) => {
+            const strength = getStrengthText(dimension.strength);
+            const pole = dimension.side === "positive" ? dimension.positive : dimension.side === "negative" ? dimension.negative : "两端可切换";
             const meaning =
-              side === "positive"
+              dimension.side === "positive"
                 ? dimension.positiveMeaning
-                : side === "negative"
+                : dimension.side === "negative"
                   ? dimension.negativeMeaning
                   : dimension.note;
-            const counterPole = side === "positive" ? dimension.negative : side === "negative" ? dimension.positive : "任一鲜明方向";
+            const counterPole = dimension.side === "positive" ? dimension.negative : dimension.side === "negative" ? dimension.positive : "任一鲜明方向";
             const counterText =
-              side === "center"
+              dimension.side === "center"
                 ? `可以按作品和当下状态切换，不必强行确定一端；下一次可用「${counterPole}」做短篇试读。`
                 : `需要拓宽时，可从「${counterPole}」方向选一篇短文本，只改变一个阅读条件。`;
+            const factor = appealFactors.find((item) => item.dimension === dimension.id) || appealFactors[0];
             return `
-              <article class="dimension-note">
-                <span>${dimension.name}</span>
-                <div>
-                  <strong>${strength} · ${pole}</strong>
-                  <p>${meaning} ${counterText}</p>
+              <details class="dimension-note" ${index < 2 ? "open" : ""}>
+                <summary>
+                  <span class="dimension-note__label">${dimension.name}</span>
+                  <div class="dimension-note__summary">
+                    <strong>${strength} · ${pole}</strong>
+                    <p>${meaning}</p>
+                  </div>
+                </summary>
+                <div class="dimension-note__body detail-body">
+                  <div>
+                    <p>${counterText}</p>
+                    <div class="link-row">
+                      <a class="ghost-button" href="#map" data-route-link="map" data-scroll-target="${factor.id}">查看阅读维度</a>
+                    </div>
+                  </div>
                 </div>
-              </article>
+              </details>
             `;
           })
-          .join("");
-      }
-
-      function renderResultPaths(scores) {
-        pathGrid.innerHTML = getResultPaths(scores)
-          .map(
-            (item) => `
-              <article class="path-card">
-                <span class="knowledge-meta">${item.label}</span>
-                <h3>${item.title}</h3>
-                <p>${item.text}</p>
-                <div class="link-row">
-                  <a class="ghost-button" href="#${item.route}" data-route-link="${item.route}" data-scroll-target="${item.anchor}">进入</a>
-                </div>
-              </article>
-            `
-          )
           .join("");
       }
 
@@ -3893,93 +3872,47 @@
         return rankedCandidates[0]?.style || styleFamilies[0];
       }
 
-      function renderRecommendations(scores) {
-        const recommendations = getRecommendations(scores).slice(0, 2);
-        const contrast = getContrastRecommendation(scores);
-        const fallback = ["light-daily", "dramatic-collision", "modern-fragment"]
-          .map((id) => styleFamilies.find((style) => style.id === id))
-          .filter(Boolean);
-        const cards = recommendations.map((style, index) => ({ style, label: `亲缘 0${index + 1}` }));
-        if (contrast && !cards.some((item) => item.style.id === contrast.id)) {
-          cards.push({ style: contrast, label: "对照试读" });
-        }
-        fallback.forEach((style) => {
-          if (cards.length < 3 && !cards.some((item) => item.style.id === style.id)) {
-            cards.push({ style, label: cards.length < 2 ? `亲缘 0${cards.length + 1}` : "对照试读" });
+      function renderReadingPlan(scores) {
+        const ranked = getRankedDimensions(scores);
+        const familiar = getRecommendations(scores)[0] || styleFamilies[0];
+        const contrast = getContrastRecommendation(scores) || styleFamilies[1];
+        const situation = findBestByFit(readingSituations, ranked, readingSituations[0]);
+        const cards = [
+          {
+            label: "01 · 熟悉入口",
+            title: familiar.title,
+            text: familiar.summary,
+            detail: `参考作品：${familiar.works.slice(0, 2).join("、")}`,
+            anchor: `style-${familiar.id}`
+          },
+          {
+            label: "02 · 对照入口",
+            title: contrast.title,
+            text: contrast.summary,
+            detail: `参考作品：${contrast.works.slice(0, 2).join("、")}`,
+            anchor: `style-${contrast.id}`
+          },
+          {
+            label: "03 · 当前情境",
+            title: situation.title,
+            text: situation.summary,
+            detail: `进入方式：${situation.entry}`,
+            anchor: `situation-${situation.id}`
           }
-        });
-        recommendationGrid.innerHTML = cards
-          .slice(0, 3)
+        ];
+
+        readingPlanGrid.innerHTML = cards
           .map(
-            ({ style, label }) => `
-              <article class="recommendation-card">
-                <span class="knowledge-meta">${label}</span>
-                <h3>${style.title}</h3>
-                <p>${style.summary}</p>
-                <div class="tag-row">${style.tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
-                <p><strong>适合入口：</strong>${style.entry}</p>
-                <p><strong>阅读时留意：</strong>${style.signals.join("、")}</p>
-                <p><strong>带着问题读：</strong>${style.question}</p>
-                <p><strong>参考作品：</strong>${style.works.join("、")}</p>
-                <div class="link-row" style="margin-top: 14px">
-                  <a class="ghost-button" href="#knowledge" data-route-link="knowledge" data-scroll-target="style-${style.id}">查看条目</a>
+            (item) => `
+              <article class="path-card">
+                <span class="knowledge-meta">${item.label}</span>
+                <h3>${item.title}</h3>
+                <p>${item.text}</p>
+                <p><strong>${item.detail}</strong></p>
+                <div class="link-row">
+                  <a class="ghost-button" href="#map" data-route-link="map" data-scroll-target="${item.anchor}">在阅读地图中查看</a>
                 </div>
               </article>
-            `
-          )
-          .join("");
-      }
-
-      function renderAxes() {
-        axisGrid.innerHTML = appealFactors
-          .map(
-            (factor) => {
-              const dimension = getDimension(factor.dimension);
-              return `
-              <details class="axis-card" id="${factor.id}">
-                <summary>
-                  <h3>${factor.title}</h3>
-                  <p>${dimension.negative} ↔ ${dimension.positive}</p>
-                </summary>
-                <div class="detail-body">
-                  <div class="axis-scale">
-                    <span>${dimension.negative}</span>
-                    <b>vs</b>
-                    <span>${dimension.positive}</span>
-                  </div>
-                  <p>${factor.summary}</p>
-                  <div class="tag-row">${factor.examples.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
-                </div>
-              </details>
-            `;
-            }
-          )
-          .join("");
-
-        situationGrid.innerHTML = readingSituations
-          .map(
-            (item) => `
-              <details class="situation-card" id="situation-${item.id}">
-                <summary><h3>${item.title}</h3><p>${item.summary}</p></summary>
-                <div class="detail-body">
-                  <div class="tag-row">${item.tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
-                  <p><strong>进入方式：</strong>${item.entry}</p>
-                </div>
-              </details>
-            `
-          )
-          .join("");
-
-        comparisonGrid.innerHTML = comparisons
-          .map(
-            (item) => `
-              <details class="comparison-card" id="comparison-${item.id}">
-                <summary><h3>${item.title}</h3><p>展开查看两种风格的区别</p></summary>
-                <div class="detail-body">
-                  <p><strong>左侧：</strong>${item.left}</p>
-                  <p><strong>右侧：</strong>${item.right}</p>
-                </div>
-              </details>
             `
           )
           .join("");
@@ -3994,10 +3927,10 @@
         libraryFilters.innerHTML = libraryTypes
           .map(
             (type) => {
-              const count = type.id === "all" ? contentIndex.length : contentIndex.filter((entry) => entry.category === type.id).length;
+              const count = type.id === "overview" ? null : type.id === "all" ? contentIndex.length : contentIndex.filter((entry) => entry.category === type.id).length;
               return `
               <button class="filter-button ${type.id === (searching ? "all" : activeLibraryType) ? "active" : ""}" type="button" data-library-type="${type.id}">
-                ${type.label} ${count}
+                ${type.label}${count === null ? "" : ` ${count}`}
               </button>
             `;
             }
@@ -4005,8 +3938,68 @@
           .join("");
       }
 
+      function renderMapOverview() {
+        const views = [
+          {
+            id: "factor",
+            number: "01",
+            title: "先理解五条阅读维度",
+            text: "看清节奏、故事重心、情绪、语言和结构两端分别改变了什么阅读体验。",
+            action: "查看维度"
+          },
+          {
+            id: "style",
+            number: "02",
+            title: "再进入十二种风格档案",
+            text: "从维度组合进入具体文本气质，并查看适合入口、观察问题、避坑提示和参考作品。",
+            action: "浏览档案"
+          },
+          {
+            id: "situation",
+            number: "03",
+            title: "按此刻的阅读需要选择",
+            text: "不先认领风格，而是从想轻松进入、想读复杂结构或想获得人物陪伴等状态出发。",
+            action: "选择情境"
+          },
+          {
+            id: "comparison",
+            number: "04",
+            title: "用对照辨认相近入口",
+            text: "把容易混淆的风格放在一起，观察它们在叙述距离、语言密度和结构方式上的差异。",
+            action: "查看对照"
+          }
+        ];
+
+        return `
+          <div class="map-directory">
+            <div class="route-list">
+              ${views
+                .map((view) => {
+                  const count = contentIndex.filter((entry) => entry.category === view.id).length;
+                  return `
+                    <article class="route-row">
+                      <span class="route-number">${view.number}</span>
+                      <div>
+                        <span class="map-route-meta">${count} 个条目</span>
+                        <h3>${view.title}</h3>
+                        <p>${view.text}</p>
+                      </div>
+                      <button class="ghost-button" type="button" data-map-view="${view.id}">${view.action}</button>
+                    </article>
+                  `;
+                })
+                .join("")}
+            </div>
+          </div>
+        `;
+      }
+
       function renderLibrary() {
         const query = normalizeSearch(librarySearch.value);
+        if (!query && activeLibraryType === "overview") {
+          libraryGrid.innerHTML = renderMapOverview();
+          return;
+        }
         const filtered = contentIndex.filter((entry) => {
           const matchType = Boolean(query) || activeLibraryType === "all" || entry.category === activeLibraryType;
           const haystack = normalizeSearch([entry.title, entry.summary, ...entry.tags, ...entry.details].join(" "));
@@ -4017,7 +4010,7 @@
           ? `<p class="library-count">显示 ${filtered.length} 个条目${query ? `，搜索“${librarySearch.value.trim()}”` : ""}</p>` + filtered
               .map(
                 (entry) => `
-                  <details class="${entry.category === "style" ? "style-card" : "knowledge-card"}" id="${entry.category === "style" ? entry.anchor : `knowledge-${entry.anchor}`}">
+                  <details class="${entry.category === "style" ? "style-card" : "knowledge-card"}" id="${entry.anchor}">
                     <summary>
                       <span class="knowledge-meta">${entry.label}</span>
                       <h3>${entry.title}</h3>
@@ -4035,24 +4028,50 @@
       }
 
       function renderMethod() {
-        const notes = methodNotes
+        const groups = methodGroups
+          .map(
+            (group, index) => `
+              <details class="method-group" ${index === 0 ? "open" : ""}>
+                <summary>
+                  <h3>${group.title}</h3>
+                  <p>${group.summary}</p>
+                </summary>
+                <div class="detail-body">
+                  <div class="method-item-list">
+                    ${group.items
+                      .map(
+                        (item) => `
+                          <div class="method-item">
+                            <strong>${item.title}</strong>
+                            <p>${item.text}</p>
+                          </div>
+                        `
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              </details>
+            `
+          )
+          .join("");
+        const sources = referenceSources
           .map(
             (item) => `
-              <li>
+              <a class="reference-row" href="${item.url}" target="_blank" rel="noopener noreferrer">
                 <strong>${item.title}</strong>
                 <span>${item.text}</span>
-              </li>
+              </a>
             `
-          );
-        const sources = referenceSources.map(
-          (item) => `
-            <li>
-              <strong><a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.title}</a></strong>
-              <span>${item.text}</span>
-            </li>
-          `
-        );
-        methodList.innerHTML = [...notes, ...sources].join("");
+          )
+          .join("");
+        methodList.innerHTML = `
+          <div class="method-groups">${groups}</div>
+          <section class="method-sources">
+            <div class="section-kicker">设计依据</div>
+            <h3>参考来源</h3>
+            <div class="reference-list">${sources}</div>
+          </section>
+        `;
       }
 
       function applyTheme(theme, persist = true) {
@@ -4165,6 +4184,16 @@
         renderLibrary();
       });
 
+      libraryGrid.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-map-view]");
+        if (!button) return;
+        activeLibraryType = button.dataset.mapView;
+        librarySearch.value = "";
+        renderLibraryFilters();
+        renderLibrary();
+        libraryFilters.scrollIntoView({ behavior: getScrollBehavior(), block: "nearest" });
+      });
+
       themeButton.addEventListener("click", () => {
         applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
       });
@@ -4181,7 +4210,6 @@
       setupTheme();
       renderQuiz();
       updateProgress();
-      renderAxes();
       renderLibraryFilters();
       renderLibrary();
       renderMethod();
