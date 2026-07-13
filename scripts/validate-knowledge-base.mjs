@@ -182,7 +182,11 @@ for (const file of sourceFiles) {
 
 const styleTestSourcePath = path.join(docsDir, 'public', 'style-test', 'index.html')
 const styleTestSource = fs.readFileSync(styleTestSourcePath, 'utf8')
-assert(styleTestSource.includes('href="/" aria-label="返回文学知识库首页"'), 'style test brand does not return to the knowledge base')
+const configSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'config.ts'), 'utf8')
+const homeSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'KnowledgeHome.vue'), 'utf8')
+assert(styleTestSource.includes('class="brand" href="#home" data-route-link="home"'), 'style test brand does not return to its own entrance')
+assert(configSource.includes("link: '/style-test/', target: '_self'"), 'top navigation can route the standalone style test through VitePress')
+assert(homeSource.includes('href="/style-test/" target="_self"'), 'home page can route the standalone style test through VitePress')
 assert(styleTestSource.includes('href="#home" data-route="home">入口</a>'), 'style test internal home route changed')
 assert(styleTestSource.includes('literaryStyleTest.v4'), 'style test result localStorage key changed')
 assert(styleTestSource.includes('literaryStyleTest.theme'), 'style test theme localStorage key changed')

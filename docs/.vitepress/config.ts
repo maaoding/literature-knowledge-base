@@ -37,7 +37,7 @@ export default defineConfig({
       { text: '名著', link: '/works/' },
       { text: '推荐阅读', link: '/paths/' },
       { text: '专题', link: '/topics/' },
-      { text: '文学风格测试', link: '/style-test/' }
+      { text: '文学风格测试', link: '/style-test/', target: '_self' }
     ],
     sidebar: createSidebar(catalog),
     search: {
