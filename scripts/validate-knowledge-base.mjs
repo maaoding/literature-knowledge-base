@@ -25,6 +25,22 @@ function normalizeOutlineTitle(title) {
   return title.normalize('NFKC').replace(/[\s“”"'‘’《》：:·、，。！？!?,.\-—（）()]/g, '')
 }
 
+function markdownBody(source) {
+  return source.replace(/^---\s*[\s\S]*?\s*---\s*/, '')
+}
+
+function visibleCharacterCount(source) {
+  return markdownBody(source)
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/[>*_~|\-]/g, '')
+    .replace(/\s/g, '')
+    .length
+}
+
 async function loadCatalog() {
   const temporaryModule = path.join(root, `.validate-catalog-${process.pid}.mjs`)
   await build({
@@ -63,6 +79,54 @@ const expectedCounts = {
 for (const [key, count] of Object.entries(expectedCounts)) {
   assert(catalog[key].length === count, `expected ${count} ${key}, found ${catalog[key].length}`)
 }
+
+const deepContentRules = {
+  author: {
+    minimumCharacters: 800,
+    headings: ['生平与时代', '文学史位置', '核心主题', '语言与文体', '代表作品', '影响与接受', '阅读建议']
+  },
+  work: {
+    minimumCharacters: 900,
+    headings: ['作品坐标', '内容概览', '结构与叙事', '核心主题', '形式与技法', '文学史意义', '阅读难点', '关联阅读']
+  },
+  history: {
+    minimumCharacters: 1000,
+    headings: ['时代背景', '主要文体', '核心观念', '地区差异', '关键作家与作品', '前后时期关系', '推荐阅读入口']
+  }
+}
+const contentDirectory = { author: 'authors', work: 'works', history: 'history' }
+let deepContentCount = 0
+for (const entry of catalog.entries.filter((entry) => deepContentRules[entry.type])) {
+  const fields = [entry.contentVersion, entry.reviewedAt, entry.sources]
+  const hasDeepContentField = fields.some((value) => value !== undefined)
+  if (!hasDeepContentField) continue
+
+  assert(entry.contentVersion === 2, `${entry.url} has incomplete contentVersion metadata`)
+  assert(/^\d{4}-\d{2}-\d{2}$/.test(entry.reviewedAt ?? ''), `${entry.url} has invalid reviewedAt`)
+  assert(Array.isArray(entry.sources) && entry.sources.length >= 2 && entry.sources.length <= 5, `${entry.url} must have 2-5 sources`)
+
+  const sources = entry.sources ?? []
+  const urls = sources.map((source) => source.url)
+  assert(new Set(urls).size === urls.length, `${entry.url} has duplicate source URLs`)
+  assert(sources.filter((source) => source.kind === 'wikipedia').length <= 1, `${entry.url} has more than one Wikipedia source`)
+  assert(sources.some((source) => source.kind !== 'wikipedia'), `${entry.url} must include a non-Wikipedia source`)
+  for (const source of sources) {
+    assert(source.url.startsWith('https://'), `${entry.url} source must use HTTPS: ${source.url}`)
+    assert(!/kdocs\.cn|goodreads\.com|douban\.com/i.test(source.url), `${entry.url} uses a disallowed ranking or aggregation source: ${source.url}`)
+  }
+
+  const file = path.join(docsDir, contentDirectory[entry.type], `${entry.slug}.md`)
+  const source = fs.readFileSync(file, 'utf8')
+  const rule = deepContentRules[entry.type]
+  const bodyCharacters = visibleCharacterCount(source)
+  assert(bodyCharacters >= rule.minimumCharacters, `${entry.url} has ${bodyCharacters} visible characters; expected at least ${rule.minimumCharacters}`)
+  const headings = [...markdownBody(source).matchAll(/^##\s+(.+)$/gm)].map((match) => normalizeOutlineTitle(match[1]))
+  for (const heading of rule.headings) {
+    assert(headings.includes(normalizeOutlineTitle(heading)), `${entry.url} is missing required heading: ${heading}`)
+  }
+  deepContentCount += 1
+}
+assert(deepContentCount === 18, `expected 18 version 2 content pages, found ${deepContentCount}`)
 
 const expectedHome = {
   authors: ['屈原', '鲁迅', '曹雪芹', '荷马', '莎士比亚', '博尔赫斯'],
@@ -155,6 +219,11 @@ function distTarget(url) {
 }
 
 for (const entry of catalog.entries) assert(fs.existsSync(distTarget(entry.url)), `missing built URL: ${entry.url}`)
+for (const entry of catalog.entries.filter((item) => item.contentVersion === 2)) {
+  const builtPage = fs.readFileSync(distTarget(entry.url), 'utf8')
+  assert(builtPage.includes(`资料校订：${entry.reviewedAt}</span>`), `${entry.url} has an invalid visible reviewedAt value`)
+  assert(!builtPage.includes(`资料校订：${entry.reviewedAt}T`), `${entry.url} exposes an ISO timestamp instead of a date`)
+}
 for (const url of ['/', '/history/', '/authors/', '/works/', '/paths/', '/topics/', '/style-test/']) {
   assert(fs.existsSync(distTarget(url)), `missing built index URL: ${url}`)
 }
@@ -280,4 +349,5 @@ console.log(sourceMap
   : 'private source map not present; skipped page-span validation')
 console.log(`validated ${catalog.historyEntries.length} timeline nodes, ${catalog.authors.length} authors, ${catalog.works.length} works`)
 console.log(`validated ${catalog.readingPaths.length} paths, ${catalog.topics.length} topics, ${catalog.entries.length} unique slugs`)
+console.log(`validated ${deepContentCount} version 2 content pages and their sources`)
 console.log(`validated ${sourceFiles.length} source files, all built URLs, shared icon and style test`)

@@ -7,7 +7,8 @@
     "docs:dev": "vitepress dev docs --host 127.0.0.1",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs --host 127.0.0.1",
-    "docs:check": "node scripts/validate-knowledge-base.mjs"
+    "docs:check": "node scripts/validate-knowledge-base.mjs",
+    "docs:sources:check": "node scripts/check-external-sources.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.28.1",

@@ -19,8 +19,35 @@ const commonFields = {
   sidebarOrder: z.number().int().nonnegative()
 }
 
+export const contentSourceKindSchema = z.enum([
+  'archive',
+  'institution',
+  'encyclopedia',
+  'scholarship',
+  'wikipedia'
+])
+
+export const contentSourceSchema = z.object({
+  title: z.string().trim().min(1),
+  publisher: z.string().trim().min(1),
+  kind: contentSourceKindSchema,
+  url: z.string().url().refine((url) => url.startsWith('https://'), {
+    message: 'source URL must use HTTPS'
+  })
+})
+
+const deepContentFields = {
+  contentVersion: z.literal(2).optional(),
+  reviewedAt: z.preprocess(
+    (value) => value instanceof Date ? value.toISOString().slice(0, 10) : value,
+    z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
+  ).optional(),
+  sources: z.array(contentSourceSchema).min(2).max(5).optional()
+}
+
 export const historyEntrySchema = z.object({
   ...commonFields,
+  ...deepContentFields,
   type: z.literal('history'),
   entryKind: z.enum(['timeline', 'overview', 'guide']),
   track: trackSchema,
@@ -33,6 +60,7 @@ export const historyEntrySchema = z.object({
 
 export const authorEntrySchema = z.object({
   ...commonFields,
+  ...deepContentFields,
   type: z.literal('author'),
   track: trackSchema,
   eraGroup: eraGroupSchema,
@@ -41,6 +69,7 @@ export const authorEntrySchema = z.object({
 
 export const workEntrySchema = z.object({
   ...commonFields,
+  ...deepContentFields,
   type: z.literal('work'),
   author: z.string().trim().min(1),
   authorSlug: z.string().trim().min(1).optional(),
@@ -79,6 +108,7 @@ export type HistoryTrack = z.infer<typeof trackSchema>
 export type EraGroup = z.infer<typeof eraGroupSchema>
 export type ContentFrontmatter = z.infer<typeof contentEntrySchema>
 export type ContentType = ContentFrontmatter['type']
+export type ContentSource = z.infer<typeof contentSourceSchema>
 export type ContentEntry = ContentFrontmatter & {
   slug: string
   url: string

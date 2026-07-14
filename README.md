@@ -19,6 +19,7 @@ npm ci
 npm run docs:dev
 npm run docs:build
 npm run docs:check
+npm run docs:sources:check
 ```
 
 文学风格测试保持为独立单文件应用，源码位于 `docs/public/style-test/index.html`，由 VitePress 开发服务器和构建流程直接提供。
@@ -34,6 +35,10 @@ npm run docs:check
 - `docs/topics/*.md`：主题阅读入口。
 
 构建期使用 Zod 校验 frontmatter，并从关系字段派生作家作品、时期节点和阅读路径索引。`npm run docs:check` 还会检查数量、引用、旧 URL、搜索关键词、公共资源和构建产物。
+
+完成深度校订的作家、作品和文学史页面使用 `contentVersion: 2`，并维护 `reviewedAt` 与 2–5 条 `sources`。页面正文必须符合对应类型的最低篇幅和固定栏目；来源会通过主题布局的 `doc-footer-before` 插槽统一显示在正文之后。`npm run docs:sources:check` 用于手动限速检查外部来源状态，不放入 CI，避免第三方限流影响部署。
+
+研究过程记录在本机忽略目录 `content-sources/`。该目录不得被 VitePress 导入，也不得放入公开 PDF、完整提取文本或来源摘抄；公开内容以页面 frontmatter 和重新组织后的中文导读为准。
 
 ## 在线地址
 
