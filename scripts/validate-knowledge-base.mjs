@@ -54,11 +54,11 @@ try {
 const expectedCounts = {
   historyPages: 37,
   historyEntries: 29,
-  authors: 53,
-  works: 71,
+  authors: 64,
+  works: 76,
   readingPaths: 18,
   topics: 6,
-  entries: 185
+  entries: 201
 }
 for (const [key, count] of Object.entries(expectedCounts)) {
   assert(catalog[key].length === count, `expected ${count} ${key}, found ${catalog[key].length}`)
