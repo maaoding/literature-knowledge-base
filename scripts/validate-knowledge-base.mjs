@@ -126,7 +126,7 @@ for (const entry of catalog.entries.filter((entry) => deepContentRules[entry.typ
   }
   deepContentCount += 1
 }
-assert(deepContentCount === 41, `expected 41 version 2 content pages, found ${deepContentCount}`)
+assert(deepContentCount === 61, `expected 61 version 2 content pages, found ${deepContentCount}`)
 
 const expectedHome = {
   authors: ['屈原', '鲁迅', '曹雪芹', '荷马', '莎士比亚', '博尔赫斯'],
