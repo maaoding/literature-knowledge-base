@@ -37,12 +37,12 @@ export const contentSourceSchema = z.object({
 })
 
 const deepContentFields = {
-  contentVersion: z.literal(2).optional(),
+  contentVersion: z.literal(2),
   reviewedAt: z.preprocess(
     (value) => value instanceof Date ? value.toISOString().slice(0, 10) : value,
     z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
-  ).optional(),
-  sources: z.array(contentSourceSchema).min(2).max(5).optional()
+  ),
+  sources: z.array(contentSourceSchema).min(2).max(5)
 }
 
 export const historyEntrySchema = z.object({

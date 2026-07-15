@@ -97,10 +97,6 @@ const deepContentRules = {
 const contentDirectory = { author: 'authors', work: 'works', history: 'history' }
 let deepContentCount = 0
 for (const entry of catalog.entries.filter((entry) => deepContentRules[entry.type])) {
-  const fields = [entry.contentVersion, entry.reviewedAt, entry.sources]
-  const hasDeepContentField = fields.some((value) => value !== undefined)
-  if (!hasDeepContentField) continue
-
   assert(entry.contentVersion === 2, `${entry.url} has incomplete contentVersion metadata`)
   assert(/^\d{4}-\d{2}-\d{2}$/.test(entry.reviewedAt ?? ''), `${entry.url} has invalid reviewedAt`)
   assert(Array.isArray(entry.sources) && entry.sources.length >= 2 && entry.sources.length <= 5, `${entry.url} must have 2-5 sources`)
@@ -126,7 +122,7 @@ for (const entry of catalog.entries.filter((entry) => deepContentRules[entry.typ
   }
   deepContentCount += 1
 }
-assert(deepContentCount === 138, `expected 138 version 2 content pages, found ${deepContentCount}`)
+assert(deepContentCount === 177, `expected 177 version 2 content pages, found ${deepContentCount}`)
 
 const expectedHome = {
   authors: ['屈原', '鲁迅', '曹雪芹', '荷马', '莎士比亚', '博尔赫斯'],
