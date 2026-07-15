@@ -70,6 +70,8 @@ try {
 const expectedCounts = {
   historyPages: 37,
   historyEntries: 29,
+  historyOverviews: 4,
+  historyGuides: 4,
   authors: 64,
   works: 76,
   readingPaths: 18,
@@ -147,6 +149,47 @@ for (const level of ['入门', '进阶', '挑战']) {
   assert(catalog.readingPaths.some((entry) => entry.sidebarGroup === level), `paths missing sidebar group: ${level}`)
 }
 
+const entryUrls = new Set(catalog.entries.map((entry) => entry.url))
+for (const entry of catalog.entries) {
+  const relations = catalog.relationsByUrl[entry.url]
+  assert(relations, `${entry.url} is missing derived relations`)
+  const relationCount = Object.values(relations ?? {}).reduce((sum, group) => sum + group.length, 0)
+  assert(relationCount > 0, `${entry.url} has no derived relations`)
+  for (const group of Object.values(relations ?? {})) {
+    for (const related of group) assert(entryUrls.has(related.link), `${entry.url} has an invalid relation: ${related.link}`)
+  }
+}
+
+for (const topic of catalog.topics) {
+  assert(topic.workSlugs.length >= 1, `${topic.url} must include at least one work`)
+  for (const key of ['historySlugs', 'authorSlugs', 'workSlugs', 'pathSlugs']) {
+    assert(new Set(topic[key]).size === topic[key].length, `${topic.url} has duplicate ${key}`)
+  }
+  const relations = catalog.relationsByUrl[topic.url]
+  assert(relations.histories.length === topic.historySlugs.length, `${topic.url} history relations are incomplete`)
+  assert(relations.authors.length === topic.authorSlugs.length, `${topic.url} author relations are incomplete`)
+  assert(relations.works.length === topic.workSlugs.length, `${topic.url} work relations are incomplete`)
+  assert(relations.paths.length === topic.pathSlugs.length, `${topic.url} path relations are incomplete`)
+}
+
+for (const readingPath of catalog.readingPaths) {
+  const stepSlugs = readingPath.steps.map((step) => step.workSlug)
+  assert(new Set(stepSlugs).size === stepSlugs.length, `${readingPath.url} has duplicate reading steps`)
+  const file = path.join(docsDir, 'paths', `${readingPath.slug}.md`)
+  const source = fs.readFileSync(file, 'utf8')
+  assert(source.includes('<ReadingPathGoal />'), `${readingPath.url} does not render its frontmatter goal`)
+  assert(source.includes('<ReadingPathSteps />'), `${readingPath.url} does not render its frontmatter steps`)
+  assert(!/^\*\*目标：\*\*/m.test(source), `${readingPath.url} still duplicates its goal in Markdown`)
+  const readingSection = source.match(/^## 阅读顺序\s*\n([\s\S]*?)(?=^## |\s*$)/m)?.[1] ?? ''
+  assert(!/^\s*\d+\.\s+\[/m.test(readingSection), `${readingPath.url} still duplicates its steps in Markdown`)
+}
+
+for (const topic of catalog.topics) {
+  const file = path.join(docsDir, 'topics', `${topic.slug}.md`)
+  const source = fs.readFileSync(file, 'utf8')
+  assert(source.includes('<TopicRelations />'), `${topic.url} does not render its structured relations`)
+}
+
 const legacyFiles = [
   'docs/.vitepress/theme/data/literature.ts',
   'docs/.vitepress/theme/data/worldHistory.ts',
@@ -161,6 +204,18 @@ for (const file of legacyFiles) assert(!fs.existsSync(path.join(root, file)), `l
 const loaderSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'data', 'catalog.data.ts'), 'utf8')
 assert(/includeSrc:\s*false/.test(loaderSource), 'content loader must not expose Markdown source')
 assert(/render:\s*false/.test(loaderSource), 'content loader must not render Markdown body into catalog data')
+const workExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'WorkExplorer.vue'), 'utf8')
+const authorExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'AuthorGrid.vue'), 'utf8')
+assert(workExplorerSource.includes('const pageSize = 20'), 'work index must paginate at 20 items')
+assert(authorExplorerSource.includes('const pageSize = 20'), 'author index must paginate at 20 items')
+assert(workExplorerSource.includes('const { topics, works } = catalog'), 'work index must use curated topics')
+assert(!workExplorerSource.includes('works.flatMap((work) => work.tags)'), 'work index still exposes raw tags as filter options')
+assert(workExplorerSource.includes("params.set('topic'"), 'work topic filter is not persisted in the URL')
+assert(authorExplorerSource.includes("params.set('view'"), 'author view mode is not persisted in the URL')
+assert(workExplorerSource.includes('ready.value = true\n  syncUrl()'), 'work index does not normalize URL state after hydration')
+assert(authorExplorerSource.includes('ready.value = true\n  syncUrl()'), 'author index does not normalize URL state after hydration')
+assert(workExplorerSource.includes('changePage(currentPage + 1)'), 'work pagination does not use the normalized page handler')
+assert(authorExplorerSource.includes('changePage(currentPage + 1)'), 'author pagination does not use the normalized page handler')
 
 const sourceMapPath = path.join(root, 'content-sources', 'world-literature-2018-map.json')
 const sourceMap = fs.existsSync(sourceMapPath)
@@ -223,6 +278,26 @@ for (const entry of catalog.entries.filter((item) => item.contentVersion === 2))
 for (const url of ['/', '/history/', '/authors/', '/works/', '/paths/', '/topics/', '/style-test/']) {
   assert(fs.existsSync(distTarget(url)), `missing built index URL: ${url}`)
 }
+
+const historyIndexBuild = fs.readFileSync(distTarget('/history/'), 'utf8')
+const workIndexBuild = fs.readFileSync(distTarget('/works/'), 'utf8')
+const authorIndexBuild = fs.readFileSync(distTarget('/authors/'), 'utf8')
+const topicIndexBuild = fs.readFileSync(distTarget('/topics/'), 'utf8')
+const pathBuild = fs.readFileSync(distTarget('/paths/现代主义地图'), 'utf8')
+const workBuild = fs.readFileSync(distTarget('/works/老人与海'), 'utf8')
+const authorBuild = fs.readFileSync(distTarget('/authors/海明威'), 'utf8')
+const historyBuild = fs.readFileSync(distTarget('/history/世界古代文学'), 'utf8')
+const topicBuild = fs.readFileSync(distTarget('/topics/现代主义'), 'utf8')
+assert(historyIndexBuild.includes('世界文学四编') && historyIndexBuild.includes('跨期导读'), 'history index is missing overview or guide sections')
+assert((workIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length === 20, 'work index SSR must render exactly 20 list rows')
+assert((authorIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length === 20, 'author index SSR must render exactly 20 list rows')
+assert(!workIndexBuild.includes('<option value="尊严">'), 'work index still renders raw tag options')
+for (const topic of catalog.topics) assert(workIndexBuild.includes(`value="${topic.slug}"`), `work index is missing topic option: ${topic.slug}`)
+for (const topic of catalog.topics) assert(topicIndexBuild.includes(topic.title), `topic index is missing: ${topic.title}`)
+assert(pathBuild.includes('kb-path-detail__goal') && pathBuild.includes('kb-path-detail__steps'), 'reading path does not render structured goal and steps')
+assert(workBuild.includes('继续探索') && workBuild.includes('kb-related__links'), 'core work page is missing derived relations')
+assert(authorBuild.includes('继续探索') && historyBuild.includes('继续探索'), 'author or history page is missing derived relations')
+assert(topicBuild.includes('kb-topic-relations__links'), 'topic page is missing structured relations')
 
 const sourceFiles = [
   ...filesUnder(docsDir, new Set(['.md', '.ts', '.vue', '.html'])),
@@ -303,7 +378,16 @@ assert(!sourceText.includes('literary-style-icon.png'), 'legacy icon reference r
 assert(!sourceText.includes('cp -R style-test'), 'workflow still copies the old style-test directory')
 
 const distFiles = filesUnder(distDir, new Set(['.html', '.js', '.json', '.css']))
-const requiredSearchTerms = ['吉尔伽美什', '中古波斯文学', '现实主义与自然主义', '拉美文学', '唐宋文学']
+const requiredSearchTerms = [
+  '吉尔伽美什',
+  '中古波斯文学',
+  '现实主义与自然主义',
+  '拉美文学',
+  '唐宋文学',
+  '冰山理论',
+  '奥涅金诗节',
+  '不可靠叙述'
+]
 const foundTerms = new Set()
 const searchIndexFiles = distFiles.filter((file) => path.basename(file).includes('localSearchIndex'))
 const searchIndexSource = searchIndexFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n')

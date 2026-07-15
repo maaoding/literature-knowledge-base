@@ -45,6 +45,11 @@ const deepContentFields = {
   sources: z.array(contentSourceSchema).min(2).max(5)
 }
 
+const slugListSchema = z.array(z.string().trim().min(1)).refine(
+  (slugs) => new Set(slugs).size === slugs.length,
+  { message: 'slug references must be unique' }
+)
+
 export const historyEntrySchema = z.object({
   ...commonFields,
   ...deepContentFields,
@@ -92,7 +97,11 @@ export const readingPathEntrySchema = z.object({
 
 export const topicEntrySchema = z.object({
   ...commonFields,
-  type: z.literal('topic')
+  type: z.literal('topic'),
+  historySlugs: slugListSchema,
+  authorSlugs: slugListSchema,
+  workSlugs: slugListSchema.min(1),
+  pathSlugs: slugListSchema
 })
 
 export const contentEntrySchema = z.discriminatedUnion('type', [

@@ -16,4 +16,4 @@ pageClass: kb-index-page
 
 在同一时间坐标中并读中国与世界文学的发展轨迹。
 
-<TimelineView />
+<HistoryIndex />
