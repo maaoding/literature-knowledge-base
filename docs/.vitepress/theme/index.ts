@@ -9,6 +9,7 @@ import HistoryIndex from './components/HistoryIndex.vue'
 import KnowledgeHome from './components/KnowledgeHome.vue'
 import ReadingPathGoal from './components/ReadingPathGoal.vue'
 import ReadingPathList from './components/ReadingPathList.vue'
+import ReadingPathNext from './components/ReadingPathNext.vue'
 import ReadingPathSteps from './components/ReadingPathSteps.vue'
 import RelatedContent from './components/RelatedContent.vue'
 import TimelineView from './components/TimelineView.vue'
@@ -32,6 +33,7 @@ export default {
     app.component('KnowledgeHome', KnowledgeHome)
     app.component('ReadingPathGoal', ReadingPathGoal)
     app.component('ReadingPathList', ReadingPathList)
+    app.component('ReadingPathNext', ReadingPathNext)
     app.component('ReadingPathSteps', ReadingPathSteps)
     app.component('TimelineView', TimelineView)
     app.component('TopicExplorer', TopicExplorer)

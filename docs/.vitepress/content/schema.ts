@@ -4,6 +4,8 @@ export const difficultySchema = z.enum(['入门', '进阶', '挑战'])
 export const trackSchema = z.enum(['中国', '世界'])
 export const eraGroupSchema = z.enum(['古代', '中古', '近代', '现当代'])
 export const topicGroupSchema = z.enum(['文学传统', '社会经验', '现代转型'])
+export const pathKindSchema = z.enum(['基础主线', '文学史进阶', '主题阅读', '形式训练'])
+export const pathStageSchema = z.enum(['起点', '转折', '深化', '延伸'])
 
 const commonFields = {
   title: z.string().trim().min(1),
@@ -90,10 +92,13 @@ export const readingPathEntrySchema = z.object({
   type: z.literal('path'),
   goal: z.string().trim().min(1),
   level: difficultySchema,
+  pathKind: pathKindSchema,
   steps: z.array(z.object({
     workSlug: z.string().trim().min(1),
-    note: z.string().trim().min(1)
-  })).min(1)
+    stage: pathStageSchema,
+    note: z.string().trim().min(10).max(80)
+  })).min(5).max(8),
+  nextPathSlugs: slugListSchema.min(1).max(2)
 })
 
 export const topicEntrySchema = z.object({
@@ -118,6 +123,8 @@ export type Difficulty = z.infer<typeof difficultySchema>
 export type HistoryTrack = z.infer<typeof trackSchema>
 export type EraGroup = z.infer<typeof eraGroupSchema>
 export type TopicGroup = z.infer<typeof topicGroupSchema>
+export type PathKind = z.infer<typeof pathKindSchema>
+export type PathStage = z.infer<typeof pathStageSchema>
 export type ContentFrontmatter = z.infer<typeof contentEntrySchema>
 export type ContentType = ContentFrontmatter['type']
 export type ContentSource = z.infer<typeof contentSourceSchema>

@@ -28,7 +28,7 @@ const groups = computed(() => {
   const related = catalog.relationsByUrl[currentUrl.value]
   if (!related) return []
   const definitions = frontmatter.value.type === 'path'
-    ? groupDefinitions.filter((definition) => definition.key !== 'works')
+    ? groupDefinitions.filter((definition) => !['works', 'paths'].includes(definition.key))
     : groupDefinitions
   return definitions
     .map((definition) => ({

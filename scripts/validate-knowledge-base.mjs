@@ -41,6 +41,10 @@ function visibleCharacterCount(source) {
     .length
 }
 
+function pathBodyCharacterCount(source) {
+  return visibleCharacterCount(markdownBody(source).replace(/^<[^>]+>\s*$/gm, ''))
+}
+
 async function loadCatalog() {
   const temporaryModule = path.join(root, `.validate-catalog-${process.pid}.mjs`)
   await build({
@@ -198,17 +202,84 @@ for (const topic of catalog.topics) {
   }
 }
 
+const expectedPathGroups = {
+  基础主线: 5,
+  文学史进阶: 6,
+  主题阅读: 3,
+  形式训练: 4
+}
+for (const [group, count] of Object.entries(expectedPathGroups)) {
+  const actual = catalog.readingPaths.filter((readingPath) => readingPath.pathKind === group).length
+  assert(actual === count, `expected ${count} paths in ${group}, found ${actual}`)
+}
+
+const pathStages = ['起点', '转折', '深化', '延伸']
+const pathStageRank = new Map(pathStages.map((stage, index) => [stage, index]))
+const readingPathSlugs = new Set(catalog.readingPaths.map((readingPath) => readingPath.slug))
+const coveredWorkSlugs = new Set()
+const pathHeadings = ['路径说明', '阅读顺序', '使用方法', '完成之后']
 for (const readingPath of catalog.readingPaths) {
   const stepSlugs = readingPath.steps.map((step) => step.workSlug)
+  assert(readingPath.steps.length >= 5 && readingPath.steps.length <= 8, `${readingPath.url} must include 5-8 reading steps`)
   assert(new Set(stepSlugs).size === stepSlugs.length, `${readingPath.url} has duplicate reading steps`)
+  stepSlugs.forEach((slug) => coveredWorkSlugs.add(slug))
+  const stages = readingPath.steps.map((step) => step.stage)
+  assert(pathStages.every((stage) => stages.includes(stage)), `${readingPath.url} must include all four reading stages`)
+  assert(stages.every((stage, index) => index === 0 || pathStageRank.get(stage) >= pathStageRank.get(stages[index - 1])), `${readingPath.url} has reading stages out of order`)
+  for (const step of readingPath.steps) {
+    const noteLength = Array.from(step.note).length
+    assert(noteLength >= 10 && noteLength <= 80, `${readingPath.url} step note must contain 10-80 characters: ${step.workSlug}`)
+  }
+  assert(readingPath.difficulty === readingPath.level, `${readingPath.url} difficulty and level must match`)
+  assert(readingPath.level === readingPath.sidebarGroup, `${readingPath.url} level and sidebarGroup must match`)
+  assert(readingPath.nextPathSlugs.length >= 1 && readingPath.nextPathSlugs.length <= 2, `${readingPath.url} must include 1-2 next paths`)
+  assert(new Set(readingPath.nextPathSlugs).size === readingPath.nextPathSlugs.length, `${readingPath.url} has duplicate next paths`)
+  for (const nextSlug of readingPath.nextPathSlugs) {
+    assert(readingPathSlugs.has(nextSlug), `${readingPath.url} has an invalid next path: ${nextSlug}`)
+    assert(nextSlug !== readingPath.slug, `${readingPath.url} links to itself as a next path`)
+  }
+  assert(catalog.relationsByUrl[readingPath.url].paths.length === readingPath.nextPathSlugs.length, `${readingPath.url} next path relations are incomplete`)
   const file = path.join(docsDir, 'paths', `${readingPath.slug}.md`)
   const source = fs.readFileSync(file, 'utf8')
   assert(source.includes('<ReadingPathGoal />'), `${readingPath.url} does not render its frontmatter goal`)
   assert(source.includes('<ReadingPathSteps />'), `${readingPath.url} does not render its frontmatter steps`)
+  assert(source.includes('<ReadingPathNext />'), `${readingPath.url} does not render its next paths`)
   assert(!/^\*\*目标：\*\*/m.test(source), `${readingPath.url} still duplicates its goal in Markdown`)
   const readingSection = source.match(/^## 阅读顺序\s*\n([\s\S]*?)(?=^## |\s*$)/m)?.[1] ?? ''
   assert(!/^\s*\d+\.\s+\[/m.test(readingSection), `${readingPath.url} still duplicates its steps in Markdown`)
+  const headings = [...markdownBody(source).matchAll(/^##\s+(.+)$/gm)].map((match) => normalizeOutlineTitle(match[1]))
+  for (const heading of pathHeadings) {
+    assert(headings.includes(normalizeOutlineTitle(heading)), `${readingPath.url} is missing required heading: ${heading}`)
+  }
+  const bodyCharacters = pathBodyCharacterCount(source)
+  assert(bodyCharacters >= 250 && bodyCharacters <= 550, `${readingPath.url} has ${bodyCharacters} visible body characters; expected 250-550`)
 }
+
+for (const work of catalog.works) assert(coveredWorkSlugs.has(work.slug), `${work.url} is not included in any reading path`)
+assert(coveredWorkSlugs.size === catalog.works.length, `reading paths cover ${coveredWorkSlugs.size} of ${catalog.works.length} works`)
+
+for (let firstIndex = 0; firstIndex < catalog.readingPaths.length; firstIndex += 1) {
+  const first = catalog.readingPaths[firstIndex]
+  for (let secondIndex = firstIndex + 1; secondIndex < catalog.readingPaths.length; secondIndex += 1) {
+    const second = catalog.readingPaths[secondIndex]
+    const isProgression = first.nextPathSlugs.includes(second.slug) || second.nextPathSlugs.includes(first.slug)
+    if (isProgression) continue
+    const firstWorks = new Set(first.steps.map((step) => step.workSlug))
+    const secondWorks = new Set(second.steps.map((step) => step.workSlug))
+    const overlap = [...firstWorks].filter((slug) => secondWorks.has(slug)).length
+    const overlapRate = overlap / Math.min(firstWorks.size, secondWorks.size)
+    assert(overlapRate <= 0.5, `${first.url} and ${second.url} overlap by ${Math.round(overlapRate * 100)}% without a progression link`)
+  }
+}
+
+const worldIntroduction = catalog.readingPaths.find((readingPath) => readingPath.slug === '世界文学入门')
+assert(worldIntroduction?.difficulty === '入门' && worldIntroduction?.level === '入门' && worldIntroduction?.sidebarGroup === '入门', 'world literature introduction must use the beginner level consistently')
+const warPath = catalog.readingPaths.find((readingPath) => readingPath.slug === '二十世纪战争文学')
+assert(warPath?.title === '战争与历史创伤', 'war path title must change without changing its slug')
+const familyTopic = catalog.topics.find((topic) => topic.slug === '家族与记忆')
+const exileTopic = catalog.topics.find((topic) => topic.slug === '流亡与身份')
+assert(familyTopic?.pathSlugs[0] === '现代小说入门', 'family and memory topic must recommend modern novel introduction first')
+assert(exileTopic?.pathSlugs[0] === '拉美与后殖民文学', 'exile and identity topic must recommend Latin American and postcolonial literature first')
 
 for (const topic of catalog.topics) {
   const file = path.join(docsDir, 'topics', `${topic.slug}.md`)
@@ -233,6 +304,10 @@ assert(/render:\s*false/.test(loaderSource), 'content loader must not render Mar
 const workExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'WorkExplorer.vue'), 'utf8')
 const authorExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'AuthorGrid.vue'), 'utf8')
 const topicExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'TopicExplorer.vue'), 'utf8')
+const pathExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'ReadingPathList.vue'), 'utf8')
+const pathStepsSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'ReadingPathSteps.vue'), 'utf8')
+const pathNextSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'ReadingPathNext.vue'), 'utf8')
+const topicRelationsSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'TopicRelations.vue'), 'utf8')
 assert(workExplorerSource.includes('const pageSize = 20'), 'work index must paginate at 20 items')
 assert(authorExplorerSource.includes('const pageSize = 20'), 'author index must paginate at 20 items')
 assert(workExplorerSource.includes('const { topics, works } = catalog'), 'work index must use curated topics')
@@ -245,6 +320,16 @@ assert(workExplorerSource.includes('ready.value = true\n  syncUrl()'), 'work ind
 assert(authorExplorerSource.includes('ready.value = true\n  syncUrl()'), 'author index does not normalize URL state after hydration')
 assert(workExplorerSource.includes('changePage(currentPage + 1)'), 'work pagination does not use the normalized page handler')
 assert(authorExplorerSource.includes('changePage(currentPage + 1)'), 'author pagination does not use the normalized page handler')
+assert(pathExplorerSource.includes("params.set('kind'"), 'path kind filter is not persisted in the URL')
+assert(pathExplorerSource.includes("params.set('level'"), 'path level filter is not persisted in the URL')
+assert(pathExplorerSource.includes("const selectedKind = ref<KindFilter>('全部')"), 'path kind filter does not default to all')
+assert(pathExplorerSource.includes("const selectedLevel = ref<LevelFilter>('全部')"), 'path level filter does not default to all')
+assert(pathExplorerSource.includes('path.pathKind'), 'path cards do not show their classification')
+assert(pathExplorerSource.includes('work.stage'), 'path cards do not show reading stages')
+assert(pathStepsSource.includes("const stages = ['起点', '转折', '深化', '延伸']"), 'path step component does not render the four stages')
+assert(pathNextSource.includes('readingPath.nextPaths'), 'next path component does not use structured next paths')
+assert(topicRelationsSource.includes('pathSlugs[0]'), 'topic relations do not treat the first path as the suggested start')
+assert(topicRelationsSource.includes('建议起点'), 'topic relations do not label the suggested start')
 
 const sourceMapPath = path.join(root, 'content-sources', 'world-literature-2018-map.json')
 const sourceMap = fs.existsSync(sourceMapPath)
@@ -312,7 +397,9 @@ const historyIndexBuild = fs.readFileSync(distTarget('/history/'), 'utf8')
 const workIndexBuild = fs.readFileSync(distTarget('/works/'), 'utf8')
 const authorIndexBuild = fs.readFileSync(distTarget('/authors/'), 'utf8')
 const topicIndexBuild = fs.readFileSync(distTarget('/topics/'), 'utf8')
+const pathIndexBuild = fs.readFileSync(distTarget('/paths/'), 'utf8')
 const pathBuild = fs.readFileSync(distTarget('/paths/现代主义地图'), 'utf8')
+const warPathBuild = fs.readFileSync(distTarget('/paths/二十世纪战争文学'), 'utf8')
 const workBuild = fs.readFileSync(distTarget('/works/老人与海'), 'utf8')
 const authorBuild = fs.readFileSync(distTarget('/authors/海明威'), 'utf8')
 const historyBuild = fs.readFileSync(distTarget('/history/世界古代文学'), 'utf8')
@@ -329,6 +416,10 @@ assert(workBuild.includes('继续探索') && workBuild.includes('kb-related__lin
 assert(authorBuild.includes('继续探索') && historyBuild.includes('继续探索'), 'author or history page is missing derived relations')
 assert(topicBuild.includes('kb-topic-relations__links'), 'topic page is missing structured relations')
 assert(topicBuild.includes('相关专题'), 'topic page is missing related topics')
+for (const group of Object.keys(expectedPathGroups)) assert(pathIndexBuild.includes(group), `path index is missing group: ${group}`)
+assert(pathBuild.includes('kb-path-detail__stages') && pathBuild.includes('kb-path-next'), 'reading path does not render stages or next paths')
+for (const stage of pathStages) assert(pathBuild.includes(stage), `reading path is missing stage: ${stage}`)
+assert(warPathBuild.includes('战争与历史创伤') && warPathBuild.includes('二十世纪战争文学'), 'war path must preserve both its new and legacy search names')
 
 const sourceFiles = [
   ...filesUnder(docsDir, new Set(['.md', '.ts', '.vue', '.html'])),
@@ -417,7 +508,9 @@ const requiredSearchTerms = [
   '唐宋文学',
   '冰山理论',
   '奥涅金诗节',
-  '不可靠叙述'
+  '不可靠叙述',
+  '战争与历史创伤',
+  '二十世纪战争文学'
 ]
 const foundTerms = new Set()
 const searchIndexFiles = distFiles.filter((file) => path.basename(file).includes('localSearchIndex'))

@@ -21,6 +21,9 @@ const currentUrl = computed(() => {
   }
 })
 
+const currentTopic = computed(() => catalog.topics.find((entry) => entry.link === currentUrl.value))
+const primaryPathSlug = computed(() => currentTopic.value?.pathSlugs[0])
+
 const groups = computed(() => {
   const related = catalog.relationsByUrl[currentUrl.value]
   if (!related) return []
@@ -38,6 +41,7 @@ const groups = computed(() => {
         <a v-for="item in group.items" :key="item.slug" :href="item.link">
           <strong>{{ item.title }}</strong>
           <span>{{ item.meta }}</span>
+          <small v-if="group.key === 'paths' && item.slug === primaryPathSlug">建议起点</small>
         </a>
       </div>
     </section>

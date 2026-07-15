@@ -115,6 +115,10 @@ export function buildContentCatalog(entries: ContentEntry[]) {
     for (const step of readingPath.steps) {
       if (!worksBySlug.has(step.workSlug)) throw new Error(`${readingPath.slug} 引用了不存在的作品 ${step.workSlug}`)
     }
+    for (const nextPathSlug of readingPath.nextPathSlugs) {
+      if (nextPathSlug === readingPath.slug) throw new Error(`${readingPath.slug} 不能把自身设为下一条路径`)
+      if (!pathsBySlug.has(nextPathSlug)) throw new Error(`${readingPath.slug} 引用了不存在的下一条路径 ${nextPathSlug}`)
+    }
   }
   for (const topic of topicEntries) {
     const references = [
@@ -146,7 +150,18 @@ export function buildContentCatalog(entries: ContentEntry[]) {
     link: readingPath.url,
     works: readingPath.steps.map((step) => {
       const work = worksBySlug.get(step.workSlug)!
-      return { title: work.title, link: work.url, note: step.note }
+      return { title: work.title, link: work.url, stage: step.stage, note: step.note }
+    }),
+    nextPaths: readingPath.nextPathSlugs.map((slug) => {
+      const nextPath = pathsBySlug.get(slug)!
+      return {
+        slug: nextPath.slug,
+        title: nextPath.title,
+        link: nextPath.url,
+        level: nextPath.level,
+        pathKind: nextPath.pathKind,
+        goal: nextPath.goal
+      }
     })
   }))
   const topics = topicEntries.map((topic) => ({
@@ -175,9 +190,10 @@ export function buildContentCatalog(entries: ContentEntry[]) {
         histories: entry.historySlugs.map((slug) => historiesBySlug.get(slug)!),
         authors: entry.authorSlugs.map((slug) => authorsBySlug.get(slug)!),
         works: entry.workSlugs.map((slug) => worksBySlug.get(slug)!),
-        paths: entry.pathSlugs.map((slug) => pathsBySlug.get(slug)!),
+        paths: [],
         topics: []
       })
+      groups.paths = entry.pathSlugs.map((slug) => relationLink(pathsBySlug.get(slug)!))
       groups.topics = relatedTopicsFor(entry).map(relationLink)
       relationsByUrl[entry.url] = groups
       continue
@@ -283,7 +299,7 @@ export function buildContentCatalog(entries: ContentEntry[]) {
       histories: pathHistories,
       authors: pathAuthors,
       works: pathWorks,
-      paths: [],
+      paths: entry.nextPathSlugs.map((slug) => pathsBySlug.get(slug)!),
       topics: pathTopics
     })
   }
