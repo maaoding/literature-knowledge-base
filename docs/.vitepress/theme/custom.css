@@ -161,6 +161,11 @@ body::before {
   font-size: 13px;
 }
 
+.kb-sources__book-title {
+  color: var(--kb-ink);
+  font-weight: 700;
+}
+
 .kb-related {
   margin-top: 48px;
   padding-top: 24px;
@@ -1431,6 +1436,222 @@ body::before {
   color: var(--kb-blue);
   font-size: 12px;
   font-weight: 700;
+}
+
+.kb-theory-index {
+  margin-top: 34px;
+}
+
+.kb-technique-index {
+  margin-top: 34px;
+}
+
+.kb-technique-index__group {
+  margin-top: 38px;
+}
+
+.kb-technique-index__header {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.34fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: baseline;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--kb-line-strong);
+}
+
+.kb-technique-index__header h2 {
+  margin: 0;
+  border: 0;
+  font-family: Georgia, "Times New Roman", "SimSun", serif;
+  font-size: 24px;
+}
+
+.kb-technique-index__header p {
+  margin: 0;
+  color: var(--kb-muted);
+  line-height: 1.7;
+}
+
+.kb-technique-list {
+  border-bottom: 1px solid var(--kb-line);
+}
+
+.kb-technique-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 0.42fr);
+  gap: 28px;
+  min-width: 0;
+  padding: 22px 0;
+  border-top: 1px solid var(--kb-line);
+  color: var(--kb-ink) !important;
+  text-decoration: none !important;
+}
+
+.kb-technique-row:first-child {
+  border-top: 0;
+}
+
+.kb-technique-row__topline {
+  display: flex;
+  gap: 12px;
+  color: var(--kb-blue);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.kb-technique-row h3 {
+  margin: 8px 0 6px;
+  border: 0;
+  font-family: Georgia, "Times New Roman", "SimSun", serif;
+  font-size: 23px;
+  line-height: 1.35;
+}
+
+.kb-technique-row:hover h3 {
+  color: var(--kb-red);
+}
+
+.kb-technique-row p {
+  margin: 0;
+  color: var(--kb-muted);
+  line-height: 1.7;
+}
+
+.kb-technique-row__practice {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 24px;
+  border-left: 1px solid var(--kb-line);
+}
+
+.kb-technique-row__practice span,
+.kb-technique-row__practice small {
+  color: var(--kb-muted);
+  font-size: 12px;
+}
+
+.kb-technique-row__practice strong {
+  margin: 6px 0 12px;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+
+.kb-theory-index__group {
+  margin-top: 38px;
+}
+
+.kb-theory-index__header {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.34fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: baseline;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--kb-line-strong);
+}
+
+.kb-theory-index__header h2 {
+  margin: 0;
+  border: 0;
+  font-family: Georgia, "Times New Roman", "SimSun", serif;
+  font-size: 24px;
+}
+
+.kb-theory-index__header p {
+  margin: 0;
+  color: var(--kb-muted);
+  line-height: 1.7;
+}
+
+.kb-theory-list {
+  border-bottom: 1px solid var(--kb-line);
+}
+
+.kb-theory-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 0.42fr);
+  gap: 28px;
+  min-width: 0;
+  padding: 22px 0;
+  border-top: 1px solid var(--kb-line);
+  color: var(--kb-ink) !important;
+  text-decoration: none !important;
+}
+
+.kb-theory-row:first-child {
+  border-top: 0;
+}
+
+.kb-theory-row__topline {
+  display: flex;
+  gap: 12px;
+  color: var(--kb-teal);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.kb-theory-row h3 {
+  margin: 8px 0 6px;
+  border: 0;
+  font-family: Georgia, "Times New Roman", "SimSun", serif;
+  font-size: 23px;
+  line-height: 1.35;
+}
+
+.kb-theory-row:hover h3 {
+  color: var(--kb-red);
+}
+
+.kb-theory-row p {
+  margin: 0;
+  color: var(--kb-muted);
+  line-height: 1.7;
+}
+
+.kb-theory-row__question {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 24px;
+  border-left: 1px solid var(--kb-line);
+}
+
+.kb-theory-row__question span,
+.kb-theory-row__question small {
+  color: var(--kb-muted);
+  font-size: 12px;
+}
+
+.kb-theory-row__question strong {
+  margin: 6px 0 12px;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .kb-theory-index__header,
+  .kb-theory-row,
+  .kb-technique-index__header,
+  .kb-technique-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .kb-theory-row__question {
+    padding: 14px 0 0;
+    border-top: 1px solid var(--kb-line);
+    border-left: 0;
+  }
+
+  .kb-technique-row__practice {
+    padding: 14px 0 0;
+    border-top: 1px solid var(--kb-line);
+    border-left: 0;
+  }
 }
 
 .kb-topic-relations {

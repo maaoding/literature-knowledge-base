@@ -12,6 +12,17 @@ const reviewedAt = computed<string | undefined>(() => {
   if (typeof value === 'string') return value.slice(0, 10)
   return undefined
 })
+
+function sourceKey(source: ContentSource) {
+  return source.url ?? source.isbn ?? `${source.publisher}:${source.title}`
+}
+
+function sourceDetails(source: ContentSource) {
+  if (source.kind !== 'book') return source.publisher
+  return [source.author, source.publisher, source.year, source.isbn ? `ISBN ${source.isbn}` : undefined]
+    .filter(Boolean)
+    .join(' · ')
+}
 </script>
 
 <template>
@@ -21,9 +32,10 @@ const reviewedAt = computed<string | undefined>(() => {
       <span v-if="reviewedAt">资料校订：{{ reviewedAt }}</span>
     </div>
     <ol>
-      <li v-for="source in sources" :key="source.url">
-        <a :href="source.url" target="_blank" rel="noopener noreferrer">{{ source.title }}</a>
-        <span>{{ source.publisher }}</span>
+      <li v-for="source in sources" :key="sourceKey(source)">
+        <a v-if="source.url" :href="source.url" target="_blank" rel="noopener noreferrer">{{ source.title }}</a>
+        <strong v-else class="kb-sources__book-title">{{ source.title }}</strong>
+        <span>{{ sourceDetails(source) }}</span>
       </li>
     </ol>
   </section>

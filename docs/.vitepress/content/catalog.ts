@@ -15,9 +15,11 @@ type RelationGroups = {
   works: RelationLink[]
   paths: RelationLink[]
   topics: RelationLink[]
+  theories: RelationLink[]
+  techniques: RelationLink[]
 }
 
-const relationGroupKeys = ['histories', 'authors', 'works', 'paths', 'topics'] as const
+const relationGroupKeys = ['histories', 'authors', 'works', 'paths', 'topics', 'theories', 'techniques'] as const
 
 function uniqueEntries<T extends ContentEntry>(entries: T[]) {
   return [...new Map(entries.map((entry) => [entry.slug, entry])).values()]
@@ -42,10 +44,10 @@ function relationLink(entry: ContentEntry): RelationLink {
   return { slug: entry.slug, title: entry.title, link: entry.url, meta }
 }
 
-function relationGroups(groups: Record<(typeof relationGroupKeys)[number], ContentEntry[]>): RelationGroups {
+function relationGroups(groups: Partial<Record<(typeof relationGroupKeys)[number], ContentEntry[]>>): RelationGroups {
   return Object.fromEntries(relationGroupKeys.map((key) => [
     key,
-    sortEntries(groups[key]).map(relationLink)
+    sortEntries(groups[key] ?? []).map(relationLink)
   ])) as RelationGroups
 }
 
@@ -70,12 +72,19 @@ export function buildContentCatalog(entries: ContentEntry[]) {
   const topicEntries = entries
     .filter((entry): entry is EntryByType<'topic'> => entry.type === 'topic')
     .sort((a, b) => a.sidebarOrder - b.sidebarOrder)
+  const theoryEntries = entries
+    .filter((entry): entry is EntryByType<'theory'> => entry.type === 'theory')
+    .sort((a, b) => a.sidebarOrder - b.sidebarOrder)
+  const techniqueEntries = entries
+    .filter((entry): entry is EntryByType<'technique'> => entry.type === 'technique')
+    .sort((a, b) => a.sidebarOrder - b.sidebarOrder)
 
   const historiesBySlug = new Map(historyPages.map((entry) => [entry.slug, entry]))
   const authorsBySlug = new Map(authorEntries.map((entry) => [entry.slug, entry]))
   const worksBySlug = new Map(workEntries.map((entry) => [entry.slug, entry]))
   const pathsBySlug = new Map(pathEntries.map((entry) => [entry.slug, entry]))
-
+  const topicsBySlug = new Map(topicEntries.map((entry) => [entry.slug, entry]))
+  const theoriesBySlug = new Map(theoryEntries.map((entry) => [entry.slug, entry]))
   const topicOverlapCount = (left: string[], right: string[]) => {
     const rightValues = new Set(right)
     return left.filter((value) => rightValues.has(value)).length
@@ -133,6 +142,50 @@ export function buildContentCatalog(entries: ContentEntry[]) {
       }
     }
   }
+  for (const theory of theoryEntries) {
+    for (const prerequisiteSlug of theory.prerequisiteSlugs) {
+      if (prerequisiteSlug === theory.slug) throw new Error(`${theory.slug} 不能把自身设为前置理论`)
+      if (!theoriesBySlug.has(prerequisiteSlug)) throw new Error(`${theory.slug} 引用了不存在的前置理论 ${prerequisiteSlug}`)
+    }
+    for (const workSlug of theory.workSlugs) {
+      if (!worksBySlug.has(workSlug)) throw new Error(`${theory.slug} 引用了不存在的作品 ${workSlug}`)
+    }
+    for (const topicSlug of theory.topicSlugs) {
+      if (!topicsBySlug.has(topicSlug)) throw new Error(`${theory.slug} 引用了不存在的专题 ${topicSlug}`)
+    }
+  }
+  for (const technique of techniqueEntries) {
+    for (const theorySlug of technique.theorySlugs) {
+      if (!theoriesBySlug.has(theorySlug)) throw new Error(`${technique.slug} 引用了不存在的理论 ${theorySlug}`)
+    }
+    for (const workSlug of technique.workSlugs) {
+      if (!worksBySlug.has(workSlug)) throw new Error(`${technique.slug} 引用了不存在的作品 ${workSlug}`)
+    }
+    for (const topicSlug of technique.topicSlugs) {
+      if (!topicsBySlug.has(topicSlug)) throw new Error(`${technique.slug} 引用了不存在的专题 ${topicSlug}`)
+    }
+  }
+
+  const theoryVisitState = new Map<string, 'visiting' | 'visited'>()
+  const theoryVisitStack: string[] = []
+  const visitTheory = (theory: EntryByType<'theory'>) => {
+    const state = theoryVisitState.get(theory.slug)
+    if (state === 'visited') return
+    if (state === 'visiting') {
+      const cycleStart = theoryVisitStack.indexOf(theory.slug)
+      const cycle = [...theoryVisitStack.slice(cycleStart), theory.slug]
+      throw new Error(`理论前置关系存在循环: ${cycle.join(' -> ')}`)
+    }
+
+    theoryVisitState.set(theory.slug, 'visiting')
+    theoryVisitStack.push(theory.slug)
+    for (const prerequisiteSlug of theory.prerequisiteSlugs) {
+      visitTheory(theoriesBySlug.get(prerequisiteSlug)!)
+    }
+    theoryVisitStack.pop()
+    theoryVisitState.set(theory.slug, 'visited')
+  }
+  theoryEntries.forEach(visitTheory)
 
   const works = workEntries.map((work) => ({
     ...work,
@@ -172,6 +225,26 @@ export function buildContentCatalog(entries: ContentEntry[]) {
     works: topic.workSlugs.map((slug) => relationLink(worksBySlug.get(slug)!)),
     paths: topic.pathSlugs.map((slug) => relationLink(pathsBySlug.get(slug)!))
   }))
+  const theories = theoryEntries.map((theory) => ({
+    ...theory,
+    link: theory.url,
+    works: theory.workSlugs.map((slug) => relationLink(worksBySlug.get(slug)!)),
+    topics: theory.topicSlugs.map((slug) => relationLink(topicsBySlug.get(slug)!)),
+    prerequisites: theory.prerequisiteSlugs.map((slug) => relationLink(theoriesBySlug.get(slug)!)),
+    dependents: theoryEntries
+      .filter((candidate) => candidate.prerequisiteSlugs.includes(theory.slug))
+      .map(relationLink),
+    techniques: techniqueEntries
+      .filter((technique) => technique.theorySlugs.includes(theory.slug))
+      .map(relationLink)
+  }))
+  const techniques = techniqueEntries.map((technique) => ({
+    ...technique,
+    link: technique.url,
+    works: technique.workSlugs.map((slug) => relationLink(worksBySlug.get(slug)!)),
+    topics: technique.topicSlugs.map((slug) => relationLink(topicsBySlug.get(slug)!)),
+    theories: technique.theorySlugs.map((slug) => relationLink(theoriesBySlug.get(slug)!))
+  }))
   const historyEntries = historyPages
     .filter((entry) => entry.entryKind === 'timeline')
     .map((entry) => ({ ...entry, link: entry.url }))
@@ -186,6 +259,8 @@ export function buildContentCatalog(entries: ContentEntry[]) {
   const relationsByUrl: Record<string, RelationGroups> = {}
   for (const entry of entries) {
     if (entry.type === 'topic') {
+      const relatedTheories = theoryEntries.filter((theory) => theory.topicSlugs.includes(entry.slug))
+      const relatedTechniques = techniqueEntries.filter((technique) => technique.topicSlugs.includes(entry.slug))
       const groups = relationGroups({
         histories: entry.historySlugs.map((slug) => historiesBySlug.get(slug)!),
         authors: entry.authorSlugs.map((slug) => authorsBySlug.get(slug)!),
@@ -195,6 +270,8 @@ export function buildContentCatalog(entries: ContentEntry[]) {
       })
       groups.paths = entry.pathSlugs.map((slug) => relationLink(pathsBySlug.get(slug)!))
       groups.topics = relatedTopicsFor(entry).map(relationLink)
+      groups.theories = relatedTheories.map(relationLink)
+      groups.techniques = relatedTechniques.map(relationLink)
       relationsByUrl[entry.url] = groups
       continue
     }
@@ -204,12 +281,48 @@ export function buildContentCatalog(entries: ContentEntry[]) {
         pathEntry.steps.some((step) => step.workSlug === entry.slug)
       ))
       const relatedTopics = topicEntries.filter((topic) => topic.workSlugs.includes(entry.slug))
+      const relatedTheories = theoryEntries.filter((theory) => theory.workSlugs.includes(entry.slug))
+      const relatedTechniques = techniqueEntries.filter((technique) => technique.workSlugs.includes(entry.slug))
       relationsByUrl[entry.url] = relationGroups({
         histories: entry.historySlugs.map((slug) => historiesBySlug.get(slug)!),
         authors: entry.authorSlug ? [authorsBySlug.get(entry.authorSlug)!] : [],
         works: [],
         paths: relatedPaths,
-        topics: relatedTopics
+        topics: relatedTopics,
+        theories: relatedTheories,
+        techniques: relatedTechniques
+      })
+      continue
+    }
+
+    if (entry.type === 'theory') {
+      const dependentTheories = theoryEntries.filter((theory) => (
+        theory.prerequisiteSlugs.includes(entry.slug)
+      ))
+      relationsByUrl[entry.url] = relationGroups({
+        histories: [],
+        authors: [],
+        works: entry.workSlugs.map((slug) => worksBySlug.get(slug)!),
+        paths: [],
+        topics: entry.topicSlugs.map((slug) => topicsBySlug.get(slug)!),
+        theories: [
+          ...entry.prerequisiteSlugs.map((slug) => theoriesBySlug.get(slug)!),
+          ...dependentTheories
+        ],
+        techniques: techniqueEntries.filter((technique) => technique.theorySlugs.includes(entry.slug))
+      })
+      continue
+    }
+
+    if (entry.type === 'technique') {
+      relationsByUrl[entry.url] = relationGroups({
+        histories: [],
+        authors: [],
+        works: entry.workSlugs.map((slug) => worksBySlug.get(slug)!),
+        paths: [],
+        topics: entry.topicSlugs.map((slug) => topicsBySlug.get(slug)!),
+        theories: entry.theorySlugs.map((slug) => theoriesBySlug.get(slug)!),
+        techniques: []
       })
       continue
     }
@@ -317,6 +430,8 @@ export function buildContentCatalog(entries: ContentEntry[]) {
     works,
     readingPaths,
     topics,
+    theories,
+    techniques,
     relationsByUrl,
     allTags
   }

@@ -4,7 +4,7 @@ import matter from 'gray-matter'
 import { buildContentCatalog, type ContentCatalog } from './catalog'
 import { parseContentEntry } from './schema'
 
-const sections = ['history', 'authors', 'works', 'paths', 'topics'] as const
+const sections = ['history', 'authors', 'works', 'paths', 'topics', 'theory', 'techniques'] as const
 
 export function loadContentCatalog(docsDir = path.resolve(process.cwd(), 'docs')) {
   const entries = sections.flatMap((section) => {
@@ -77,6 +77,14 @@ export function createSidebar(catalog: ContentCatalog) {
     '/topics/': groupedSidebar(catalog.topics, ['文学传统', '社会经验', '现代转型'], {
       text: '专题索引',
       items: [{ text: '全部专题', link: '/topics/' }]
+    }),
+    '/theory/': groupedSidebar(catalog.theories, ['批评基础', '文本细读', '文化与历史', '概念工具'], {
+      text: '文学理论',
+      items: [{ text: '栏目总览', link: '/theory/' }]
+    }),
+    '/techniques/': groupedSidebar(catalog.techniques, ['语言与修辞', '叙述与结构', '诗歌与节奏', '戏剧与舞台'], {
+      text: '文学技巧',
+      items: [{ text: '栏目总览', link: '/techniques/' }]
     })
   }
 }

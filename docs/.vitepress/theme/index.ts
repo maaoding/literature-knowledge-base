@@ -13,6 +13,8 @@ import ReadingPathNext from './components/ReadingPathNext.vue'
 import ReadingPathSteps from './components/ReadingPathSteps.vue'
 import RelatedContent from './components/RelatedContent.vue'
 import TimelineView from './components/TimelineView.vue'
+import TheoryExplorer from './components/TheoryExplorer.vue'
+import TechniqueExplorer from './components/TechniqueExplorer.vue'
 import TopicExplorer from './components/TopicExplorer.vue'
 import TopicRelations from './components/TopicRelations.vue'
 import WorkExplorer from './components/WorkExplorer.vue'
@@ -36,6 +38,8 @@ export default {
     app.component('ReadingPathNext', ReadingPathNext)
     app.component('ReadingPathSteps', ReadingPathSteps)
     app.component('TimelineView', TimelineView)
+    app.component('TheoryExplorer', TheoryExplorer)
+    app.component('TechniqueExplorer', TechniqueExplorer)
     app.component('TopicExplorer', TopicExplorer)
     app.component('TopicRelations', TopicRelations)
     app.component('WorkExplorer', WorkExplorer)

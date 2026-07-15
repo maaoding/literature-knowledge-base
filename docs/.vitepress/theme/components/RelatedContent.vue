@@ -11,7 +11,9 @@ const groupDefinitions = [
   { key: 'authors', title: '相关作家' },
   { key: 'works', title: '相关作品' },
   { key: 'paths', title: '收录路径' },
-  { key: 'topics', title: '相关专题' }
+  { key: 'topics', title: '相关专题' },
+  { key: 'theories', title: '相关理论' },
+  { key: 'techniques', title: '文学技巧' }
 ] as const
 
 const currentUrl = computed(() => {
@@ -24,7 +26,14 @@ const currentUrl = computed(() => {
 })
 
 const groups = computed(() => {
-  if (frontmatter.value.type === 'topic') return []
+  if (frontmatter.value.type === 'topic') {
+    const related = catalog.relationsByUrl[currentUrl.value]
+    if (!related) return []
+    return groupDefinitions
+      .filter((definition) => ['theories', 'techniques'].includes(definition.key))
+      .map((definition) => ({ ...definition, items: related[definition.key].slice(0, 8) }))
+      .filter((group) => group.items.length)
+  }
   const related = catalog.relationsByUrl[currentUrl.value]
   if (!related) return []
   const definitions = frontmatter.value.type === 'path'

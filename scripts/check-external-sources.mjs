@@ -4,7 +4,7 @@ import matter from 'gray-matter'
 
 const root = process.cwd()
 const docsDir = path.join(root, 'docs')
-const directories = ['history', 'authors', 'works']
+const directories = ['history', 'authors', 'works', 'theory', 'techniques']
 const sourcePages = directories.flatMap((directory) => {
   const fullDirectory = path.join(docsDir, directory)
   return fs.readdirSync(fullDirectory)
@@ -13,11 +13,13 @@ const sourcePages = directories.flatMap((directory) => {
       const file = path.join(fullDirectory, name)
       const frontmatter = matter(fs.readFileSync(file, 'utf8')).data
       if (frontmatter.contentVersion !== 2) return []
-      return (frontmatter.sources ?? []).map((source) => ({
-        file: path.relative(root, file),
-        title: source.title,
-        url: source.url
-      }))
+      return (frontmatter.sources ?? [])
+        .filter((source) => source.url)
+        .map((source) => ({
+          file: path.relative(root, file),
+          title: source.title,
+          url: source.url
+        }))
     })
 })
 

@@ -6,24 +6,32 @@ export const eraGroupSchema = z.enum(['古代', '中古', '近代', '现当代']
 export const topicGroupSchema = z.enum(['文学传统', '社会经验', '现代转型'])
 export const pathKindSchema = z.enum(['基础主线', '文学史进阶', '主题阅读', '形式训练'])
 export const pathStageSchema = z.enum(['起点', '转折', '深化', '延伸'])
+export const theoryEntryKindSchema = z.enum(['foundation', 'method', 'lens', 'concept'])
+export const theoryGroupSchema = z.enum(['批评基础', '文本细读', '文化与历史', '概念工具'])
+export const techniqueGroupSchema = z.enum(['语言与修辞', '叙述与结构', '诗歌与节奏', '戏剧与舞台'])
 
-const commonFields = {
+const baseContentFields = {
   title: z.string().trim().min(1),
   summary: z.string().trim().min(1),
-  period: z.string().trim().min(1),
-  country: z.string().trim().min(1),
-  genres: z.array(z.string().trim().min(1)),
   tags: z.array(z.string().trim().min(1)),
   difficulty: difficultySchema,
-  recommendedFor: z.array(z.string().trim().min(1)),
   featured: z.boolean(),
   homeOrder: z.number().int().positive().nullable(),
   sidebarGroup: z.string().trim().min(1),
   sidebarOrder: z.number().int().nonnegative()
 }
 
+const commonFields = {
+  ...baseContentFields,
+  period: z.string().trim().min(1),
+  country: z.string().trim().min(1),
+  genres: z.array(z.string().trim().min(1)),
+  recommendedFor: z.array(z.string().trim().min(1))
+}
+
 export const contentSourceKindSchema = z.enum([
   'archive',
+  'book',
   'institution',
   'encyclopedia',
   'scholarship',
@@ -36,7 +44,30 @@ export const contentSourceSchema = z.object({
   kind: contentSourceKindSchema,
   url: z.string().url().refine((url) => url.startsWith('https://'), {
     message: 'source URL must use HTTPS'
-  })
+  }).optional(),
+  author: z.string().trim().min(1).optional(),
+  year: z.number().int().min(1000).max(2100).optional(),
+  isbn: z.string().trim().min(10).optional()
+}).superRefine((source, context) => {
+  if (source.kind === 'book') {
+    for (const field of ['author', 'year', 'isbn'] as const) {
+      if (!source[field]) {
+        context.addIssue({
+          code: 'custom',
+          path: [field],
+          message: `book source requires ${field}`
+        })
+      }
+    }
+    return
+  }
+  if (!source.url) {
+    context.addIssue({
+      code: 'custom',
+      path: ['url'],
+      message: 'non-book source requires an HTTPS URL'
+    })
+  }
 })
 
 const deepContentFields = {
@@ -111,12 +142,43 @@ export const topicEntrySchema = z.object({
   pathSlugs: slugListSchema.min(1)
 })
 
+export const theoryEntrySchema = z.object({
+  ...baseContentFields,
+  ...deepContentFields,
+  type: z.literal('theory'),
+  entryKind: theoryEntryKindSchema,
+  theoryGroup: theoryGroupSchema,
+  sidebarGroup: theoryGroupSchema,
+  coreQuestion: z.string().trim().min(1),
+  prerequisiteSlugs: slugListSchema,
+  workSlugs: slugListSchema.min(1),
+  topicSlugs: slugListSchema.min(1)
+})
+
+export const techniqueEntrySchema = z.object({
+  ...baseContentFields,
+  ...deepContentFields,
+  type: z.literal('technique'),
+  techniqueGroup: techniqueGroupSchema,
+  sidebarGroup: techniqueGroupSchema,
+  coreFunction: z.string().trim().min(1),
+  identifyBy: z.array(z.string().trim().min(1)).min(3).max(5).refine(
+    (items) => new Set(items).size === items.length,
+    { message: 'identification clues must be unique' }
+  ),
+  theorySlugs: slugListSchema.min(1),
+  workSlugs: slugListSchema.min(3),
+  topicSlugs: slugListSchema.min(1)
+})
+
 export const contentEntrySchema = z.discriminatedUnion('type', [
   historyEntrySchema,
   authorEntrySchema,
   workEntrySchema,
   readingPathEntrySchema,
-  topicEntrySchema
+  topicEntrySchema,
+  theoryEntrySchema,
+  techniqueEntrySchema
 ])
 
 export type Difficulty = z.infer<typeof difficultySchema>
@@ -125,6 +187,9 @@ export type EraGroup = z.infer<typeof eraGroupSchema>
 export type TopicGroup = z.infer<typeof topicGroupSchema>
 export type PathKind = z.infer<typeof pathKindSchema>
 export type PathStage = z.infer<typeof pathStageSchema>
+export type TheoryEntryKind = z.infer<typeof theoryEntryKindSchema>
+export type TheoryGroup = z.infer<typeof theoryGroupSchema>
+export type TechniqueGroup = z.infer<typeof techniqueGroupSchema>
 export type ContentFrontmatter = z.infer<typeof contentEntrySchema>
 export type ContentType = ContentFrontmatter['type']
 export type ContentSource = z.infer<typeof contentSourceSchema>

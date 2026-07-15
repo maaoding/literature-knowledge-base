@@ -80,7 +80,9 @@ const expectedCounts = {
   works: 76,
   readingPaths: 18,
   topics: 12,
-  entries: 207
+  theories: 20,
+  techniques: 8,
+  entries: 235
 }
 for (const [key, count] of Object.entries(expectedCounts)) {
   assert(catalog[key].length === count, `expected ${count} ${key}, found ${catalog[key].length}`)
@@ -98,9 +100,19 @@ const deepContentRules = {
   history: {
     minimumCharacters: 1000,
     headings: ['时代背景', '主要文体', '核心观念', '地区差异', '关键作家与作品', '前后时期关系', '推荐阅读入口']
+  },
+  theory: {
+    minimumCharacters: 1200,
+    maximumCharacters: 1600,
+    headings: ['问题起点', '核心概念', '分析步骤', '作品试读', '方法边界', '继续阅读']
+  },
+  technique: {
+    minimumCharacters: 800,
+    maximumCharacters: 1200,
+    headings: ['技巧说明', '识别线索', '形式作用', '作品试读', '常见误区', '关联理论']
   }
 }
-const contentDirectory = { author: 'authors', work: 'works', history: 'history' }
+const contentDirectory = { author: 'authors', work: 'works', history: 'history', theory: 'theory', technique: 'techniques' }
 let deepContentCount = 0
 for (const entry of catalog.entries.filter((entry) => deepContentRules[entry.type])) {
   assert(entry.contentVersion === 2, `${entry.url} has incomplete contentVersion metadata`)
@@ -108,13 +120,23 @@ for (const entry of catalog.entries.filter((entry) => deepContentRules[entry.typ
   assert(Array.isArray(entry.sources) && entry.sources.length >= 2 && entry.sources.length <= 5, `${entry.url} must have 2-5 sources`)
 
   const sources = entry.sources ?? []
-  const urls = sources.map((source) => source.url)
-  assert(new Set(urls).size === urls.length, `${entry.url} has duplicate source URLs`)
+  const sourceKeys = sources.map((source) => source.url ?? source.isbn ?? `${source.publisher}:${source.title}`)
+  assert(new Set(sourceKeys).size === sourceKeys.length, `${entry.url} has duplicate sources`)
   assert(sources.filter((source) => source.kind === 'wikipedia').length <= 1, `${entry.url} has more than one Wikipedia source`)
   assert(sources.some((source) => source.kind !== 'wikipedia'), `${entry.url} must include a non-Wikipedia source`)
+  if (entry.type === 'theory' || entry.type === 'technique') {
+    assert(sources.length >= 3, `${entry.url} must have 3-5 sources`)
+    assert(sources.some((source) => source.kind === 'book'), `${entry.url} must include a published book source`)
+    assert(sources.some((source) => source.kind !== 'book' && source.kind !== 'wikipedia'), `${entry.url} must include a professional non-book source`)
+    assert(!sources.some((source) => source.kind === 'wikipedia'), `${entry.url} must not use Wikipedia as a theory or technique source`)
+  }
   for (const source of sources) {
-    assert(source.url.startsWith('https://'), `${entry.url} source must use HTTPS: ${source.url}`)
-    assert(!/kdocs\.cn|goodreads\.com|douban\.com/i.test(source.url), `${entry.url} uses a disallowed ranking or aggregation source: ${source.url}`)
+    if (source.kind === 'book') {
+      assert(Boolean(source.author && source.year && source.isbn), `${entry.url} book source is missing author, year or ISBN: ${source.title}`)
+    } else {
+      assert(source.url?.startsWith('https://'), `${entry.url} source must use HTTPS: ${source.url}`)
+    }
+    assert(!/kdocs\.cn|goodreads\.com|douban\.com/i.test(source.url ?? ''), `${entry.url} uses a disallowed ranking or aggregation source: ${source.url}`)
   }
 
   const file = path.join(docsDir, contentDirectory[entry.type], `${entry.slug}.md`)
@@ -122,13 +144,16 @@ for (const entry of catalog.entries.filter((entry) => deepContentRules[entry.typ
   const rule = deepContentRules[entry.type]
   const bodyCharacters = visibleCharacterCount(source)
   assert(bodyCharacters >= rule.minimumCharacters, `${entry.url} has ${bodyCharacters} visible characters; expected at least ${rule.minimumCharacters}`)
+  if (rule.maximumCharacters) {
+    assert(bodyCharacters <= rule.maximumCharacters, `${entry.url} has ${bodyCharacters} visible characters; expected at most ${rule.maximumCharacters}`)
+  }
   const headings = [...markdownBody(source).matchAll(/^##\s+(.+)$/gm)].map((match) => normalizeOutlineTitle(match[1]))
   for (const heading of rule.headings) {
     assert(headings.includes(normalizeOutlineTitle(heading)), `${entry.url} is missing required heading: ${heading}`)
   }
   deepContentCount += 1
 }
-assert(deepContentCount === 177, `expected 177 version 2 content pages, found ${deepContentCount}`)
+assert(deepContentCount === 205, `expected 205 version 2 content pages, found ${deepContentCount}`)
 
 const expectedHome = {
   authors: ['屈原', '鲁迅', '曹雪芹', '荷马', '莎士比亚', '博尔赫斯'],
@@ -168,6 +193,226 @@ const expectedTopicGroups = {
   文学传统: 4,
   社会经验: 5,
   现代转型: 3
+}
+
+const expectedTheories = {
+  作者与文本意义: {
+    title: '作者、文本与意义', entryKind: 'foundation', theoryGroup: '批评基础', prerequisiteSlugs: [],
+    workSlugs: ['哈姆雷特', '红楼梦', '微暗的火'], topicSlugs: ['现代主义', '讽刺与权力']
+  },
+  描述阐释与评价: {
+    title: '描述、阐释与评价', entryKind: 'foundation', theoryGroup: '批评基础', prerequisiteSlugs: ['作者与文本意义'],
+    workSlugs: ['哈姆雷特', '老人与海', '荒原'], topicSlugs: ['命运与伦理', '现代主义']
+  },
+  形式分析与细读: {
+    title: '形式分析与细读', entryKind: 'method', theoryGroup: '文本细读', prerequisiteSlugs: ['描述阐释与评价'],
+    workSlugs: ['变形记', '荒原', '红楼梦'], topicSlugs: ['现代主义', '诗歌传统']
+  },
+  叙述者与视角: {
+    title: '叙述者与视角', entryKind: 'method', theoryGroup: '文本细读', prerequisiteSlugs: ['描述阐释与评价'],
+    workSlugs: ['到灯塔去', '喧哗与骚动', '微暗的火'], topicSlugs: ['现代主义', '家族与记忆']
+  },
+  叙事时间与空间: {
+    title: '叙事时间与空间', entryKind: 'method', theoryGroup: '文本细读', prerequisiteSlugs: ['叙述者与视角'],
+    workSlugs: ['追忆似水年华', '百年孤独', '尤利西斯'], topicSlugs: ['家族与记忆', '现代主义']
+  },
+  文体与风格: {
+    title: '文体与风格', entryKind: 'method', theoryGroup: '文本细读', prerequisiteSlugs: ['形式分析与细读'],
+    workSlugs: ['老人与海', '雪国', '呐喊'], topicSlugs: ['现实主义', '现代主义']
+  },
+  女性主义批评: {
+    title: '女性主义批评', entryKind: 'lens', theoryGroup: '文化与历史', prerequisiteSlugs: ['作者与文本意义', '描述阐释与评价'],
+    workSlugs: ['玩偶之家', '傲慢与偏见', '红楼梦'], topicSlugs: ['女性与婚姻', '讽刺与权力']
+  },
+  意识形态批评: {
+    title: '意识形态批评', entryKind: 'lens', theoryGroup: '文化与历史', prerequisiteSlugs: ['作者与文本意义', '形式分析与细读'],
+    workSlugs: ['死魂灵', '格列佛游记', '呐喊'], topicSlugs: ['讽刺与权力', '启蒙与现代性']
+  },
+  解释学与象征阐释: {
+    title: '解释学与象征阐释', entryKind: 'foundation', theoryGroup: '批评基础', prerequisiteSlugs: ['作者与文本意义', '描述阐释与评价'],
+    workSlugs: ['旧约', '神曲', '罪与罚'], topicSlugs: ['信仰与救赎', '命运与伦理']
+  },
+  精神分析批评: {
+    title: '精神分析批评', entryKind: 'lens', theoryGroup: '文化与历史', prerequisiteSlugs: ['作者与文本意义', '形式分析与细读'],
+    workSlugs: ['俄狄浦斯王', '哈姆雷特', '变形记'], topicSlugs: ['命运与伦理', '神话与史诗']
+  },
+  新历史主义批评: {
+    title: '新历史主义批评', entryKind: 'lens', theoryGroup: '文化与历史', prerequisiteSlugs: ['描述阐释与评价', '意识形态批评'],
+    workSlugs: ['哈姆雷特', '儒林外史', '格列佛游记'], topicSlugs: ['讽刺与权力', '启蒙与现代性']
+  },
+  后殖民批评: {
+    title: '后殖民批评', entryKind: 'lens', theoryGroup: '文化与历史', prerequisiteSlugs: ['叙述者与视角', '意识形态批评'],
+    workSlugs: ['鲁滨逊漂流记', '午夜之子', '百年孤独'], topicSlugs: ['流亡与身份', '启蒙与现代性']
+  },
+  文化记忆与创伤叙事: {
+    title: '文化记忆与创伤叙事', entryKind: 'lens', theoryGroup: '文化与历史', prerequisiteSlugs: ['叙事时间与空间', '意识形态批评'],
+    workSlugs: ['战争与和平', '喧哗与骚动', '午夜之子'], topicSlugs: ['战争与创伤', '家族与记忆']
+  },
+  神话与原型批评: {
+    title: '神话与原型批评', entryKind: 'lens', theoryGroup: '文化与历史', prerequisiteSlugs: ['形式分析与细读', '精神分析批评'],
+    workSlugs: ['吉尔伽美什', '伊利亚特', '俄狄浦斯王'], topicSlugs: ['神话与史诗', '命运与伦理']
+  },
+  结构与符号: {
+    title: '结构与符号', entryKind: 'concept', theoryGroup: '概念工具', prerequisiteSlugs: ['形式分析与细读'],
+    workSlugs: ['西游记', '俄狄浦斯王', '变形记'], topicSlugs: ['神话与史诗', '现代主义']
+  },
+  读者反应与接受史: {
+    title: '读者反应与接受史', entryKind: 'concept', theoryGroup: '概念工具', prerequisiteSlugs: ['描述阐释与评价', '解释学与象征阐释'],
+    workSlugs: ['哈姆雷特', '红楼梦', '尤利西斯'], topicSlugs: ['命运与伦理', '现代主义']
+  },
+  互文性与文学传统: {
+    title: '互文性与文学传统', entryKind: 'concept', theoryGroup: '概念工具', prerequisiteSlugs: ['作者与文本意义', '结构与符号'],
+    workSlugs: ['埃涅阿斯纪', '神曲', '尤利西斯'], topicSlugs: ['神话与史诗', '诗歌传统']
+  },
+  陌生化: {
+    title: '陌生化', entryKind: 'concept', theoryGroup: '概念工具', prerequisiteSlugs: ['形式分析与细读'],
+    workSlugs: ['变形记', '格列佛游记', '呐喊'], topicSlugs: ['现代主义', '讽刺与权力']
+  },
+  复调与对话性: {
+    title: '复调与对话性', entryKind: 'concept', theoryGroup: '概念工具', prerequisiteSlugs: ['叙述者与视角', '结构与符号'],
+    workSlugs: ['罪与罚', '儒林外史', '午夜之子'], topicSlugs: ['现实主义', '流亡与身份']
+  },
+  文学伦理与价值判断: {
+    title: '文学伦理与价值判断', entryKind: 'concept', theoryGroup: '概念工具', prerequisiteSlugs: ['描述阐释与评价', '意识形态批评'],
+    workSlugs: ['俄狄浦斯王', '玩偶之家', '罪与罚'], topicSlugs: ['命运与伦理', '女性与婚姻']
+  }
+}
+const expectedTheoryGroups = { 批评基础: 3, 文本细读: 4, 文化与历史: 7, 概念工具: 6 }
+for (const [group, count] of Object.entries(expectedTheoryGroups)) {
+  const actual = catalog.theories.filter((theory) => theory.theoryGroup === group).length
+  assert(actual === count, `expected ${count} theories in ${group}, found ${actual}`)
+}
+
+const theoryBySlug = new Map(catalog.theories.map((theory) => [theory.slug, theory]))
+for (const [slug, expected] of Object.entries(expectedTheories)) {
+  const theory = theoryBySlug.get(slug)
+  assert(theory, `missing theory entry: ${slug}`)
+  if (!theory) continue
+  for (const key of ['title', 'entryKind', 'theoryGroup']) {
+    assert(theory[key] === expected[key], `${theory.url} has unexpected ${key}: ${theory[key]}`)
+  }
+  for (const key of ['prerequisiteSlugs', 'workSlugs', 'topicSlugs']) {
+    assert(JSON.stringify(theory[key]) === JSON.stringify(expected[key]), `${theory.url} has unexpected ${key}`)
+    assert(new Set(theory[key]).size === theory[key].length, `${theory.url} has duplicate ${key}`)
+  }
+  assert(theory.sources.some((source) => source.title === '文学批评入门'), `${theory.url} must cite 文学批评入门`)
+
+  const dependentSlugs = catalog.theories
+    .filter((candidate) => candidate.prerequisiteSlugs.includes(theory.slug))
+    .map((candidate) => candidate.slug)
+  assert(JSON.stringify(theory.dependents.map((entry) => entry.slug)) === JSON.stringify(dependentSlugs), `${theory.url} has incomplete dependent theories`)
+
+  const theoryRelations = catalog.relationsByUrl[theory.url]
+  assert(theoryRelations.works.length === theory.workSlugs.length, `${theory.url} work relations are incomplete`)
+  assert(theoryRelations.topics.length === theory.topicSlugs.length, `${theory.url} topic relations are incomplete`)
+  const expectedRelatedTheories = new Set([...theory.prerequisiteSlugs, ...dependentSlugs])
+  assert(theoryRelations.theories.length === expectedRelatedTheories.size, `${theory.url} theory relations are incomplete`)
+  assert(theoryRelations.theories.every((entry) => expectedRelatedTheories.has(entry.slug)), `${theory.url} has an unexpected theory relation`)
+  const expectedTechniqueSlugs = catalog.techniques
+    .filter((technique) => technique.theorySlugs.includes(theory.slug))
+    .map((technique) => technique.slug)
+  assert(JSON.stringify(theory.techniques.map((entry) => entry.slug)) === JSON.stringify(expectedTechniqueSlugs), `${theory.url} has incomplete technique summaries`)
+  assert(theoryRelations.techniques.length === expectedTechniqueSlugs.length, `${theory.url} technique relations are incomplete`)
+  for (const workSlug of theory.workSlugs) {
+    assert(catalog.relationsByUrl[`/works/${workSlug}`].theories.some((entry) => entry.slug === theory.slug), `work is missing reverse theory relation: ${workSlug} -> ${theory.slug}`)
+  }
+  for (const topicSlug of theory.topicSlugs) {
+    assert(catalog.relationsByUrl[`/topics/${topicSlug}`].theories.some((entry) => entry.slug === theory.slug), `topic is missing reverse theory relation: ${topicSlug} -> ${theory.slug}`)
+  }
+}
+
+const theoryVisitState = new Map()
+const visitTheory = (slug) => {
+  if (theoryVisitState.get(slug) === 'visited') return
+  assert(theoryVisitState.get(slug) !== 'visiting', `theory prerequisite cycle detected at ${slug}`)
+  if (theoryVisitState.get(slug) === 'visiting') return
+  theoryVisitState.set(slug, 'visiting')
+  for (const prerequisiteSlug of theoryBySlug.get(slug)?.prerequisiteSlugs ?? []) visitTheory(prerequisiteSlug)
+  theoryVisitState.set(slug, 'visited')
+}
+for (const slug of theoryBySlug.keys()) visitTheory(slug)
+
+const culturalKeywordTheorySlugs = new Set([
+  '作者与文本意义', '形式分析与细读', '叙述者与视角', '叙事时间与空间', '女性主义批评', '意识形态批评',
+  '解释学与象征阐释', '精神分析批评', '新历史主义批评', '后殖民批评', '文化记忆与创伤叙事', '神话与原型批评',
+  '互文性与文学传统', '陌生化', '复调与对话性', '文学伦理与价值判断'
+])
+for (const theory of catalog.theories) {
+  const citesCulturalKeywords = theory.sources.some((source) => source.title === '文化研究关键词')
+  assert(citesCulturalKeywords === culturalKeywordTheorySlugs.has(theory.slug), `${theory.url} has an unexpected 文化研究关键词 source decision`)
+}
+
+const expectedTechniques = {
+  比喻与转喻: {
+    title: '比喻与转喻', techniqueGroup: '语言与修辞',
+    theorySlugs: ['形式分析与细读', '文体与风格'], workSlugs: ['草叶集', '恶之花', '荒原'], topicSlugs: ['诗歌传统', '现代主义']
+  },
+  象征与寓言: {
+    title: '象征与寓言', techniqueGroup: '语言与修辞',
+    theorySlugs: ['解释学与象征阐释', '形式分析与细读'], workSlugs: ['旧约', '神曲', '变形记'], topicSlugs: ['信仰与救赎', '现代主义']
+  },
+  反讽与歧义: {
+    title: '反讽与歧义', techniqueGroup: '语言与修辞',
+    theorySlugs: ['文体与风格', '文学伦理与价值判断'], workSlugs: ['俄狄浦斯王', '格列佛游记', '儒林外史'], topicSlugs: ['讽刺与权力', '命运与伦理']
+  },
+  意象与母题: {
+    title: '意象与母题', techniqueGroup: '语言与修辞',
+    theorySlugs: ['形式分析与细读', '神话与原型批评'], workSlugs: ['诗经', '草叶集', '荒原'], topicSlugs: ['诗歌传统', '神话与史诗']
+  },
+  不可靠叙述: {
+    title: '不可靠叙述', techniqueGroup: '叙述与结构',
+    theorySlugs: ['叙述者与视角', '读者反应与接受史'], workSlugs: ['微暗的火', '喧哗与骚动', '午夜之子'], topicSlugs: ['现代主义', '家族与记忆']
+  },
+  自由间接引语: {
+    title: '自由间接引语', techniqueGroup: '叙述与结构',
+    theorySlugs: ['叙述者与视角', '文体与风格'], workSlugs: ['傲慢与偏见', '包法利夫人', '到灯塔去'], topicSlugs: ['女性与婚姻', '现实主义']
+  },
+  意识流与内心独白: {
+    title: '意识流与内心独白', techniqueGroup: '叙述与结构',
+    theorySlugs: ['叙事时间与空间', '叙述者与视角'], workSlugs: ['尤利西斯', '到灯塔去', '喧哗与骚动'], topicSlugs: ['现代主义', '家族与记忆']
+  },
+  重复与变奏: {
+    title: '重复与变奏', techniqueGroup: '叙述与结构',
+    theorySlugs: ['结构与符号', '形式分析与细读'], workSlugs: ['诗经', '百年孤独', '等待戈多'], topicSlugs: ['诗歌传统', '家族与记忆']
+  }
+}
+const expectedTechniqueGroups = { 语言与修辞: 4, 叙述与结构: 4, 诗歌与节奏: 0, 戏剧与舞台: 0 }
+for (const [group, count] of Object.entries(expectedTechniqueGroups)) {
+  const actual = catalog.techniques.filter((technique) => technique.techniqueGroup === group).length
+  assert(actual === count, `expected ${count} techniques in ${group}, found ${actual}`)
+}
+
+const techniqueBySlug = new Map(catalog.techniques.map((technique) => [technique.slug, technique]))
+for (const [slug, expected] of Object.entries(expectedTechniques)) {
+  const technique = techniqueBySlug.get(slug)
+  assert(technique, `missing technique entry: ${slug}`)
+  if (!technique) continue
+  for (const key of ['title', 'techniqueGroup']) {
+    assert(technique[key] === expected[key], `${technique.url} has unexpected ${key}: ${technique[key]}`)
+  }
+  assert(technique.sidebarGroup === technique.techniqueGroup, `${technique.url} sidebar and technique groups differ`)
+  assert(technique.coreFunction.length > 0, `${technique.url} is missing coreFunction`)
+  assert(technique.identifyBy.length >= 3 && technique.identifyBy.length <= 5, `${technique.url} must have 3-5 identification clues`)
+  assert(new Set(technique.identifyBy).size === technique.identifyBy.length, `${technique.url} has duplicate identification clues`)
+  for (const key of ['theorySlugs', 'workSlugs', 'topicSlugs']) {
+    assert(JSON.stringify(technique[key]) === JSON.stringify(expected[key]), `${technique.url} has unexpected ${key}`)
+    assert(new Set(technique[key]).size === technique[key].length, `${technique.url} has duplicate ${key}`)
+  }
+  assert(technique.sources.some((source) => source.title === '文学批评入门'), `${technique.url} must cite 文学批评入门`)
+
+  const relations = catalog.relationsByUrl[technique.url]
+  assert(relations.works.length === technique.workSlugs.length, `${technique.url} work relations are incomplete`)
+  assert(relations.topics.length === technique.topicSlugs.length, `${technique.url} topic relations are incomplete`)
+  assert(relations.theories.length === technique.theorySlugs.length, `${technique.url} theory relations are incomplete`)
+  for (const workSlug of technique.workSlugs) {
+    assert(catalog.relationsByUrl[`/works/${workSlug}`].techniques.some((entry) => entry.slug === technique.slug), `work is missing reverse technique relation: ${workSlug} -> ${technique.slug}`)
+  }
+  for (const topicSlug of technique.topicSlugs) {
+    assert(catalog.relationsByUrl[`/topics/${topicSlug}`].techniques.some((entry) => entry.slug === technique.slug), `topic is missing reverse technique relation: ${topicSlug} -> ${technique.slug}`)
+  }
+  for (const theorySlug of technique.theorySlugs) {
+    assert(catalog.relationsByUrl[`/theory/${theorySlug}`].techniques.some((entry) => entry.slug === technique.slug), `theory is missing reverse technique relation: ${theorySlug} -> ${technique.slug}`)
+  }
 }
 for (const [group, count] of Object.entries(expectedTopicGroups)) {
   const actual = catalog.topics.filter((topic) => topic.sidebarGroup === group).length
@@ -308,6 +553,8 @@ const pathExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'the
 const pathStepsSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'ReadingPathSteps.vue'), 'utf8')
 const pathNextSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'ReadingPathNext.vue'), 'utf8')
 const topicRelationsSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'TopicRelations.vue'), 'utf8')
+const theoryExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'TheoryExplorer.vue'), 'utf8')
+const techniqueExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'TechniqueExplorer.vue'), 'utf8')
 assert(workExplorerSource.includes('const pageSize = 20'), 'work index must paginate at 20 items')
 assert(authorExplorerSource.includes('const pageSize = 20'), 'author index must paginate at 20 items')
 assert(workExplorerSource.includes('const { topics, works } = catalog'), 'work index must use curated topics')
@@ -330,6 +577,14 @@ assert(pathStepsSource.includes("const stages = ['起点', '转折', '深化', '
 assert(pathNextSource.includes('readingPath.nextPaths'), 'next path component does not use structured next paths')
 assert(topicRelationsSource.includes('pathSlugs[0]'), 'topic relations do not treat the first path as the suggested start')
 assert(topicRelationsSource.includes('建议起点'), 'topic relations do not label the suggested start')
+assert(theoryExplorerSource.includes('catalog.theories'), 'theory index does not use the structured catalog')
+assert(theoryExplorerSource.includes(".filter((group) => group.entries.length)"), 'theory index does not hide empty groups')
+assert(theoryExplorerSource.includes('建议先读：'), 'theory index does not label prerequisite reading')
+assert(theoryExplorerSource.includes('可直接开始'), 'theory index does not label direct starting points')
+assert(techniqueExplorerSource.includes('catalog.techniques'), 'technique index does not use the structured catalog')
+assert(techniqueExplorerSource.includes(".filter((group) => group.entries.length)"), 'technique index does not hide empty groups')
+assert(techniqueExplorerSource.includes('entry.identifyBy.join'), 'technique index does not show identification clues')
+assert(techniqueExplorerSource.includes('entry.coreFunction'), 'technique index does not show core functions')
 
 const sourceMapPath = path.join(root, 'content-sources', 'world-literature-2018-map.json')
 const sourceMap = fs.existsSync(sourceMapPath)
@@ -389,7 +644,7 @@ for (const entry of catalog.entries.filter((item) => item.contentVersion === 2))
   assert(builtPage.includes(`资料校订：${entry.reviewedAt}</span>`), `${entry.url} has an invalid visible reviewedAt value`)
   assert(!builtPage.includes(`资料校订：${entry.reviewedAt}T`), `${entry.url} exposes an ISO timestamp instead of a date`)
 }
-for (const url of ['/', '/history/', '/authors/', '/works/', '/paths/', '/topics/', '/style-test/']) {
+for (const url of ['/', '/history/', '/authors/', '/works/', '/paths/', '/topics/', '/theory/', '/techniques/', '/style-test/']) {
   assert(fs.existsSync(distTarget(url)), `missing built index URL: ${url}`)
 }
 
@@ -397,6 +652,8 @@ const historyIndexBuild = fs.readFileSync(distTarget('/history/'), 'utf8')
 const workIndexBuild = fs.readFileSync(distTarget('/works/'), 'utf8')
 const authorIndexBuild = fs.readFileSync(distTarget('/authors/'), 'utf8')
 const topicIndexBuild = fs.readFileSync(distTarget('/topics/'), 'utf8')
+const theoryIndexBuild = fs.readFileSync(distTarget('/theory/'), 'utf8')
+const techniqueIndexBuild = fs.readFileSync(distTarget('/techniques/'), 'utf8')
 const pathIndexBuild = fs.readFileSync(distTarget('/paths/'), 'utf8')
 const pathBuild = fs.readFileSync(distTarget('/paths/现代主义地图'), 'utf8')
 const warPathBuild = fs.readFileSync(distTarget('/paths/二十世纪战争文学'), 'utf8')
@@ -404,6 +661,9 @@ const workBuild = fs.readFileSync(distTarget('/works/老人与海'), 'utf8')
 const authorBuild = fs.readFileSync(distTarget('/authors/海明威'), 'utf8')
 const historyBuild = fs.readFileSync(distTarget('/history/世界古代文学'), 'utf8')
 const topicBuild = fs.readFileSync(distTarget('/topics/现代主义'), 'utf8')
+const theoryBuild = fs.readFileSync(distTarget('/theory/作者与文本意义'), 'utf8')
+const advancedTheoryBuild = fs.readFileSync(distTarget('/theory/意识形态批评'), 'utf8')
+const techniqueBuild = fs.readFileSync(distTarget('/techniques/不可靠叙述'), 'utf8')
 assert(historyIndexBuild.includes('世界文学四编') && historyIndexBuild.includes('跨期导读'), 'history index is missing overview or guide sections')
 assert((workIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length === 20, 'work index SSR must render exactly 20 list rows')
 assert((authorIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length === 20, 'author index SSR must render exactly 20 list rows')
@@ -416,6 +676,25 @@ assert(workBuild.includes('继续探索') && workBuild.includes('kb-related__lin
 assert(authorBuild.includes('继续探索') && historyBuild.includes('继续探索'), 'author or history page is missing derived relations')
 assert(topicBuild.includes('kb-topic-relations__links'), 'topic page is missing structured relations')
 assert(topicBuild.includes('相关专题'), 'topic page is missing related topics')
+for (const theory of catalog.theories) assert(theoryIndexBuild.includes(theory.title), `theory index is missing: ${theory.title}`)
+for (const group of Object.keys(expectedTheoryGroups).filter((group) => expectedTheoryGroups[group] > 0)) {
+  assert(theoryIndexBuild.includes(group), `theory index is missing group: ${group}`)
+}
+assert(theoryIndexBuild.includes('theory-group-概念工具'), 'theory index is missing the concept group')
+assert(theoryIndexBuild.includes('建议先读：') && theoryIndexBuild.includes('可直接开始'), 'theory index is missing prerequisite states')
+assert(theoryBuild.includes('相关作品') && theoryBuild.includes('相关专题') && theoryBuild.includes('相关理论'), 'theory foundation is missing derived relations')
+assert(advancedTheoryBuild.includes('相关理论') && advancedTheoryBuild.includes('形式分析与细读'), 'advanced theory page is missing prerequisite relations')
+assert(theoryBuild.includes('ISBN 978-7-5760-0444-1') && !theoryBuild.includes('href="undefined"'), 'theory sample does not render book references safely')
+for (const technique of catalog.techniques) assert(techniqueIndexBuild.includes(technique.title), `technique index is missing: ${technique.title}`)
+for (const group of Object.keys(expectedTechniqueGroups).filter((group) => expectedTechniqueGroups[group] > 0)) {
+  assert(techniqueIndexBuild.includes(group), `technique index is missing group: ${group}`)
+}
+for (const group of Object.keys(expectedTechniqueGroups).filter((group) => expectedTechniqueGroups[group] === 0)) {
+  assert(!techniqueIndexBuild.includes(`technique-group-${group}`), `technique index renders an empty group: ${group}`)
+}
+assert(techniqueIndexBuild.includes('主要作用') && techniqueIndexBuild.includes('识别：'), 'technique index is missing practical metadata')
+assert(techniqueBuild.includes('相关作品') && techniqueBuild.includes('相关专题') && techniqueBuild.includes('相关理论'), 'technique page is missing derived relations')
+assert(techniqueBuild.includes('ISBN 978-7-5760-0444-1') && !techniqueBuild.includes('href="undefined"'), 'technique page does not render book references safely')
 for (const group of Object.keys(expectedPathGroups)) assert(pathIndexBuild.includes(group), `path index is missing group: ${group}`)
 assert(pathBuild.includes('kb-path-detail__stages') && pathBuild.includes('kb-path-next'), 'reading path does not render stages or next paths')
 for (const stage of pathStages) assert(pathBuild.includes(stage), `reading path is missing stage: ${stage}`)
@@ -448,6 +727,7 @@ const configSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'config.ts
 const homeSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'KnowledgeHome.vue'), 'utf8')
 assert(styleTestSource.includes('class="brand" href="#home" data-route-link="home"'), 'style test brand does not return to its own entrance')
 assert(configSource.includes("link: '/style-test/', target: '_self'"), 'top navigation can route the standalone style test through VitePress')
+assert(configSource.includes("text: '阅读方法'") && configSource.includes("text: '文学理论', link: '/theory/'") && configSource.includes("text: '文学技巧', link: '/techniques/'"), 'top navigation is missing the grouped theory and technique links')
 assert(homeSource.includes('href="/style-test/" target="_self"'), 'home page can route the standalone style test through VitePress')
 assert(styleTestSource.includes('href="#home" data-route="home">入口</a>'), 'style test internal home route changed')
 assert(styleTestSource.includes('const routeAliases = { library: "map", knowledge: "map" }'), 'legacy style-test library routes no longer resolve to the reading map')
@@ -509,6 +789,20 @@ const requiredSearchTerms = [
   '冰山理论',
   '奥涅金诗节',
   '不可靠叙述',
+  '作者之死',
+  '作者意图',
+  '描述阐释评价',
+  '叙述者',
+  '叙事时间',
+  '文体与风格',
+  '女性主义批评',
+  '意识形态批评',
+  '解释学与象征阐释',
+  '后殖民批评',
+  '互文性与文学传统',
+  '自由间接引语',
+  '意识流与内心独白',
+  '重复与变奏',
   '战争与历史创伤',
   '二十世纪战争文学'
 ]
@@ -552,6 +846,6 @@ console.log(sourceMap
   ? `validated ${sourceMap.parts.length} private source parts, ${chapters.length} chapters, ${sections.length} sections`
   : 'private source map not present; skipped page-span validation')
 console.log(`validated ${catalog.historyEntries.length} timeline nodes, ${catalog.authors.length} authors, ${catalog.works.length} works`)
-console.log(`validated ${catalog.readingPaths.length} paths, ${catalog.topics.length} topics, ${catalog.entries.length} unique slugs`)
+console.log(`validated ${catalog.readingPaths.length} paths, ${catalog.topics.length} topics, ${catalog.theories.length} theories, ${catalog.techniques.length} techniques, ${catalog.entries.length} unique slugs`)
 console.log(`validated ${deepContentCount} version 2 content pages and their sources`)
 console.log(`validated ${sourceFiles.length} source files, all built URLs, shared icon and style test`)
