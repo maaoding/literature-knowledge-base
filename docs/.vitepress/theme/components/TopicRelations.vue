@@ -8,7 +8,8 @@ const groupDefinitions = [
   { key: 'histories', title: '文学史' },
   { key: 'authors', title: '作家' },
   { key: 'works', title: '作品' },
-  { key: 'paths', title: '阅读路径' }
+  { key: 'paths', title: '阅读路径' },
+  { key: 'topics', title: '相关专题' }
 ] as const
 
 const currentUrl = computed(() => {
@@ -21,10 +22,10 @@ const currentUrl = computed(() => {
 })
 
 const groups = computed(() => {
-  const topic = catalog.topics.find((entry) => entry.link === currentUrl.value)
-  if (!topic) return []
+  const related = catalog.relationsByUrl[currentUrl.value]
+  if (!related) return []
   return groupDefinitions
-    .map((definition) => ({ ...definition, items: topic[definition.key] }))
+    .map((definition) => ({ ...definition, items: related[definition.key] }))
     .filter((group) => group.items.length)
 })
 </script>

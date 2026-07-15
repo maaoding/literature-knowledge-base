@@ -74,7 +74,7 @@ export function createSidebar(catalog: ContentCatalog) {
       text: '阅读路径',
       items: [{ text: '全部路径', link: '/paths/' }]
     }),
-    '/topics/': groupedSidebar(catalog.topics, ['专题'], {
+    '/topics/': groupedSidebar(catalog.topics, ['文学传统', '社会经验', '现代转型'], {
       text: '专题索引',
       items: [{ text: '全部专题', link: '/topics/' }]
     })

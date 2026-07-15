@@ -76,6 +76,28 @@ export function buildContentCatalog(entries: ContentEntry[]) {
   const worksBySlug = new Map(workEntries.map((entry) => [entry.slug, entry]))
   const pathsBySlug = new Map(pathEntries.map((entry) => [entry.slug, entry]))
 
+  const topicOverlapCount = (left: string[], right: string[]) => {
+    const rightValues = new Set(right)
+    return left.filter((value) => rightValues.has(value)).length
+  }
+  const relatedTopicsFor = (topic: EntryByType<'topic'>) => topicEntries
+    .filter((candidate) => candidate.slug !== topic.slug)
+    .map((candidate) => ({
+      candidate,
+      score:
+        topicOverlapCount(topic.workSlugs, candidate.workSlugs) * 4
+        + topicOverlapCount(topic.pathSlugs, candidate.pathSlugs) * 3
+        + topicOverlapCount(topic.authorSlugs, candidate.authorSlugs) * 2
+        + topicOverlapCount(topic.historySlugs, candidate.historySlugs)
+    }))
+    .sort((a, b) => (
+      b.score - a.score
+      || a.candidate.sidebarOrder - b.candidate.sidebarOrder
+      || a.candidate.title.localeCompare(b.candidate.title, 'zh-Hans-CN')
+    ))
+    .slice(0, 3)
+    .map(({ candidate }) => candidate)
+
   for (const author of authorEntries) {
     for (const historySlug of author.historySlugs) {
       if (!historiesBySlug.has(historySlug)) throw new Error(`${author.slug} 引用了不存在的文学史条目 ${historySlug}`)
@@ -149,13 +171,15 @@ export function buildContentCatalog(entries: ContentEntry[]) {
   const relationsByUrl: Record<string, RelationGroups> = {}
   for (const entry of entries) {
     if (entry.type === 'topic') {
-      relationsByUrl[entry.url] = relationGroups({
+      const groups = relationGroups({
         histories: entry.historySlugs.map((slug) => historiesBySlug.get(slug)!),
         authors: entry.authorSlugs.map((slug) => authorsBySlug.get(slug)!),
         works: entry.workSlugs.map((slug) => worksBySlug.get(slug)!),
         paths: entry.pathSlugs.map((slug) => pathsBySlug.get(slug)!),
         topics: []
       })
+      groups.topics = relatedTopicsFor(entry).map(relationLink)
+      relationsByUrl[entry.url] = groups
       continue
     }
 

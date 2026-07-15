@@ -3,6 +3,7 @@ import { z } from 'zod'
 export const difficultySchema = z.enum(['入门', '进阶', '挑战'])
 export const trackSchema = z.enum(['中国', '世界'])
 export const eraGroupSchema = z.enum(['古代', '中古', '近代', '现当代'])
+export const topicGroupSchema = z.enum(['文学传统', '社会经验', '现代转型'])
 
 const commonFields = {
   title: z.string().trim().min(1),
@@ -98,10 +99,11 @@ export const readingPathEntrySchema = z.object({
 export const topicEntrySchema = z.object({
   ...commonFields,
   type: z.literal('topic'),
-  historySlugs: slugListSchema,
-  authorSlugs: slugListSchema,
-  workSlugs: slugListSchema.min(1),
-  pathSlugs: slugListSchema
+  sidebarGroup: topicGroupSchema,
+  historySlugs: slugListSchema.min(2),
+  authorSlugs: slugListSchema.min(2),
+  workSlugs: slugListSchema.min(3),
+  pathSlugs: slugListSchema.min(1)
 })
 
 export const contentEntrySchema = z.discriminatedUnion('type', [
@@ -115,6 +117,7 @@ export const contentEntrySchema = z.discriminatedUnion('type', [
 export type Difficulty = z.infer<typeof difficultySchema>
 export type HistoryTrack = z.infer<typeof trackSchema>
 export type EraGroup = z.infer<typeof eraGroupSchema>
+export type TopicGroup = z.infer<typeof topicGroupSchema>
 export type ContentFrontmatter = z.infer<typeof contentEntrySchema>
 export type ContentType = ContentFrontmatter['type']
 export type ContentSource = z.infer<typeof contentSourceSchema>

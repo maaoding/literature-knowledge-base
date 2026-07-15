@@ -19,6 +19,10 @@ const ready = ref(false)
 const explorerRef = ref<HTMLElement | null>(null)
 const difficultyOptions: Array<Difficulty | '全部'> = ['全部', '入门', '进阶', '挑战']
 const difficultyRank: Record<Difficulty, number> = { 入门: 0, 进阶: 1, 挑战: 2 }
+const topicGroups = ['文学传统', '社会经验', '现代转型'].map((group) => ({
+  group,
+  topics: topics.filter((topic) => topic.sidebarGroup === group)
+}))
 
 const countryOptions = computed(() => [
   '全部',
@@ -154,7 +158,9 @@ watch(pageCount, (count) => {
           <span>专题</span>
           <select v-model="selectedTopic">
             <option value="全部">全部</option>
-            <option v-for="topic in topics" :key="topic.slug" :value="topic.slug">{{ topic.title }}</option>
+            <optgroup v-for="group in topicGroups" :key="group.group" :label="group.group">
+              <option v-for="topic in group.topics" :key="topic.slug" :value="topic.slug">{{ topic.title }}</option>
+            </optgroup>
           </select>
         </label>
         <label class="kb-select-field">

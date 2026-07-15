@@ -75,8 +75,8 @@ const expectedCounts = {
   authors: 64,
   works: 76,
   readingPaths: 18,
-  topics: 6,
-  entries: 201
+  topics: 12,
+  entries: 207
 }
 for (const [key, count] of Object.entries(expectedCounts)) {
   assert(catalog[key].length === count, `expected ${count} ${key}, found ${catalog[key].length}`)
@@ -160,8 +160,22 @@ for (const entry of catalog.entries) {
   }
 }
 
+const expectedTopicGroups = {
+  文学传统: 4,
+  社会经验: 5,
+  现代转型: 3
+}
+for (const [group, count] of Object.entries(expectedTopicGroups)) {
+  const actual = catalog.topics.filter((topic) => topic.sidebarGroup === group).length
+  assert(actual === count, `expected ${count} topics in ${group}, found ${actual}`)
+}
+
+const topicHeadings = ['专题坐标', '核心问题', '比较路径', '阅读方法', '推荐入口']
 for (const topic of catalog.topics) {
-  assert(topic.workSlugs.length >= 1, `${topic.url} must include at least one work`)
+  assert(topic.historySlugs.length >= 2, `${topic.url} must include at least two history entries`)
+  assert(topic.authorSlugs.length >= 2, `${topic.url} must include at least two authors`)
+  assert(topic.workSlugs.length >= 3, `${topic.url} must include at least three works`)
+  assert(topic.pathSlugs.length >= 1, `${topic.url} must include at least one reading path`)
   for (const key of ['historySlugs', 'authorSlugs', 'workSlugs', 'pathSlugs']) {
     assert(new Set(topic[key]).size === topic[key].length, `${topic.url} has duplicate ${key}`)
   }
@@ -170,6 +184,18 @@ for (const topic of catalog.topics) {
   assert(relations.authors.length === topic.authorSlugs.length, `${topic.url} author relations are incomplete`)
   assert(relations.works.length === topic.workSlugs.length, `${topic.url} work relations are incomplete`)
   assert(relations.paths.length === topic.pathSlugs.length, `${topic.url} path relations are incomplete`)
+  assert(relations.topics.length === 3, `${topic.url} must include three related topics`)
+  assert(!relations.topics.some((related) => related.slug === topic.slug), `${topic.url} relates to itself`)
+  assert(new Set(relations.topics.map((related) => related.slug)).size === relations.topics.length, `${topic.url} has duplicate related topics`)
+
+  const file = path.join(docsDir, 'topics', `${topic.slug}.md`)
+  const source = fs.readFileSync(file, 'utf8')
+  const bodyCharacters = visibleCharacterCount(source)
+  assert(bodyCharacters >= 600 && bodyCharacters <= 900, `${topic.url} has ${bodyCharacters} visible characters; expected 600-900`)
+  const headings = [...markdownBody(source).matchAll(/^##\s+(.+)$/gm)].map((match) => normalizeOutlineTitle(match[1]))
+  for (const heading of topicHeadings) {
+    assert(headings.includes(normalizeOutlineTitle(heading)), `${topic.url} is missing required heading: ${heading}`)
+  }
 }
 
 for (const readingPath of catalog.readingPaths) {
@@ -206,11 +232,14 @@ assert(/includeSrc:\s*false/.test(loaderSource), 'content loader must not expose
 assert(/render:\s*false/.test(loaderSource), 'content loader must not render Markdown body into catalog data')
 const workExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'WorkExplorer.vue'), 'utf8')
 const authorExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'AuthorGrid.vue'), 'utf8')
+const topicExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'TopicExplorer.vue'), 'utf8')
 assert(workExplorerSource.includes('const pageSize = 20'), 'work index must paginate at 20 items')
 assert(authorExplorerSource.includes('const pageSize = 20'), 'author index must paginate at 20 items')
 assert(workExplorerSource.includes('const { topics, works } = catalog'), 'work index must use curated topics')
 assert(!workExplorerSource.includes('works.flatMap((work) => work.tags)'), 'work index still exposes raw tags as filter options')
 assert(workExplorerSource.includes("params.set('topic'"), 'work topic filter is not persisted in the URL')
+assert(workExplorerSource.includes('<optgroup v-for="group in topicGroups"'), 'work topic filter is not grouped')
+assert(topicExplorerSource.includes('kb-topic-index__group'), 'topic index is not grouped')
 assert(authorExplorerSource.includes("params.set('view'"), 'author view mode is not persisted in the URL')
 assert(workExplorerSource.includes('ready.value = true\n  syncUrl()'), 'work index does not normalize URL state after hydration')
 assert(authorExplorerSource.includes('ready.value = true\n  syncUrl()'), 'author index does not normalize URL state after hydration')
@@ -294,10 +323,12 @@ assert((authorIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length =
 assert(!workIndexBuild.includes('<option value="尊严">'), 'work index still renders raw tag options')
 for (const topic of catalog.topics) assert(workIndexBuild.includes(`value="${topic.slug}"`), `work index is missing topic option: ${topic.slug}`)
 for (const topic of catalog.topics) assert(topicIndexBuild.includes(topic.title), `topic index is missing: ${topic.title}`)
+for (const group of Object.keys(expectedTopicGroups)) assert(topicIndexBuild.includes(group), `topic index is missing group: ${group}`)
 assert(pathBuild.includes('kb-path-detail__goal') && pathBuild.includes('kb-path-detail__steps'), 'reading path does not render structured goal and steps')
 assert(workBuild.includes('继续探索') && workBuild.includes('kb-related__links'), 'core work page is missing derived relations')
 assert(authorBuild.includes('继续探索') && historyBuild.includes('继续探索'), 'author or history page is missing derived relations')
 assert(topicBuild.includes('kb-topic-relations__links'), 'topic page is missing structured relations')
+assert(topicBuild.includes('相关专题'), 'topic page is missing related topics')
 
 const sourceFiles = [
   ...filesUnder(docsDir, new Set(['.md', '.ts', '.vue', '.html'])),
