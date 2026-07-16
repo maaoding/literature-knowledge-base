@@ -123,7 +123,7 @@ export const workEntrySchema = z.object({
   eraGroup: eraGroupSchema,
   historySlugs: z.array(z.string().trim().min(1)),
   whyRead: z.string().trim().min(1),
-  readingGuide: workReadingGuideSchema.optional()
+  readingGuide: workReadingGuideSchema
 })
 
 export const readingPathEntrySchema = z.object({

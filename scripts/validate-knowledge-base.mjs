@@ -720,11 +720,343 @@ const expectedReadingGuides = {
     exercise: '比较到达第一周与后期段落的篇幅、重复活动和时间标记。'
   }
 }
+const firstBatchGuideSlugs = new Set(Object.keys(expectedReadingGuides))
+const expectedReadingGuideBatch1 = {
+  '三国演义': {
+    question: '多线推进怎样把群雄行动组织为带有正统判断的历史因果？',
+    theorySlug: '情节因果与阅读期待',
+    techniqueSlug: '多线叙事与交叉结构',
+    exercise: '选择一场战役，按三方人物列出信息、目标与行动后果，再比较叙事篇幅和切换顺序。'
+  },
+  '儒林外史': {
+    question: '叙述反讽怎样让科举礼仪和士人自我解释暴露自身矛盾？',
+    theorySlug: '新历史主义批评',
+    techniqueSlug: '反讽与歧义',
+    exercise: '细读一次拜会或宴饮，分列人物自我评价、实际行动、旁人反应和结局中的反讽证据。'
+  },
+  '红楼梦': {
+    question: '多线叙事怎样分配大观园女性的声音，并把私人命运连到家族衰败？',
+    theorySlug: '女性主义叙事学',
+    techniqueSlug: '多线叙事与交叉结构',
+    exercise: '追踪一位女性在三个关键场景中的发言权、观察视角和他人回应，画出关系变化。'
+  },
+  '西游记': {
+    question: '反复出现的取经考验怎样在相似结构中改变欲望、权力和修行判断？',
+    theorySlug: '结构与符号',
+    techniqueSlug: '重复与变奏',
+    exercise: '比较三个降妖单元的进入方式、误认、求助和结局，标出重复环节及每次变奏。'
+  },
+  '史记': {
+    question: '列传的取舍、场景安排和间接刻画怎样共同形成历史人物判断？',
+    theorySlug: '故事话语与叙述行为',
+    techniqueSlug: '人物塑造与间接刻画',
+    exercise: '对照一位人物的关键行动、对话、他人反应和篇末评语，区分事实与叙述评价。'
+  },
+  '楚辞': {
+    question: '长短变化的句式、兮字停顿和声音回环怎样塑造抒情主体？',
+    theorySlug: '文体与风格',
+    techniqueSlug: '声音、节奏与格律',
+    exercise: '选取一个双语段落，标出句长、停顿和重复音型，比较译文如何补偿原作节奏。'
+  },
+  '诗经': {
+    question: '重章复沓怎样让看似相同的场景和情感在反复中逐步变化？',
+    theorySlug: '形式分析与细读',
+    techniqueSlug: '重复与变奏',
+    exercise: '逐章标出一首作品的不变句和替换词，说明变化怎样推进时间、关系或情绪。'
+  },
+  '呐喊': {
+    question: '叙述距离和反讽怎样使被视为日常的社会暴力重新显得可疑？',
+    theorySlug: '意识形态批评',
+    techniqueSlug: '反讽与歧义',
+    exercise: '细读一处人物自辩，分列字面说法、语境事实、叙述提示和相反判断。'
+  },
+  '边城': {
+    question: '河流、渡口与山城空间怎样塑造人物相遇，也限制他们表达和行动？',
+    theorySlug: '生态批评与自然书写',
+    techniqueSlug: '场景氛围与空间建构',
+    exercise: '画出三处关键空间及人物移动路线，记录每次进入、停留和离开的关系变化。'
+  },
+  '伊利亚特': {
+    question: '英雄程式和战斗场景的重复怎样在荣誉叙事中逐步显出死亡代价？',
+    theorySlug: '神话与原型批评',
+    techniqueSlug: '重复与变奏',
+    exercise: '比较两场决斗或死亡场景的称谓、动作、旁观者和结尾，标出相同结构中的价值变化。'
+  },
+  '俄狄浦斯王': {
+    question: '观众预知与主人公追查之间的信息差怎样制造悲剧反讽？',
+    theorySlug: '情节因果与阅读期待',
+    techniqueSlug: '反讽与歧义',
+    exercise: '按出场顺序整理五条线索，记录主人公解释、观众已知信息和判断转折。'
+  },
+  '吉尔伽美什': {
+    question: '英雄旅程的重复怎样把追求声名的故事转向对死亡与限度的认识？',
+    theorySlug: '神话与原型批评',
+    techniqueSlug: '重复与变奏',
+    exercise: '比较恩奇都死前后两次出行的目标、同行者、障碍和结局，说明旅程范型如何改变。'
+  },
+  '埃涅阿斯纪': {
+    question: '作品怎样变奏荷马史诗的漂泊与战争，把个人命运改写为罗马使命？',
+    theorySlug: '互文性与文学传统',
+    techniqueSlug: '重复与变奏',
+    exercise: '对照一个呼应场景的人物位置、行动结果和叙述评价，列出继承与改写。'
+  },
+  '旧约': {
+    question: '平行句式怎样让历史、伦理与象征意义在同一段文字中彼此解释？',
+    theorySlug: '解释学与象征阐释',
+    techniqueSlug: '对仗、排比与平行',
+    exercise: '划分一段诗性文本的对应句组，标出同义、对比或递进关系，再说明其对阐释的限制。'
+  },
+  '一千零一夜': {
+    question: '层层讲述怎样延缓死亡，并把讲故事本身转化为权力行动？',
+    theorySlug: '故事话语与叙述行为',
+    techniqueSlug: '叙事层级与嵌套故事',
+    exercise: '画出一个故事的讲述者、听众和层级，记录进入或返回外层时产生的后果。'
+  },
+  '鲁拜集': {
+    question: '四行诗的音响和译本选择怎样塑造不同读者心中的诗人形象？',
+    theorySlug: '读者反应与接受史',
+    techniqueSlug: '押韵与音响',
+    exercise: '对照同一首诗的两个译本，标出韵脚、句长、关键词和语气差异，再说明阅读印象为何改变。'
+  },
+  '午夜之子': {
+    question: '不可靠的个人记忆怎样与国家历史互相争夺叙述权？',
+    theorySlug: '后殖民叙事学',
+    techniqueSlug: '不可靠叙述',
+    exercise: '选择一次自我纠正，列出原说法、修正版、历史节点和仍未解决的偏差。'
+  },
+  '雪国': {
+    question: '感官片段和空间距离怎样让亲密关系始终带着不可抵达感？',
+    theorySlug: '文体与风格',
+    techniqueSlug: '场景氛围与空间建构',
+    exercise: '追踪窗、镜、雪或火车中的一个意象，记录视点、距离、感官词和人物关系的变化。'
+  }
+}
+const expectedReadingGuideBatch2 = {
+  '坎特伯雷故事集': {
+    question: '朝圣者的故事与听众回应怎样让不同阶层和价值声音持续对话？',
+    theorySlug: '复调与对话性',
+    techniqueSlug: '叙事层级与嵌套故事',
+    exercise: '选择两个互相回应的故事，画出讲述层级，并比较讲述者身份、故事立场和听众反应。'
+  },
+  '神曲': {
+    question: '一次旅程怎样同时承载字面行动、伦理秩序、政治判断和精神象征？',
+    theorySlug: '解释学与象征阐释',
+    techniqueSlug: '象征与寓言',
+    exercise: '选取一个相遇场景，分列地点、人物行动、道德位置和历史语境，检验各层解释的文本证据。'
+  },
+  '十日谈': {
+    question: '瘟疫框架与轮流讲故事的规则怎样重新协商日常秩序？',
+    theorySlug: '新历史主义批评',
+    techniqueSlug: '叙事层级与嵌套故事',
+    exercise: '对照一天的主题规则与其中一个故事，记录规则被遵守、偏离或反讽的位置及其社会含义。'
+  },
+  '伪君子': {
+    question: '幕场节奏怎样延迟揭露伪善，并显示宗教话语在家庭中的权力？',
+    theorySlug: '意识形态批评',
+    techniqueSlug: '幕场结构与戏剧节奏',
+    exercise: '按人物出入整理一次冲突的知情差，标出信息延宕、误判累积和揭露发生的准确位置。'
+  },
+  '哈姆雷特': {
+    question: '独白为什么既揭示王子的欲望与恐惧，也可能成为新的自我遮蔽？',
+    theorySlug: '精神分析批评',
+    techniqueSlug: '独白与旁白',
+    exercise: '对照两段独白中的自我解释、情绪转折和随后行动，找出言说与行为不一致的证据。'
+  },
+  '堂吉诃德': {
+    question: '伪作者、译者和文献来源怎样动摇故事的真实性与解释权？',
+    theorySlug: '故事话语与叙述行为',
+    techniqueSlug: '叙事层级与嵌套故事',
+    exercise: '画出一处来源说明中的作者、译者、叙述者和读者层级，标出信息冲突及其喜剧效果。'
+  },
+  '格列佛游记': {
+    question: '一本正经的旅行叙述怎样把社会常识转化为可疑的意识形态？',
+    theorySlug: '意识形态批评',
+    techniqueSlug: '反讽与歧义',
+    exercise: '选一段表面赞许的描述，分列字面评价、制度细节、实际后果和反讽所指向的对象。'
+  },
+  '鲁滨逊漂流记': {
+    question: '物品清单、劳动记录和命名行为怎样建立殖民式的空间控制？',
+    theorySlug: '后殖民叙事学',
+    techniqueSlug: '动作物件与细节',
+    exercise: '细读一组清单或劳动段落，记录物件、所有权词语、时间安排和被排除的他者视角。'
+  },
+  '少年维特之烦恼': {
+    question: '自然意象怎样从情感共鸣的媒介转变为封闭主体的回声？',
+    theorySlug: '情感与情动',
+    techniqueSlug: '意象与母题',
+    exercise: '追踪同一种自然意象在三个阶段的颜色、动作和搭配词，说明情绪强度如何累积或转向。'
+  },
+  '浮士德': {
+    question: '追求无限经验的语言怎样与具体行动后果形成伦理张力？',
+    theorySlug: '文学伦理与价值判断',
+    techniqueSlug: '独白与旁白',
+    exercise: '对照一段宏大自述和随后影响他人的场景，分列愿望、手段、受影响者与叙述评价。'
+  },
+  '傲慢与偏见': {
+    question: '自由间接引语怎样让读者贴近伊丽莎白，同时保留修正她判断的距离？',
+    theorySlug: '女性主义批评',
+    techniqueSlug: '自由间接引语',
+    exercise: '选一段第三人称叙述，标出人物用词、叙述信息和双声句，再说明判断何时开始改变。'
+  },
+  '人间喜剧': {
+    question: '反复人物与物质细节怎样把个人欲望组织成一张社会关系网？',
+    theorySlug: '人物行动与关系分析',
+    techniqueSlug: '人物塑造与间接刻画',
+    exercise: '追踪一位人物在三个场景中的服饰、空间、金钱行动和他人评价，检验人物类型如何形成。'
+  },
+  '死魂灵': {
+    question: '夸张的人物刻画怎样把财产、人格与官僚制度之间的关系变得可见？',
+    theorySlug: '意识形态批评',
+    techniqueSlug: '人物塑造与间接刻画',
+    exercise: '选择一位地主，分列外貌、居所、话语、交易动作和叙述评论，说明细节如何超出性格笑料。'
+  },
+  '白鲸': {
+    question: '海洋和鲸怎样从冒险背景转化为抵抗人类占有与解释的行动力量？',
+    theorySlug: '生态批评与自然书写',
+    techniqueSlug: '场景氛围与空间建构',
+    exercise: '对照一段技术性鲸学描述和一段亚哈演说，记录自然对象、知识方式和空间氛围的差异。'
+  },
+  '包法利夫人': {
+    question: '自由间接引语怎样同时呈现爱玛的欲望语言，又让其社会来源接受检验？',
+    theorySlug: '女性主义叙事学',
+    techniqueSlug: '自由间接引语',
+    exercise: '细读一段愿望描写，分别标出人物词汇、叙述距离、套语来源和现实细节造成的摩擦。'
+  },
+  '罪与罚': {
+    question: '当罪行早已发生，信息揭示怎样把悬念转向自我认识与伦理承担？',
+    theorySlug: '文学伦理与价值判断',
+    techniqueSlug: '伏笔悬念与信息揭示',
+    exercise: '选择三处伏笔或追问，记录读者已知、人物隐瞒和新信息如何改变对结局与责任的期待。'
+  },
+  '米德尔马契': {
+    question: '多条私人选择怎样在交叉结构中形成一座城镇的社会因果？',
+    theorySlug: '人物行动与关系分析',
+    techniqueSlug: '多线叙事与交叉结构',
+    exercise: '画出两条人物线的目标、资源与阻力，并标出一次间接影响和一次直接汇合。'
+  },
+  '恶之花': {
+    question: '整齐诗形与跨行、停顿之间的压力怎样容纳现代城市的震荡经验？',
+    theorySlug: '文体与风格',
+    techniqueSlug: '诗行、停顿与跨行',
+    exercise: '选一首诗，标出诗行边界、句法边界、押韵与跨行，说明形式稳定和感受不安如何并存。'
+  }
+}
+const expectedReadingGuideBatch3 = {
+  '安娜卡列尼娜': {
+    question: '反复行动和他人目光怎样逐步塑造对安娜的社会与伦理判断？',
+    theorySlug: '人物行动与关系分析',
+    techniqueSlug: '人物塑造与间接刻画',
+    exercise: '追踪一个动作或社交场景在三个阶段的变化，分列安娜的选择、旁人反应和叙述距离。'
+  },
+  '战争与和平': {
+    question: '多线叙事怎样把私人记忆、战争经验和国家历史放入同一判断框架？',
+    theorySlug: '文化记忆与创伤叙事',
+    techniqueSlug: '多线叙事与交叉结构',
+    exercise: '选取一个历史事件，比较三位人物的所见、行动和事后记忆，标出信息互补与冲突。'
+  },
+  '樱桃园': {
+    question: '人物不断回避、打断和沉默，怎样让无力行动成为戏剧的核心动作？',
+    theorySlug: '人物行动与关系分析',
+    techniqueSlug: '对话沉默与人物关系',
+    exercise: '细读一次关于庄园前途的对话，标出提议、转移、沉默和未被回应的话，再判断权力位置。'
+  },
+  '玩偶之家': {
+    question: '家庭台词中的昵称、请求和回避怎样维持并最终暴露性别权力？',
+    theorySlug: '女性主义叙事学',
+    techniqueSlug: '台词与潜台词',
+    exercise: '对照前后两场夫妻对话，分列字面称呼、行动目标、潜台词和谁拥有结束谈话的权力。'
+  },
+  '草叶集': {
+    question: '自由诗行怎样把个人身体、自然环境和公共共同体扩展到同一尺度？',
+    theorySlug: '生态批评与自然书写',
+    techniqueSlug: '诗行、停顿与跨行',
+    exercise: '选一个长句段落，标出列举、换行、停顿和声音回环，说明阅读呼吸怎样改变主体边界。'
+  },
+  '到灯塔去': {
+    question: '视角在家庭成员间移动时，照料劳动和思想权威怎样被重新分配？',
+    theorySlug: '女性主义叙事学',
+    techniqueSlug: '意识流与内心独白',
+    exercise: '细读一次聚餐或室内场景，按段记录感知者、关注对象、未说出的话和视角转换的效果。'
+  },
+  '变形记': {
+    question: '平静语调中的动作与物件细节怎样使荒诞事件暴露家庭劳动关系？',
+    theorySlug: '陌生化',
+    techniqueSlug: '动作物件与细节',
+    exercise: '比较变形前后同一房间或物件的用途、使用者和叙述语气，说明熟悉事物如何被陌生化。'
+  },
+  '喧哗与骚动': {
+    question: '破碎意识和视角限制怎样让同一段家族记忆呈现互相冲突的版本？',
+    theorySlug: '叙述者与视角',
+    techniqueSlug: '意识流与内心独白',
+    exercise: '选择一个反复事件，按三个叙述者列出时间线、感官线索、遗漏与判断，重建可核事实。'
+  },
+  '尤利西斯': {
+    question: '荷马结构与意识流语言怎样把普通城市一天改写成现代史诗？',
+    theorySlug: '互文性与文学传统',
+    techniqueSlug: '意识流与内心独白',
+    exercise: '选择一个章节，对照其荷马原型、叙述技法、感官联想和都柏林行动，说明互文如何发生变奏。'
+  },
+  '局外人': {
+    question: '有限的感官事实怎样诱使读者推断人物动机，并在审判中暴露归因偏差？',
+    theorySlug: '认知叙事学',
+    techniqueSlug: '动作物件与细节',
+    exercise: '细读一段审判叙述，分列文本事实、检方推断、默尔索陈述和自己的初步判断，再逐项复核。'
+  },
+  '微暗的火': {
+    question: '注释者怎样借解释诗歌夺取作者意图，并暴露自身叙述的不可靠？',
+    theorySlug: '作者与文本意义',
+    techniqueSlug: '不可靠叙述',
+    exercise: '选择一条注释，对照原诗行、注释声称、其他文本证据和被忽略信息，判断解释何处越界。'
+  },
+  '百年孤独': {
+    question: '姓名、事件和家族角色的重复怎样制造历史循环，又保留每代人的差异？',
+    theorySlug: '叙事时间与空间',
+    techniqueSlug: '重复与变奏',
+    exercise: '建立三代人物表，记录重复姓名、欲望、事件和结局，标出一次真正改变循环的变奏。'
+  },
+  '看不见的城市': {
+    question: '同类城市描述的反复与变奏怎样把空间转化为欲望、记忆和权力模型？',
+    theorySlug: '空间批评与地方经验',
+    techniqueSlug: '重复与变奏',
+    exercise: '从同一分类选择三座城市，比较叙述模板、关键物件、感官路线和隐含的社会关系。'
+  },
+  '等待戈多': {
+    question: '第二天几乎重复第一天时，细微变奏怎样取代传统情节进展？',
+    theorySlug: '结构与符号',
+    techniqueSlug: '重复与变奏',
+    exercise: '并列两幕的出场、等待、谈话、道具和离场，标出所有差异并判断哪些改变观众期待。'
+  },
+  '老人与海': {
+    question: '克制的动作与物件细节怎样承载尊严，而不把主题直接说成格言？',
+    theorySlug: '文体与风格',
+    techniqueSlug: '动作物件与细节',
+    exercise: '选一段捕鱼过程，按动作顺序记录身体、工具、海面与自言自语，区分事实、象征和评价。'
+  },
+  '荒原': {
+    question: '碎片化声音怎样借反复意象形成跨越章节的隐性结构？',
+    theorySlug: '形式分析与细读',
+    techniqueSlug: '意象与母题',
+    exercise: '追踪水、荒地或复生中的一个母题，记录每次出现的说话者、语境、感官特征和意义变化。'
+  },
+  '追忆似水年华': {
+    question: '非自愿记忆怎样把瞬间感官扩展为跨越多年的人生叙事？',
+    theorySlug: '认知叙事学',
+    techniqueSlug: '时序时距与频率',
+    exercise: '选择一次记忆触发，分出当下感官、回忆展开、叙述时距和返回现在的位置，比较各段篇幅。'
+  }
+}
+Object.assign(
+  expectedReadingGuides,
+  expectedReadingGuideBatch1,
+  expectedReadingGuideBatch2,
+  expectedReadingGuideBatch3
+)
 const guidedWorks = catalog.works.filter((work) => work.readingGuide)
 const guidedWorkSlugs = new Set(guidedWorks.map((work) => work.slug))
-assert(Object.keys(expectedReadingGuides).length === 23, 'expected reading-guide contract must contain exactly 23 works')
-assert(guidedWorks.length === 23, `expected 23 works with reading guides, found ${guidedWorks.length}`)
-assert(catalog.works.filter((work) => !work.readingGuide).length === 53, 'expected 53 works without first-batch reading guides')
+assert(firstBatchGuideSlugs.size === 23, 'original reading-guide batch must contain exactly 23 works')
+assert(Object.keys(expectedReadingGuides).length === 76, 'expected reading-guide contract must contain all 76 works')
+assert(guidedWorks.length === 76, `expected 76 works with reading guides, found ${guidedWorks.length}`)
+assert(catalog.works.every((work) => work.readingGuide), 'every work must provide a reading guide')
 
 const guideQuestions = []
 const guideExercises = []
@@ -742,20 +1074,36 @@ for (const [slug, expected] of Object.entries(expectedReadingGuides)) {
   assert(guide.exercise.length >= 20 && guide.exercise.length <= 120, `${work.url} reading exercise has invalid length`)
   assert(catalog.theories.some((theory) => theory.slug === guide.theorySlug), `${work.url} reading guide has an invalid theory`)
   assert(catalog.techniques.some((technique) => technique.slug === guide.techniqueSlug), `${work.url} reading guide has an invalid technique`)
-  assert(!methodCoveredWorks.has(slug), `${work.url} should use a work-side guide instead of duplicating an existing case study`)
-
-  const workRelations = catalog.relationsByUrl[work.url]
-  assert(!workRelations.theories.some((entry) => entry.slug === guide.theorySlug), `${work.url} leaked its reading guide into theory relations`)
-  assert(!workRelations.techniques.some((entry) => entry.slug === guide.techniqueSlug), `${work.url} leaked its reading guide into technique relations`)
-  assert(!catalog.relationsByUrl[`/theory/${guide.theorySlug}`].works.some((entry) => entry.slug === slug), `${work.url} leaked into reverse theory cases`)
-  assert(!catalog.relationsByUrl[`/techniques/${guide.techniqueSlug}`].works.some((entry) => entry.slug === slug), `${work.url} leaked into reverse technique cases`)
+  if (firstBatchGuideSlugs.has(slug)) {
+    assert(!methodCoveredWorks.has(slug), `${work.url} should remain outside the declared case-study set`)
+    const workRelations = catalog.relationsByUrl[work.url]
+    assert(!workRelations.theories.some((entry) => entry.slug === guide.theorySlug), `${work.url} leaked its reading guide into theory relations`)
+    assert(!workRelations.techniques.some((entry) => entry.slug === guide.techniqueSlug), `${work.url} leaked its reading guide into technique relations`)
+    assert(!catalog.relationsByUrl[`/theory/${guide.theorySlug}`].works.some((entry) => entry.slug === slug), `${work.url} leaked into reverse theory cases`)
+    assert(!catalog.relationsByUrl[`/techniques/${guide.techniqueSlug}`].works.some((entry) => entry.slug === slug), `${work.url} leaked into reverse technique cases`)
+  }
   guideQuestions.push(guide.question)
   guideExercises.push(guide.exercise)
 }
 for (const work of guidedWorks) assert(expectedReadingGuides[work.slug], `unexpected work reading guide: ${work.slug}`)
 assert(new Set(guideQuestions).size === guideQuestions.length, 'work reading-guide questions must be unique')
 assert(new Set(guideExercises).size === guideExercises.length, 'work reading-guide exercises must be unique')
-assert(new Set([...methodCoveredWorks, ...guidedWorkSlugs]).size === 76, 'case studies and work-side reading guides must cover all 76 works')
+assert(guidedWorkSlugs.size === 76, 'work-side reading guides must cover all 76 works')
+
+for (const theory of catalog.theories) {
+  const declaredWorks = [...theory.workSlugs].sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))
+  const relatedWorks = catalog.relationsByUrl[`/theory/${theory.slug}`].works
+    .map((entry) => entry.slug)
+    .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))
+  assert(JSON.stringify(relatedWorks) === JSON.stringify(declaredWorks), `${theory.url} work relations differ from declared case studies`)
+}
+for (const technique of catalog.techniques) {
+  const declaredWorks = [...technique.workSlugs].sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))
+  const relatedWorks = catalog.relationsByUrl[`/techniques/${technique.slug}`].works
+    .map((entry) => entry.slug)
+    .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))
+  assert(JSON.stringify(relatedWorks) === JSON.stringify(declaredWorks), `${technique.url} work relations differ from declared case studies`)
+}
 
 for (const [group, count] of Object.entries(expectedTopicGroups)) {
   const actual = catalog.topics.filter((topic) => topic.sidebarGroup === group).length
@@ -1011,7 +1359,6 @@ const topicBuild = fs.readFileSync(distTarget('/topics/现代主义'), 'utf8')
 const theoryBuild = fs.readFileSync(distTarget('/theory/作者与文本意义'), 'utf8')
 const advancedTheoryBuild = fs.readFileSync(distTarget('/theory/意识形态批评'), 'utf8')
 const techniqueBuild = fs.readFileSync(distTarget('/techniques/不可靠叙述'), 'utf8')
-const unguidedWorkBuild = fs.readFileSync(distTarget('/works/红楼梦'), 'utf8')
 assert(historyIndexBuild.includes('世界文学四编') && historyIndexBuild.includes('跨期导读'), 'history index is missing overview or guide sections')
 assert((workIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length === 20, 'work index SSR must render exactly 20 list rows')
 assert((authorIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length === 20, 'author index SSR must render exactly 20 list rows')
@@ -1035,7 +1382,6 @@ for (const [slug, guide] of Object.entries(expectedReadingGuides)) {
     )
   }
 }
-assert(!unguidedWorkBuild.includes('kb-work-reading-guide'), 'an unconfigured work renders an empty reading guide')
 assert(authorBuild.includes('继续探索') && historyBuild.includes('继续探索'), 'author or history page is missing derived relations')
 assert(topicBuild.includes('kb-topic-relations__links'), 'topic page is missing structured relations')
 assert(topicBuild.includes('相关专题'), 'topic page is missing related topics')
@@ -1187,6 +1533,9 @@ const requiredSearchTerms = [
   '阅读抓手',
   '疗养院怎样把短暂探访扩展为长期思想经验',
   '比较译本的声音得失',
+  '多线推进怎样把群雄行动组织为带有正统判断的历史因果',
+  '一本正经的旅行叙述怎样把社会常识转化为可疑的意识形态',
+  '第二天几乎重复第一天时',
   '战争与历史创伤',
   '二十世纪战争文学'
 ]
