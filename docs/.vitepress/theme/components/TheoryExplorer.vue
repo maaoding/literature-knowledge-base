@@ -37,6 +37,10 @@ const entryKindLabels = {
 
 <template>
   <section class="kb-theory-index" aria-label="文学理论索引">
+    <div class="kb-theory-route" aria-label="叙事学学习线索">
+      <span>学习线索</span>
+      <p><strong>经典叙事学</strong>先描述故事、话语、人物、视角、时间与空间，<strong>后经典叙事学</strong>再追问性别、认知、殖民经验和读者判断怎样改变这些形式。</p>
+    </div>
     <section v-for="group in theoryGroups" :key="group.key" class="kb-theory-index__group">
       <header class="kb-theory-index__header">
         <h2 :id="`theory-group-${group.key}`">{{ group.key }}</h2>

@@ -80,9 +80,9 @@ const expectedCounts = {
   works: 76,
   readingPaths: 18,
   topics: 12,
-  theories: 24,
-  techniques: 16,
-  entries: 247
+  theories: 32,
+  techniques: 24,
+  entries: 263
 }
 for (const [key, count] of Object.entries(expectedCounts)) {
   assert(catalog[key].length === count, `expected ${count} ${key}, found ${catalog[key].length}`)
@@ -153,7 +153,7 @@ for (const entry of catalog.entries.filter((entry) => deepContentRules[entry.typ
   }
   deepContentCount += 1
 }
-assert(deepContentCount === 217, `expected 217 version 2 content pages, found ${deepContentCount}`)
+assert(deepContentCount === 233, `expected 233 version 2 content pages, found ${deepContentCount}`)
 
 const expectedHome = {
   authors: ['屈原', '鲁迅', '曹雪芹', '荷马', '莎士比亚', '博尔赫斯'],
@@ -291,9 +291,41 @@ const expectedTheories = {
   情感与情动: {
     title: '情感与情动', entryKind: 'concept', theoryGroup: '概念工具', prerequisiteSlugs: ['文学伦理与价值判断', '读者反应与接受史'],
     workSlugs: ['少年维特之烦恼', '红楼梦', '到灯塔去'], topicSlugs: ['女性与婚姻', '家族与记忆']
+  },
+  故事话语与叙述行为: {
+    title: '故事、话语与叙述行为', entryKind: 'method', theoryGroup: '文本细读', prerequisiteSlugs: ['描述阐释与评价', '形式分析与细读'],
+    workSlugs: ['史记', '堂吉诃德', '尤利西斯'], topicSlugs: ['现实主义', '现代主义']
+  },
+  情节因果与阅读期待: {
+    title: '情节、因果与阅读期待', entryKind: 'method', theoryGroup: '文本细读', prerequisiteSlugs: ['故事话语与叙述行为', '叙事时间与空间'],
+    workSlugs: ['俄狄浦斯王', '三国演义', '罪与罚'], topicSlugs: ['命运与伦理', '战争与创伤', '现实主义']
+  },
+  人物行动与关系分析: {
+    title: '人物、行动与关系分析', entryKind: 'method', theoryGroup: '文本细读', prerequisiteSlugs: ['故事话语与叙述行为', '叙述者与视角'],
+    workSlugs: ['人间喜剧', '安娜卡列尼娜', '边城'], topicSlugs: ['女性与婚姻', '现实主义']
+  },
+  修辞性叙事学: {
+    title: '修辞性叙事学', entryKind: 'method', theoryGroup: '文本细读', prerequisiteSlugs: ['故事话语与叙述行为', '作者与文本意义', '文学伦理与价值判断'],
+    workSlugs: ['哈姆雷特', '微暗的火', '午夜之子'], topicSlugs: ['命运与伦理', '现代主义', '流亡与身份']
+  },
+  女性主义叙事学: {
+    title: '女性主义叙事学', entryKind: 'lens', theoryGroup: '文化与历史', prerequisiteSlugs: ['女性主义批评', '叙述者与视角'],
+    workSlugs: ['玩偶之家', '到灯塔去', '红楼梦'], topicSlugs: ['女性与婚姻', '现代主义']
+  },
+  认知叙事学: {
+    title: '认知叙事学', entryKind: 'method', theoryGroup: '文本细读', prerequisiteSlugs: ['读者反应与接受史', '叙事时间与空间', '情感与情动'],
+    workSlugs: ['局外人', '追忆似水年华', '看不见的城市'], topicSlugs: ['现代主义', '家族与记忆']
+  },
+  后殖民叙事学: {
+    title: '后殖民叙事学', entryKind: 'lens', theoryGroup: '文化与历史', prerequisiteSlugs: ['后殖民批评', '叙述者与视角', '空间批评与地方经验'],
+    workSlugs: ['鲁滨逊漂流记', '午夜之子', '百年孤独'], topicSlugs: ['流亡与身份', '启蒙与现代性']
+  },
+  隐性进程与双重叙事: {
+    title: '隐性进程与双重叙事', entryKind: 'concept', theoryGroup: '概念工具', prerequisiteSlugs: ['修辞性叙事学', '叙述者与视角', '文体与风格'],
+    workSlugs: ['变形记', '边城', '微暗的火'], topicSlugs: ['现代主义', '家族与记忆']
   }
 }
-const expectedTheoryGroups = { 批评基础: 3, 文本细读: 4, 文化与历史: 10, 概念工具: 7 }
+const expectedTheoryGroups = { 批评基础: 3, 文本细读: 9, 文化与历史: 12, 概念工具: 8 }
 for (const [group, count] of Object.entries(expectedTheoryGroups)) {
   const actual = catalog.theories.filter((theory) => theory.theoryGroup === group).length
   assert(actual === count, `expected ${count} theories in ${group}, found ${actual}`)
@@ -311,7 +343,7 @@ for (const [slug, expected] of Object.entries(expectedTheories)) {
     assert(JSON.stringify(theory[key]) === JSON.stringify(expected[key]), `${theory.url} has unexpected ${key}`)
     assert(new Set(theory[key]).size === theory[key].length, `${theory.url} has duplicate ${key}`)
   }
-  assert(theory.sources.some((source) => source.title === '文学批评入门'), `${theory.url} must cite 文学批评入门`)
+  assert(theory.sources.some((source) => ['文学批评入门', '西方叙事学：经典与后经典（第二版）'].includes(source.title)), `${theory.url} must cite a core method book`)
 
   const dependentSlugs = catalog.theories
     .filter((candidate) => candidate.prerequisiteSlugs.includes(theory.slug))
@@ -357,6 +389,16 @@ const culturalKeywordTheorySlugs = new Set([
 for (const theory of catalog.theories) {
   const citesCulturalKeywords = theory.sources.some((source) => source.title === '文化研究关键词')
   assert(citesCulturalKeywords === culturalKeywordTheorySlugs.has(theory.slug), `${theory.url} has an unexpected 文化研究关键词 source decision`)
+}
+
+const narratologySourceSlugs = new Set([
+  '作者与文本意义', '叙述者与视角', '叙事时间与空间', '文体与风格', '女性主义批评', '后殖民批评',
+  '故事话语与叙述行为', '情节因果与阅读期待', '人物行动与关系分析', '修辞性叙事学',
+  '女性主义叙事学', '认知叙事学', '后殖民叙事学', '隐性进程与双重叙事'
+])
+for (const theory of catalog.theories) {
+  const citesNarratologyBook = theory.sources.some((source) => source.title === '西方叙事学：经典与后经典（第二版）')
+  assert(citesNarratologyBook === narratologySourceSlugs.has(theory.slug), `${theory.url} has an unexpected 西方叙事学 source decision`)
 }
 
 const expectedTechniques = {
@@ -423,9 +465,41 @@ const expectedTechniques = {
   幕场结构与戏剧节奏: {
     title: '幕场结构与戏剧节奏', techniqueGroup: '戏剧与舞台',
     theorySlugs: ['结构与符号', '形式分析与细读'], workSlugs: ['伪君子', '樱桃园', '等待戈多'], topicSlugs: ['讽刺与权力', '现代主义']
+  },
+  伏笔悬念与信息揭示: {
+    title: '伏笔、悬念与信息揭示', techniqueGroup: '叙述与结构',
+    theorySlugs: ['情节因果与阅读期待', '读者反应与接受史', '叙事时间与空间'], workSlugs: ['哈姆雷特', '罪与罚', '等待戈多'], topicSlugs: ['命运与伦理', '现代主义']
+  },
+  叙事层级与嵌套故事: {
+    title: '叙事层级与嵌套故事', techniqueGroup: '叙述与结构',
+    theorySlugs: ['故事话语与叙述行为', '叙述者与视角'], workSlugs: ['一千零一夜', '坎特伯雷故事集', '十日谈'], topicSlugs: ['讽刺与权力', '信仰与救赎']
+  },
+  时序时距与频率: {
+    title: '时序、时距与频率', techniqueGroup: '叙述与结构',
+    theorySlugs: ['叙事时间与空间', '故事话语与叙述行为'], workSlugs: ['追忆似水年华', '百年孤独', '尤利西斯'], topicSlugs: ['家族与记忆', '现代主义']
+  },
+  多线叙事与交叉结构: {
+    title: '多线叙事与交叉结构', techniqueGroup: '叙述与结构',
+    theorySlugs: ['情节因果与阅读期待', '复调与对话性'], workSlugs: ['战争与和平', '米德尔马契', '红楼梦'], topicSlugs: ['现实主义', '家族与记忆']
+  },
+  人物塑造与间接刻画: {
+    title: '人物塑造与间接刻画', techniqueGroup: '人物与场景',
+    theorySlugs: ['人物行动与关系分析', '形式分析与细读'], workSlugs: ['傲慢与偏见', '安娜卡列尼娜', '红楼梦'], topicSlugs: ['女性与婚姻', '现实主义']
+  },
+  对话沉默与人物关系: {
+    title: '对话、沉默与人物关系', techniqueGroup: '人物与场景',
+    theorySlugs: ['人物行动与关系分析', '复调与对话性', '女性主义叙事学'], workSlugs: ['玩偶之家', '樱桃园', '边城'], topicSlugs: ['女性与婚姻', '现实主义']
+  },
+  场景氛围与空间建构: {
+    title: '场景、氛围与空间建构', techniqueGroup: '人物与场景',
+    theorySlugs: ['空间批评与地方经验', '叙事时间与空间', '认知叙事学'], workSlugs: ['白鲸', '雪国', '边城'], topicSlugs: ['现实主义', '现代主义']
+  },
+  动作物件与细节: {
+    title: '动作、物件与细节', techniqueGroup: '人物与场景',
+    theorySlugs: ['人物行动与关系分析', '形式分析与细读', '情感与情动'], workSlugs: ['老人与海', '变形记', '红楼梦'], topicSlugs: ['现实主义', '现代主义', '家族与记忆']
   }
 }
-const expectedTechniqueGroups = { 语言与修辞: 4, 叙述与结构: 4, 诗歌与节奏: 4, 戏剧与舞台: 4 }
+const expectedTechniqueGroups = { 语言与修辞: 4, 叙述与结构: 8, 人物与场景: 4, 诗歌与节奏: 4, 戏剧与舞台: 4 }
 for (const [group, count] of Object.entries(expectedTechniqueGroups)) {
   const actual = catalog.techniques.filter((technique) => technique.techniqueGroup === group).length
   assert(actual === count, `expected ${count} techniques in ${group}, found ${actual}`)
@@ -468,7 +542,7 @@ for (const [slug, expected] of Object.entries(expectedTechniques)) {
     assert(JSON.stringify(technique[key]) === JSON.stringify(expected[key]), `${technique.url} has unexpected ${key}`)
     assert(new Set(technique[key]).size === technique[key].length, `${technique.url} has duplicate ${key}`)
   }
-  assert(technique.sources.some((source) => source.title === '文学批评入门'), `${technique.url} must cite 文学批评入门`)
+  assert(technique.sources.some((source) => ['文学批评入门', '西方叙事学：经典与后经典（第二版）'].includes(source.title)), `${technique.url} must cite a core method book`)
 
   const relations = catalog.relationsByUrl[technique.url]
   assert(relations.works.length === technique.workSlugs.length, `${technique.url} work relations are incomplete`)
@@ -488,6 +562,24 @@ for (const [slug, expected] of Object.entries(expectedTechniques)) {
     assert(catalog.relationsByUrl[`/theory/${theorySlug}`].techniques.some((entry) => entry.slug === technique.slug), `theory is missing reverse technique relation: ${theorySlug} -> ${technique.slug}`)
   }
 }
+
+const narratologyTechniqueSlugs = new Set([
+  '不可靠叙述', '自由间接引语', '意识流与内心独白', '台词与潜台词', '独白与旁白', '舞台空间与场面调度',
+  '伏笔悬念与信息揭示', '叙事层级与嵌套故事', '时序时距与频率', '多线叙事与交叉结构',
+  '人物塑造与间接刻画', '对话沉默与人物关系', '场景氛围与空间建构', '动作物件与细节'
+])
+for (const technique of catalog.techniques) {
+  const citesNarratologyBook = technique.sources.some((source) => source.title === '西方叙事学：经典与后经典（第二版）')
+  assert(citesNarratologyBook === narratologyTechniqueSlugs.has(technique.slug), `${technique.url} has an unexpected 西方叙事学 source decision`)
+}
+
+const theoryCoveredWorks = new Set(catalog.theories.flatMap((theory) => theory.workSlugs))
+const techniqueCoveredWorks = new Set(catalog.techniques.flatMap((technique) => technique.workSlugs))
+const methodCoveredWorks = new Set([...theoryCoveredWorks, ...techniqueCoveredWorks])
+assert(theoryCoveredWorks.size === 40, `expected 40 works linked to theory, found ${theoryCoveredWorks.size}`)
+assert(techniqueCoveredWorks.size === 39, `expected 39 works linked to techniques, found ${techniqueCoveredWorks.size}`)
+assert(methodCoveredWorks.size === 53, `expected 53 works linked to theory or techniques, found ${methodCoveredWorks.size}`)
+
 for (const [group, count] of Object.entries(expectedTopicGroups)) {
   const actual = catalog.topics.filter((topic) => topic.sidebarGroup === group).length
   assert(actual === count, `expected ${count} topics in ${group}, found ${actual}`)
@@ -756,6 +848,7 @@ for (const group of Object.keys(expectedTheoryGroups).filter((group) => expected
 }
 assert(theoryIndexBuild.includes('theory-group-概念工具'), 'theory index is missing the concept group')
 assert(theoryIndexBuild.includes('建议先读：') && theoryIndexBuild.includes('可直接开始'), 'theory index is missing prerequisite states')
+assert(theoryIndexBuild.includes('经典叙事学') && theoryIndexBuild.includes('后经典叙事学'), 'theory index is missing the narratology learning route')
 for (const label of ['基础问题', '分析方法', '批评视角', '概念工具']) {
   assert(theoryIndexBuild.includes(label), `theory index is missing entry kind label: ${label}`)
 }
@@ -886,6 +979,13 @@ const requiredSearchTerms = [
   '跨行',
   '潜台词',
   '场面调度',
+  '故事与话语',
+  '隐含作者',
+  '受述者',
+  '时距',
+  '频率',
+  '认知地图',
+  '隐性进程',
   '战争与历史创伤',
   '二十世纪战争文学'
 ]

@@ -1449,6 +1449,31 @@ body::before {
   margin-top: 34px;
 }
 
+.kb-theory-route {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.25fr) minmax(0, 1fr);
+  gap: 24px;
+  padding: 18px 0;
+  border-top: 1px solid var(--kb-line-strong);
+  border-bottom: 1px solid var(--kb-line);
+}
+
+.kb-theory-route span {
+  color: var(--kb-teal);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.kb-theory-route p {
+  margin: 0;
+  color: var(--kb-muted);
+  line-height: 1.75;
+}
+
+.kb-theory-route strong {
+  color: var(--vp-c-text-1);
+}
+
 .kb-technique-index {
   margin-top: 34px;
 }
@@ -1641,6 +1666,7 @@ body::before {
 
 @media (max-width: 640px) {
   .kb-theory-index__header,
+  .kb-theory-route,
   .kb-theory-row,
   .kb-technique-index__header,
   .kb-technique-row {

@@ -82,7 +82,7 @@ export function createSidebar(catalog: ContentCatalog) {
       text: '文学理论',
       items: [{ text: '栏目总览', link: '/theory/' }]
     }),
-    '/techniques/': groupedSidebar(catalog.techniques, ['语言与修辞', '叙述与结构', '诗歌与节奏', '戏剧与舞台'], {
+    '/techniques/': groupedSidebar(catalog.techniques, ['语言与修辞', '叙述与结构', '人物与场景', '诗歌与节奏', '戏剧与舞台'], {
       text: '文学技巧',
       items: [{ text: '栏目总览', link: '/techniques/' }]
     })

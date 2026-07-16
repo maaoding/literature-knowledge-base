@@ -11,6 +11,10 @@ const groupDefinitions = [
     description: '观察谁在讲述、信息怎样分配，以及次序和重复如何组织阅读经验。'
   },
   {
+    key: '人物与场景',
+    description: '从行动、对话、物件和空间线索理解人物怎样被塑造，场景怎样承载关系。'
+  },
+  {
     key: '诗歌与节奏',
     description: '从声音、停顿、格律和诗行结构进入诗歌。'
   },

@@ -8,7 +8,7 @@ export const pathKindSchema = z.enum(['基础主线', '文学史进阶', '主题
 export const pathStageSchema = z.enum(['起点', '转折', '深化', '延伸'])
 export const theoryEntryKindSchema = z.enum(['foundation', 'method', 'lens', 'concept'])
 export const theoryGroupSchema = z.enum(['批评基础', '文本细读', '文化与历史', '概念工具'])
-export const techniqueGroupSchema = z.enum(['语言与修辞', '叙述与结构', '诗歌与节奏', '戏剧与舞台'])
+export const techniqueGroupSchema = z.enum(['语言与修辞', '叙述与结构', '人物与场景', '诗歌与节奏', '戏剧与舞台'])
 
 const baseContentFields = {
   title: z.string().trim().min(1),
