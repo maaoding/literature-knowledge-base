@@ -26,6 +26,13 @@ const theoryGroups = groupDefinitions
     entries: catalog.theories.filter((entry) => entry.theoryGroup === group.key)
   }))
   .filter((group) => group.entries.length)
+
+const entryKindLabels = {
+  foundation: '基础问题',
+  method: '分析方法',
+  lens: '批评视角',
+  concept: '概念工具'
+} as const
 </script>
 
 <template>
@@ -40,7 +47,7 @@ const theoryGroups = groupDefinitions
           <div class="kb-theory-row__body">
             <div class="kb-theory-row__topline">
               <span>{{ entry.difficulty }}</span>
-              <span>{{ entry.entryKind === 'foundation' ? '基础问题' : entry.theoryGroup }}</span>
+              <span>{{ entryKindLabels[entry.entryKind] }}</span>
             </div>
             <h3>{{ entry.title }}</h3>
             <p>{{ entry.summary }}</p>

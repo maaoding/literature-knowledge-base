@@ -13,7 +13,7 @@ const groupDefinitions = [
   { key: 'paths', title: '收录路径' },
   { key: 'topics', title: '相关专题' },
   { key: 'theories', title: '相关理论' },
-  { key: 'techniques', title: '文学技巧' }
+  { key: 'techniques', title: '相关技巧' }
 ] as const
 
 const currentUrl = computed(() => {

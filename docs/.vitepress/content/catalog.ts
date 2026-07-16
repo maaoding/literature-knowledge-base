@@ -106,6 +106,23 @@ export function buildContentCatalog(entries: ContentEntry[]) {
     ))
     .slice(0, 3)
     .map(({ candidate }) => candidate)
+  const relatedTechniquesFor = (technique: EntryByType<'technique'>) => techniqueEntries
+    .filter((candidate) => candidate.slug !== technique.slug)
+    .map((candidate) => ({
+      candidate,
+      score:
+        topicOverlapCount(technique.workSlugs, candidate.workSlugs) * 4
+        + topicOverlapCount(technique.theorySlugs, candidate.theorySlugs) * 3
+        + topicOverlapCount(technique.topicSlugs, candidate.topicSlugs) * 2
+        + (technique.techniqueGroup === candidate.techniqueGroup ? 1 : 0)
+    }))
+    .sort((a, b) => (
+      b.score - a.score
+      || a.candidate.sidebarOrder - b.candidate.sidebarOrder
+      || a.candidate.slug.localeCompare(b.candidate.slug, 'zh-Hans-CN')
+    ))
+    .slice(0, 3)
+    .map(({ candidate }) => candidate)
 
   for (const author of authorEntries) {
     for (const historySlug of author.historySlugs) {
@@ -315,15 +332,16 @@ export function buildContentCatalog(entries: ContentEntry[]) {
     }
 
     if (entry.type === 'technique') {
-      relationsByUrl[entry.url] = relationGroups({
+      const groups = relationGroups({
         histories: [],
         authors: [],
         works: entry.workSlugs.map((slug) => worksBySlug.get(slug)!),
         paths: [],
         topics: entry.topicSlugs.map((slug) => topicsBySlug.get(slug)!),
-        theories: entry.theorySlugs.map((slug) => theoriesBySlug.get(slug)!),
-        techniques: []
+        theories: entry.theorySlugs.map((slug) => theoriesBySlug.get(slug)!)
       })
+      groups.techniques = relatedTechniquesFor(entry).map(relationLink)
+      relationsByUrl[entry.url] = groups
       continue
     }
 

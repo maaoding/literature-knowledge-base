@@ -80,9 +80,9 @@ const expectedCounts = {
   works: 76,
   readingPaths: 18,
   topics: 12,
-  theories: 20,
-  techniques: 8,
-  entries: 235
+  theories: 24,
+  techniques: 16,
+  entries: 247
 }
 for (const [key, count] of Object.entries(expectedCounts)) {
   assert(catalog[key].length === count, `expected ${count} ${key}, found ${catalog[key].length}`)
@@ -153,7 +153,7 @@ for (const entry of catalog.entries.filter((entry) => deepContentRules[entry.typ
   }
   deepContentCount += 1
 }
-assert(deepContentCount === 205, `expected 205 version 2 content pages, found ${deepContentCount}`)
+assert(deepContentCount === 217, `expected 217 version 2 content pages, found ${deepContentCount}`)
 
 const expectedHome = {
   authors: ['屈原', '鲁迅', '曹雪芹', '荷马', '莎士比亚', '博尔赫斯'],
@@ -275,9 +275,25 @@ const expectedTheories = {
   文学伦理与价值判断: {
     title: '文学伦理与价值判断', entryKind: 'concept', theoryGroup: '概念工具', prerequisiteSlugs: ['描述阐释与评价', '意识形态批评'],
     workSlugs: ['俄狄浦斯王', '玩偶之家', '罪与罚'], topicSlugs: ['命运与伦理', '女性与婚姻']
+  },
+  生态批评与自然书写: {
+    title: '生态批评与自然书写', entryKind: 'lens', theoryGroup: '文化与历史', prerequisiteSlugs: ['新历史主义批评', '意识形态批评'],
+    workSlugs: ['白鲸', '草叶集', '边城'], topicSlugs: ['启蒙与现代性', '诗歌传统']
+  },
+  空间批评与地方经验: {
+    title: '空间批评与地方经验', entryKind: 'lens', theoryGroup: '文化与历史', prerequisiteSlugs: ['叙事时间与空间', '新历史主义批评'],
+    workSlugs: ['尤利西斯', '百年孤独', '看不见的城市'], topicSlugs: ['流亡与身份', '家族与记忆']
+  },
+  性别与酷儿阅读: {
+    title: '性别与酷儿阅读', entryKind: 'lens', theoryGroup: '文化与历史', prerequisiteSlugs: ['女性主义批评', '意识形态批评'],
+    workSlugs: ['红楼梦', '哈姆雷特', '到灯塔去'], topicSlugs: ['女性与婚姻', '讽刺与权力']
+  },
+  情感与情动: {
+    title: '情感与情动', entryKind: 'concept', theoryGroup: '概念工具', prerequisiteSlugs: ['文学伦理与价值判断', '读者反应与接受史'],
+    workSlugs: ['少年维特之烦恼', '红楼梦', '到灯塔去'], topicSlugs: ['女性与婚姻', '家族与记忆']
   }
 }
-const expectedTheoryGroups = { 批评基础: 3, 文本细读: 4, 文化与历史: 7, 概念工具: 6 }
+const expectedTheoryGroups = { 批评基础: 3, 文本细读: 4, 文化与历史: 10, 概念工具: 7 }
 for (const [group, count] of Object.entries(expectedTheoryGroups)) {
   const actual = catalog.theories.filter((theory) => theory.theoryGroup === group).length
   assert(actual === count, `expected ${count} theories in ${group}, found ${actual}`)
@@ -335,7 +351,8 @@ for (const slug of theoryBySlug.keys()) visitTheory(slug)
 const culturalKeywordTheorySlugs = new Set([
   '作者与文本意义', '形式分析与细读', '叙述者与视角', '叙事时间与空间', '女性主义批评', '意识形态批评',
   '解释学与象征阐释', '精神分析批评', '新历史主义批评', '后殖民批评', '文化记忆与创伤叙事', '神话与原型批评',
-  '互文性与文学传统', '陌生化', '复调与对话性', '文学伦理与价值判断'
+  '互文性与文学传统', '陌生化', '复调与对话性', '文学伦理与价值判断',
+  '生态批评与自然书写', '空间批评与地方经验', '性别与酷儿阅读', '情感与情动'
 ])
 for (const theory of catalog.theories) {
   const citesCulturalKeywords = theory.sources.some((source) => source.title === '文化研究关键词')
@@ -374,15 +391,68 @@ const expectedTechniques = {
   重复与变奏: {
     title: '重复与变奏', techniqueGroup: '叙述与结构',
     theorySlugs: ['结构与符号', '形式分析与细读'], workSlugs: ['诗经', '百年孤独', '等待戈多'], topicSlugs: ['诗歌传统', '家族与记忆']
+  },
+  '声音、节奏与格律': {
+    title: '声音、节奏与格律', techniqueGroup: '诗歌与节奏',
+    theorySlugs: ['形式分析与细读', '文体与风格'], workSlugs: ['诗经', '楚辞', '草叶集'], topicSlugs: ['诗歌传统']
+  },
+  押韵与音响: {
+    title: '押韵与音响', techniqueGroup: '诗歌与节奏',
+    theorySlugs: ['形式分析与细读', '文体与风格'], workSlugs: ['诗经', '鲁拜集', '恶之花'], topicSlugs: ['诗歌传统']
+  },
+  '诗行、停顿与跨行': {
+    title: '诗行、停顿与跨行', techniqueGroup: '诗歌与节奏',
+    theorySlugs: ['形式分析与细读', '文体与风格'], workSlugs: ['草叶集', '恶之花', '荒原'], topicSlugs: ['诗歌传统', '现代主义']
+  },
+  '对仗、排比与平行': {
+    title: '对仗、排比与平行', techniqueGroup: '诗歌与节奏',
+    theorySlugs: ['结构与符号', '形式分析与细读'], workSlugs: ['诗经', '楚辞', '旧约'], topicSlugs: ['诗歌传统', '信仰与救赎']
+  },
+  台词与潜台词: {
+    title: '台词与潜台词', techniqueGroup: '戏剧与舞台',
+    theorySlugs: ['文体与风格', '文学伦理与价值判断'], workSlugs: ['哈姆雷特', '玩偶之家', '樱桃园'], topicSlugs: ['讽刺与权力', '女性与婚姻']
+  },
+  独白与旁白: {
+    title: '独白与旁白', techniqueGroup: '戏剧与舞台',
+    theorySlugs: ['叙述者与视角', '文学伦理与价值判断'], workSlugs: ['哈姆雷特', '俄狄浦斯王', '浮士德'], topicSlugs: ['命运与伦理', '讽刺与权力']
+  },
+  舞台空间与场面调度: {
+    title: '舞台空间与场面调度', techniqueGroup: '戏剧与舞台',
+    theorySlugs: ['叙事时间与空间', '形式分析与细读'], workSlugs: ['俄狄浦斯王', '玩偶之家', '等待戈多'], topicSlugs: ['命运与伦理', '女性与婚姻']
+  },
+  幕场结构与戏剧节奏: {
+    title: '幕场结构与戏剧节奏', techniqueGroup: '戏剧与舞台',
+    theorySlugs: ['结构与符号', '形式分析与细读'], workSlugs: ['伪君子', '樱桃园', '等待戈多'], topicSlugs: ['讽刺与权力', '现代主义']
   }
 }
-const expectedTechniqueGroups = { 语言与修辞: 4, 叙述与结构: 4, 诗歌与节奏: 0, 戏剧与舞台: 0 }
+const expectedTechniqueGroups = { 语言与修辞: 4, 叙述与结构: 4, 诗歌与节奏: 4, 戏剧与舞台: 4 }
 for (const [group, count] of Object.entries(expectedTechniqueGroups)) {
   const actual = catalog.techniques.filter((technique) => technique.techniqueGroup === group).length
   assert(actual === count, `expected ${count} techniques in ${group}, found ${actual}`)
 }
 
 const techniqueBySlug = new Map(catalog.techniques.map((technique) => [technique.slug, technique]))
+const techniqueOverlapCount = (left, right) => {
+  const rightValues = new Set(right)
+  return left.filter((value) => rightValues.has(value)).length
+}
+const expectedRelatedTechniquesFor = (technique) => catalog.techniques
+  .filter((candidate) => candidate.slug !== technique.slug)
+  .map((candidate) => ({
+    candidate,
+    score:
+      techniqueOverlapCount(technique.workSlugs, candidate.workSlugs) * 4
+      + techniqueOverlapCount(technique.theorySlugs, candidate.theorySlugs) * 3
+      + techniqueOverlapCount(technique.topicSlugs, candidate.topicSlugs) * 2
+      + (technique.techniqueGroup === candidate.techniqueGroup ? 1 : 0)
+  }))
+  .sort((a, b) => (
+    b.score - a.score
+    || a.candidate.sidebarOrder - b.candidate.sidebarOrder
+    || a.candidate.slug.localeCompare(b.candidate.slug, 'zh-Hans-CN')
+  ))
+  .slice(0, 3)
+  .map(({ candidate }) => candidate.slug)
 for (const [slug, expected] of Object.entries(expectedTechniques)) {
   const technique = techniqueBySlug.get(slug)
   assert(technique, `missing technique entry: ${slug}`)
@@ -404,6 +474,10 @@ for (const [slug, expected] of Object.entries(expectedTechniques)) {
   assert(relations.works.length === technique.workSlugs.length, `${technique.url} work relations are incomplete`)
   assert(relations.topics.length === technique.topicSlugs.length, `${technique.url} topic relations are incomplete`)
   assert(relations.theories.length === technique.theorySlugs.length, `${technique.url} theory relations are incomplete`)
+  const expectedRelatedTechniqueSlugs = expectedRelatedTechniquesFor(technique)
+  assert(JSON.stringify(relations.techniques.map((entry) => entry.slug)) === JSON.stringify(expectedRelatedTechniqueSlugs), `${technique.url} has incorrect related technique ranking`)
+  assert(!relations.techniques.some((entry) => entry.slug === technique.slug), `${technique.url} relates to itself`)
+  assert(new Set(relations.techniques.map((entry) => entry.slug)).size === 3, `${technique.url} must include three unique related techniques`)
   for (const workSlug of technique.workSlugs) {
     assert(catalog.relationsByUrl[`/works/${workSlug}`].techniques.some((entry) => entry.slug === technique.slug), `work is missing reverse technique relation: ${workSlug} -> ${technique.slug}`)
   }
@@ -682,6 +756,9 @@ for (const group of Object.keys(expectedTheoryGroups).filter((group) => expected
 }
 assert(theoryIndexBuild.includes('theory-group-概念工具'), 'theory index is missing the concept group')
 assert(theoryIndexBuild.includes('建议先读：') && theoryIndexBuild.includes('可直接开始'), 'theory index is missing prerequisite states')
+for (const label of ['基础问题', '分析方法', '批评视角', '概念工具']) {
+  assert(theoryIndexBuild.includes(label), `theory index is missing entry kind label: ${label}`)
+}
 assert(theoryBuild.includes('相关作品') && theoryBuild.includes('相关专题') && theoryBuild.includes('相关理论'), 'theory foundation is missing derived relations')
 assert(advancedTheoryBuild.includes('相关理论') && advancedTheoryBuild.includes('形式分析与细读'), 'advanced theory page is missing prerequisite relations')
 assert(theoryBuild.includes('ISBN 978-7-5760-0444-1') && !theoryBuild.includes('href="undefined"'), 'theory sample does not render book references safely')
@@ -693,7 +770,7 @@ for (const group of Object.keys(expectedTechniqueGroups).filter((group) => expec
   assert(!techniqueIndexBuild.includes(`technique-group-${group}`), `technique index renders an empty group: ${group}`)
 }
 assert(techniqueIndexBuild.includes('主要作用') && techniqueIndexBuild.includes('识别：'), 'technique index is missing practical metadata')
-assert(techniqueBuild.includes('相关作品') && techniqueBuild.includes('相关专题') && techniqueBuild.includes('相关理论'), 'technique page is missing derived relations')
+assert(techniqueBuild.includes('相关作品') && techniqueBuild.includes('相关专题') && techniqueBuild.includes('相关理论') && techniqueBuild.includes('相关技巧'), 'technique page is missing derived relations')
 assert(techniqueBuild.includes('ISBN 978-7-5760-0444-1') && !techniqueBuild.includes('href="undefined"'), 'technique page does not render book references safely')
 for (const group of Object.keys(expectedPathGroups)) assert(pathIndexBuild.includes(group), `path index is missing group: ${group}`)
 assert(pathBuild.includes('kb-path-detail__stages') && pathBuild.includes('kb-path-next'), 'reading path does not render stages or next paths')
@@ -803,6 +880,12 @@ const requiredSearchTerms = [
   '自由间接引语',
   '意识流与内心独白',
   '重复与变奏',
+  '生态批评',
+  '性别表演',
+  '情动',
+  '跨行',
+  '潜台词',
+  '场面调度',
   '战争与历史创伤',
   '二十世纪战争文学'
 ]

@@ -88,6 +88,13 @@ body::before {
   backdrop-filter: blur(12px);
 }
 
+@media (max-width: 767px) {
+  .VPNavScreen {
+    height: calc(100vh - var(--vp-nav-height) - var(--vp-layout-top-height, 0px));
+    height: calc(100dvh - var(--vp-nav-height) - var(--vp-layout-top-height, 0px));
+  }
+}
+
 .VPDoc .container {
   max-width: 1240px !important;
 }
