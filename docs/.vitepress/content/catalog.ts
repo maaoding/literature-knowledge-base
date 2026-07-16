@@ -85,6 +85,7 @@ export function buildContentCatalog(entries: ContentEntry[]) {
   const pathsBySlug = new Map(pathEntries.map((entry) => [entry.slug, entry]))
   const topicsBySlug = new Map(topicEntries.map((entry) => [entry.slug, entry]))
   const theoriesBySlug = new Map(theoryEntries.map((entry) => [entry.slug, entry]))
+  const techniquesBySlug = new Map(techniqueEntries.map((entry) => [entry.slug, entry]))
   const topicOverlapCount = (left: string[], right: string[]) => {
     const rightValues = new Set(right)
     return left.filter((value) => rightValues.has(value)).length
@@ -135,6 +136,14 @@ export function buildContentCatalog(entries: ContentEntry[]) {
     }
     for (const historySlug of work.historySlugs) {
       if (!historiesBySlug.has(historySlug)) throw new Error(`${work.slug} 引用了不存在的文学史条目 ${historySlug}`)
+    }
+    if (work.readingGuide) {
+      if (!theoriesBySlug.has(work.readingGuide.theorySlug)) {
+        throw new Error(`${work.slug} 的阅读抓手引用了不存在的理论 ${work.readingGuide.theorySlug}`)
+      }
+      if (!techniquesBySlug.has(work.readingGuide.techniqueSlug)) {
+        throw new Error(`${work.slug} 的阅读抓手引用了不存在的技巧 ${work.readingGuide.techniqueSlug}`)
+      }
     }
   }
   for (const readingPath of pathEntries) {

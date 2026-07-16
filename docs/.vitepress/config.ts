@@ -5,6 +5,17 @@ import { createSidebar, loadContentCatalog } from './content/catalog.node'
 
 const catalog = loadContentCatalog()
 const styleTestIndex = path.resolve(process.cwd(), 'docs/public/style-test/index.html')
+const searchHtmlEntities: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+}
+
+function escapeSearchHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => searchHtmlEntities[character])
+}
 
 export default defineConfig({
   lang: 'zh-CN',
@@ -50,6 +61,23 @@ export default defineConfig({
     search: {
       provider: 'local',
       options: {
+        _render(src, env, md) {
+          const html = md.render(src, env)
+          if (env.frontmatter?.search === false) return ''
+
+          const guide = env.frontmatter?.readingGuide
+          if (!guide) return html
+          const theory = catalog.theories.find((entry) => entry.slug === guide.theorySlug)
+          const technique = catalog.techniques.find((entry) => entry.slug === guide.techniqueSlug)
+          if (!theory || !technique) return html
+
+          return `${html}
+            <h2 id="kb-work-reading-guide-title">阅读抓手</h2>
+            <p>核心问题：${escapeSearchHtml(guide.question)}</p>
+            <p>理论视角：${escapeSearchHtml(theory.title)}。${escapeSearchHtml(theory.summary)}</p>
+            <p>文本技巧：${escapeSearchHtml(technique.title)}。${escapeSearchHtml(technique.summary)}</p>
+            <p>动手练习：${escapeSearchHtml(guide.exercise)}</p>`
+        },
         translations: {
           button: {
             buttonText: '搜索',

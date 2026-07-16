@@ -580,6 +580,183 @@ assert(theoryCoveredWorks.size === 40, `expected 40 works linked to theory, foun
 assert(techniqueCoveredWorks.size === 39, `expected 39 works linked to techniques, found ${techniqueCoveredWorks.size}`)
 assert(methodCoveredWorks.size === 53, `expected 53 works linked to theory or techniques, found ${methodCoveredWorks.size}`)
 
+const expectedReadingGuides = {
+  '万叶集': {
+    question: '歌体与声音重复怎样把私人感受转化为公共经验？',
+    theorySlug: '文体与风格',
+    techniqueSlug: '声音、节奏与格律',
+    exercise: '选三首题材相近的短歌，标出节奏、停顿和重复词，比较译本的声音得失。'
+  },
+  '亡灵书': {
+    question: '咒语和审判场景怎样兼具仪式功能与死亡象征？',
+    theorySlug: '解释学与象征阐释',
+    techniqueSlug: '象征与寓言',
+    exercise: '选一个场景，分列字面行动、仪式用途和象征解释及其证据。'
+  },
+  '列王纪': {
+    question: '王朝与英雄循环怎样组织共同体记忆？',
+    theorySlug: '文化记忆与创伤叙事',
+    techniqueSlug: '重复与变奏',
+    exercise: '比较两位英雄面对忠诚或王权考验时重复结构中的差异。'
+  },
+  '叶甫盖尼·奥涅金': {
+    question: '叙述者的亲近与距离怎样改变爱情和社交判断？',
+    theorySlug: '叙述者与视角',
+    techniqueSlug: '反讽与歧义',
+    exercise: '细读塔季扬娜书信前后，区分人物语言、叙述评论和反讽线索。'
+  },
+  '失乐园': {
+    question: '撒旦的修辞感染力为何不等于作品的最终立场？',
+    theorySlug: '文学伦理与价值判断',
+    techniqueSlug: '象征与寓言',
+    exercise: '对照一段演说、随后行动和叙述评价，整理支持与反驳证据。'
+  },
+  '奥德赛': {
+    question: '奥德修斯的自述怎样塑造身份与可信度？',
+    theorySlug: '故事话语与叙述行为',
+    techniqueSlug: '叙事层级与嵌套故事',
+    exercise: '画出一段回忆的讲述者、听众和故事层级，区分可验证信息与自述。'
+  },
+  '奥维德变形记': {
+    question: '变形模式怎样连接不同神话并保留情感差异？',
+    theorySlug: '互文性与文学传统',
+    techniqueSlug: '重复与变奏',
+    exercise: '比较两个故事的触发原因、视角和结尾，判断相同结构如何产生不同评价。'
+  },
+  '巨人传': {
+    question: '身体、笑声和混杂语体怎样松动权威话语？',
+    theorySlug: '复调与对话性',
+    techniqueSlug: '反讽与歧义',
+    exercise: '比较庄严论说与身体喜剧，标出语体冲突、反讽对象和未被取消的声音。'
+  },
+  '巴黎圣母院': {
+    question: '城市空间怎样分配可见性、行动范围和社会位置？',
+    theorySlug: '空间批评与地方经验',
+    techniqueSlug: '场景氛围与空间建构',
+    exercise: '追踪一名人物经过三个空间，记录进入、观看和情节变化。'
+  },
+  '庄子': {
+    question: '尺度和立场突变怎样打断习惯判断？',
+    theorySlug: '陌生化',
+    techniqueSlug: '反讽与歧义',
+    exercise: '选一则寓言，记录初始判断、视角反转和结尾迫使解释改变的位置。'
+  },
+  '摩诃婆罗多': {
+    question: '嵌套故事怎样让正法成为冲突中的判断？',
+    theorySlug: '文学伦理与价值判断',
+    techniqueSlug: '叙事层级与嵌套故事',
+    exercise: '选择一个伦理抉择，列出行动者、讲述者和听众各自的信息与立场。'
+  },
+  '水浒传': {
+    question: '个人传奇怎样汇入梁山集体并保留差异？',
+    theorySlug: '人物行动与关系分析',
+    techniqueSlug: '多线叙事与交叉结构',
+    exercise: '追踪一名人物上山前后的四个场景，比较目标、关系位置和篇幅。'
+  },
+  '沙恭达罗': {
+    question: '记忆和宫廷承认怎样决定谁能被相信？',
+    theorySlug: '女性主义批评',
+    techniqueSlug: '台词与潜台词',
+    exercise: '比较相恋与拒认两场对话，标出请求、回避、沉默和权力位置。'
+  },
+  '源氏物语': {
+    question: '视角移动与时间跳跃怎样显出亲密关系中的权力差异？',
+    theorySlug: '女性主义叙事学',
+    techniqueSlug: '时序时距与频率',
+    exercise: '为一位女性制作出场和缺席时间线，记录省略前后的处境与表达空间。'
+  },
+  '漱玉词': {
+    question: '同一意象怎样形成从日常感受到历史离乱的情绪轨迹？',
+    theorySlug: '文体与风格',
+    techniqueSlug: '意象与母题',
+    exercise: '在三首词中记录一种意象的感官特征、搭配词和情绪作用。'
+  },
+  '罗兰之歌': {
+    question: '程式化重复怎样把忠诚、宗教和战争价值变成常识？',
+    theorySlug: '意识形态批评',
+    techniqueSlug: '重复与变奏',
+    exercise: '收集三组重复称谓或行动，记录其强化的价值、排除的视角及结局修正。'
+  },
+  '罗摩衍那': {
+    question: '英雄旅程和反复考验怎样建立理想身份并显出规范张力？',
+    theorySlug: '神话与原型批评',
+    techniqueSlug: '重复与变奏',
+    exercise: '比较两个考验场景的规则、行动者和后果各有何不同。'
+  },
+  '聊斋志异': {
+    question: '鬼狐异事怎样使婚姻、科举和官场秩序变得陌生？',
+    theorySlug: '陌生化',
+    techniqueSlug: '反讽与歧义',
+    exercise: '选一篇故事，区分表层奇事、人物判断和结尾评论之间的距离。'
+  },
+  '虚构集': {
+    question: '伪引文和虚构文献怎样动摇文本与现实的边界？',
+    theorySlug: '互文性与文学传统',
+    techniqueSlug: '叙事层级与嵌套故事',
+    exercise: '为一篇小说画出作者、叙述者、文献和读者层级，标出一次越界。'
+  },
+  '论语': {
+    question: '简短对话和相近语句怎样让概念保持开放？',
+    theorySlug: '解释学与象征阐释',
+    techniqueSlug: '对仗、排比与平行',
+    exercise: '选择一个重复概念，对照两至三章的对象、句式和语境差异。'
+  },
+  '贝奥武甫': {
+    question: '头韵、停顿和程式称谓怎样承载英雄记忆？',
+    theorySlug: '神话与原型批评',
+    techniqueSlug: '声音、节奏与格律',
+    exercise: '用一个双语段落标出头韵、重音和句中停顿，比较译文的补偿方式。'
+  },
+  '雾都孤儿': {
+    question: '人物类型和环境细节怎样塑造贫困与济贫制度的社会想象？',
+    theorySlug: '意识形态批评',
+    techniqueSlug: '人物塑造与间接刻画',
+    exercise: '细读一场济贫院场景，分列直接评价、行动和空间物件。'
+  },
+  '魔山': {
+    question: '疗养院怎样把短暂探访扩展为长期思想经验？',
+    theorySlug: '叙事时间与空间',
+    techniqueSlug: '时序时距与频率',
+    exercise: '比较到达第一周与后期段落的篇幅、重复活动和时间标记。'
+  }
+}
+const guidedWorks = catalog.works.filter((work) => work.readingGuide)
+const guidedWorkSlugs = new Set(guidedWorks.map((work) => work.slug))
+assert(Object.keys(expectedReadingGuides).length === 23, 'expected reading-guide contract must contain exactly 23 works')
+assert(guidedWorks.length === 23, `expected 23 works with reading guides, found ${guidedWorks.length}`)
+assert(catalog.works.filter((work) => !work.readingGuide).length === 53, 'expected 53 works without first-batch reading guides')
+
+const guideQuestions = []
+const guideExercises = []
+for (const [slug, expected] of Object.entries(expectedReadingGuides)) {
+  const work = catalog.works.find((entry) => entry.slug === slug)
+  assert(work, `missing reading-guide work: ${slug}`)
+  const guide = work?.readingGuide
+  assert(guide, `${slug} is missing its reading guide`)
+  if (!work || !guide) continue
+
+  for (const key of ['question', 'theorySlug', 'techniqueSlug', 'exercise']) {
+    assert(guide[key] === expected[key], `${work.url} has unexpected readingGuide.${key}`)
+  }
+  assert(guide.question.length >= 15 && guide.question.length <= 90, `${work.url} reading question has invalid length`)
+  assert(guide.exercise.length >= 20 && guide.exercise.length <= 120, `${work.url} reading exercise has invalid length`)
+  assert(catalog.theories.some((theory) => theory.slug === guide.theorySlug), `${work.url} reading guide has an invalid theory`)
+  assert(catalog.techniques.some((technique) => technique.slug === guide.techniqueSlug), `${work.url} reading guide has an invalid technique`)
+  assert(!methodCoveredWorks.has(slug), `${work.url} should use a work-side guide instead of duplicating an existing case study`)
+
+  const workRelations = catalog.relationsByUrl[work.url]
+  assert(!workRelations.theories.some((entry) => entry.slug === guide.theorySlug), `${work.url} leaked its reading guide into theory relations`)
+  assert(!workRelations.techniques.some((entry) => entry.slug === guide.techniqueSlug), `${work.url} leaked its reading guide into technique relations`)
+  assert(!catalog.relationsByUrl[`/theory/${guide.theorySlug}`].works.some((entry) => entry.slug === slug), `${work.url} leaked into reverse theory cases`)
+  assert(!catalog.relationsByUrl[`/techniques/${guide.techniqueSlug}`].works.some((entry) => entry.slug === slug), `${work.url} leaked into reverse technique cases`)
+  guideQuestions.push(guide.question)
+  guideExercises.push(guide.exercise)
+}
+for (const work of guidedWorks) assert(expectedReadingGuides[work.slug], `unexpected work reading guide: ${work.slug}`)
+assert(new Set(guideQuestions).size === guideQuestions.length, 'work reading-guide questions must be unique')
+assert(new Set(guideExercises).size === guideExercises.length, 'work reading-guide exercises must be unique')
+assert(new Set([...methodCoveredWorks, ...guidedWorkSlugs]).size === 76, 'case studies and work-side reading guides must cover all 76 works')
+
 for (const [group, count] of Object.entries(expectedTopicGroups)) {
   const actual = catalog.topics.filter((topic) => topic.sidebarGroup === group).length
   assert(actual === count, `expected ${count} topics in ${group}, found ${actual}`)
@@ -721,6 +898,7 @@ const pathNextSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme',
 const topicRelationsSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'TopicRelations.vue'), 'utf8')
 const theoryExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'TheoryExplorer.vue'), 'utf8')
 const techniqueExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'TechniqueExplorer.vue'), 'utf8')
+const workReadingGuideSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'WorkReadingGuide.vue'), 'utf8')
 assert(workExplorerSource.includes('const pageSize = 20'), 'work index must paginate at 20 items')
 assert(authorExplorerSource.includes('const pageSize = 20'), 'author index must paginate at 20 items')
 assert(workExplorerSource.includes('const { topics, works } = catalog'), 'work index must use curated topics')
@@ -751,6 +929,9 @@ assert(techniqueExplorerSource.includes('catalog.techniques'), 'technique index 
 assert(techniqueExplorerSource.includes(".filter((group) => group.entries.length)"), 'technique index does not hide empty groups')
 assert(techniqueExplorerSource.includes('entry.identifyBy.join'), 'technique index does not show identification clues')
 assert(techniqueExplorerSource.includes('entry.coreFunction'), 'technique index does not show core functions')
+assert(workReadingGuideSource.includes('catalog.works.find'), 'work reading guide does not resolve the current work from the catalog')
+assert(workReadingGuideSource.includes('guide && theory && technique'), 'work reading guide does not guard incomplete references')
+assert(!workReadingGuideSource.includes('relationsByUrl'), 'work reading guide must not reuse derived case-study relations')
 
 const sourceMapPath = path.join(root, 'content-sources', 'world-literature-2018-map.json')
 const sourceMap = fs.existsSync(sourceMapPath)
@@ -830,6 +1011,7 @@ const topicBuild = fs.readFileSync(distTarget('/topics/现代主义'), 'utf8')
 const theoryBuild = fs.readFileSync(distTarget('/theory/作者与文本意义'), 'utf8')
 const advancedTheoryBuild = fs.readFileSync(distTarget('/theory/意识形态批评'), 'utf8')
 const techniqueBuild = fs.readFileSync(distTarget('/techniques/不可靠叙述'), 'utf8')
+const unguidedWorkBuild = fs.readFileSync(distTarget('/works/红楼梦'), 'utf8')
 assert(historyIndexBuild.includes('世界文学四编') && historyIndexBuild.includes('跨期导读'), 'history index is missing overview or guide sections')
 assert((workIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length === 20, 'work index SSR must render exactly 20 list rows')
 assert((authorIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length === 20, 'author index SSR must render exactly 20 list rows')
@@ -839,6 +1021,21 @@ for (const topic of catalog.topics) assert(topicIndexBuild.includes(topic.title)
 for (const group of Object.keys(expectedTopicGroups)) assert(topicIndexBuild.includes(group), `topic index is missing group: ${group}`)
 assert(pathBuild.includes('kb-path-detail__goal') && pathBuild.includes('kb-path-detail__steps'), 'reading path does not render structured goal and steps')
 assert(workBuild.includes('继续探索') && workBuild.includes('kb-related__links'), 'core work page is missing derived relations')
+for (const [slug, guide] of Object.entries(expectedReadingGuides)) {
+  const builtPage = fs.readFileSync(distTarget(`/works/${slug}`), 'utf8')
+  const theory = catalog.theories.find((entry) => entry.slug === guide.theorySlug)
+  const technique = catalog.techniques.find((entry) => entry.slug === guide.techniqueSlug)
+  assert(builtPage.includes('class="kb-work-reading-guide"'), `/works/${slug} does not render its reading guide`)
+  assert(builtPage.includes(guide.question) && builtPage.includes(guide.exercise), `/works/${slug} is missing reading-guide text`)
+  assert(builtPage.includes(theory.title) && builtPage.includes(technique.title), `/works/${slug} is missing reading-guide method labels`)
+  for (const link of [theory.link, technique.link]) {
+    assert(
+      builtPage.includes(`href="${link}"`) || builtPage.includes(`href="${encodeURI(link)}"`),
+      `/works/${slug} is missing reading-guide link ${link}`
+    )
+  }
+}
+assert(!unguidedWorkBuild.includes('kb-work-reading-guide'), 'an unconfigured work renders an empty reading guide')
 assert(authorBuild.includes('继续探索') && historyBuild.includes('继续探索'), 'author or history page is missing derived relations')
 assert(topicBuild.includes('kb-topic-relations__links'), 'topic page is missing structured relations')
 assert(topicBuild.includes('相关专题'), 'topic page is missing related topics')
@@ -898,6 +1095,7 @@ const homeSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'co
 assert(styleTestSource.includes('class="brand" href="#home" data-route-link="home"'), 'style test brand does not return to its own entrance')
 assert(configSource.includes("link: '/style-test/', target: '_self'"), 'top navigation can route the standalone style test through VitePress')
 assert(configSource.includes("text: '阅读方法'") && configSource.includes("text: '文学理论', link: '/theory/'") && configSource.includes("text: '文学技巧', link: '/techniques/'"), 'top navigation is missing the grouped theory and technique links')
+assert(configSource.includes('_render(src, env, md)') && configSource.includes('kb-work-reading-guide-title'), 'local search does not index work reading guides')
 assert(homeSource.includes('href="/style-test/" target="_self"'), 'home page can route the standalone style test through VitePress')
 assert(styleTestSource.includes('href="#home" data-route="home">入口</a>'), 'style test internal home route changed')
 assert(styleTestSource.includes('const routeAliases = { library: "map", knowledge: "map" }'), 'legacy style-test library routes no longer resolve to the reading map')
@@ -986,6 +1184,9 @@ const requiredSearchTerms = [
   '频率',
   '认知地图',
   '隐性进程',
+  '阅读抓手',
+  '疗养院怎样把短暂探访扩展为长期思想经验',
+  '比较译本的声音得失',
   '战争与历史创伤',
   '二十世纪战争文学'
 ]

@@ -18,12 +18,14 @@ import TechniqueExplorer from './components/TechniqueExplorer.vue'
 import TopicExplorer from './components/TopicExplorer.vue'
 import TopicRelations from './components/TopicRelations.vue'
 import WorkExplorer from './components/WorkExplorer.vue'
+import WorkReadingGuide from './components/WorkReadingGuide.vue'
 
 export default {
   extends: DefaultTheme,
   Layout() {
     return h(DefaultTheme.Layout, null, {
       'doc-footer-before': () => h('div', { class: 'kb-doc-footer-extras' }, [
+        h(WorkReadingGuide),
         h(RelatedContent),
         h(ContentSources)
       ])

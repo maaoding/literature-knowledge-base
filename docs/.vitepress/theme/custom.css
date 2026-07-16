@@ -173,6 +173,120 @@ body::before {
   font-weight: 700;
 }
 
+.kb-work-reading-guide {
+  margin-top: 48px;
+  padding: 24px 0;
+  border-top: 1px solid var(--kb-line-strong);
+  border-bottom: 1px solid var(--kb-line);
+}
+
+.kb-work-reading-guide__header {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.25fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.kb-work-reading-guide__header span,
+.kb-work-reading-guide__method > span,
+.kb-work-reading-guide__exercise > span {
+  color: var(--kb-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.kb-work-reading-guide__header h2 {
+  margin: 4px 0 0;
+  border: 0;
+  font-family: Georgia, "Times New Roman", "SimSun", serif;
+  font-size: 24px;
+  line-height: 1.35;
+  scroll-margin-top: calc(var(--vp-nav-height) + 16px);
+}
+
+.kb-work-reading-guide__header p {
+  margin: 0;
+  color: var(--kb-ink);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.kb-work-reading-guide__methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 22px;
+  border-top: 1px solid var(--kb-line);
+  border-bottom: 1px solid var(--kb-line);
+}
+
+.kb-work-reading-guide__method {
+  display: block;
+  min-width: 0;
+  padding: 18px 20px 18px 0;
+  color: var(--kb-ink) !important;
+  text-decoration: none !important;
+}
+
+.kb-work-reading-guide__method + .kb-work-reading-guide__method {
+  padding-right: 0;
+  padding-left: 20px;
+  border-left: 1px solid var(--kb-line);
+}
+
+.kb-work-reading-guide__method--theory > span {
+  color: var(--kb-teal);
+}
+
+.kb-work-reading-guide__method--technique > span {
+  color: var(--kb-red);
+}
+
+.kb-work-reading-guide__method h3 {
+  margin: 6px 0;
+  border: 0;
+  font-family: Georgia, "Times New Roman", "SimSun", serif;
+  font-size: 18px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.kb-work-reading-guide__method:hover h3 {
+  color: var(--kb-red);
+}
+
+.kb-work-reading-guide__method p {
+  margin: 0;
+  color: var(--kb-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.kb-work-reading-guide__exercise {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.25fr) minmax(0, 1fr);
+  gap: 24px;
+  padding-top: 18px;
+}
+
+.kb-work-reading-guide__exercise > span {
+  color: var(--kb-gold);
+}
+
+.kb-work-reading-guide__exercise p {
+  margin: 0;
+  color: var(--kb-muted);
+  line-height: 1.75;
+}
+
+.kb-work-reading-guide + .kb-related {
+  margin-top: 36px;
+}
+
+.kb-work-reading-guide + .kb-sources {
+  margin-top: 36px;
+}
+
 .kb-related {
   margin-top: 48px;
   padding-top: 24px;
@@ -253,6 +367,28 @@ body::before {
 }
 
 @media (max-width: 640px) {
+  .kb-work-reading-guide__header,
+  .kb-work-reading-guide__methods,
+  .kb-work-reading-guide__exercise {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .kb-work-reading-guide__methods {
+    border-bottom: 0;
+  }
+
+  .kb-work-reading-guide__method,
+  .kb-work-reading-guide__method + .kb-work-reading-guide__method {
+    padding: 16px 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--kb-line);
+  }
+
+  .kb-work-reading-guide__header p {
+    font-size: 17px;
+  }
+
   .kb-sources__header {
     align-items: flex-start;
     flex-direction: column;

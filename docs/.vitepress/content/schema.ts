@@ -106,6 +106,13 @@ export const authorEntrySchema = z.object({
   historySlugs: z.array(z.string().trim().min(1))
 })
 
+export const workReadingGuideSchema = z.object({
+  question: z.string().trim().min(15).max(90),
+  theorySlug: z.string().trim().min(1),
+  techniqueSlug: z.string().trim().min(1),
+  exercise: z.string().trim().min(20).max(120)
+})
+
 export const workEntrySchema = z.object({
   ...commonFields,
   ...deepContentFields,
@@ -115,7 +122,8 @@ export const workEntrySchema = z.object({
   track: trackSchema,
   eraGroup: eraGroupSchema,
   historySlugs: z.array(z.string().trim().min(1)),
-  whyRead: z.string().trim().min(1)
+  whyRead: z.string().trim().min(1),
+  readingGuide: workReadingGuideSchema.optional()
 })
 
 export const readingPathEntrySchema = z.object({
@@ -190,6 +198,7 @@ export type PathStage = z.infer<typeof pathStageSchema>
 export type TheoryEntryKind = z.infer<typeof theoryEntryKindSchema>
 export type TheoryGroup = z.infer<typeof theoryGroupSchema>
 export type TechniqueGroup = z.infer<typeof techniqueGroupSchema>
+export type WorkReadingGuide = z.infer<typeof workReadingGuideSchema>
 export type ContentFrontmatter = z.infer<typeof contentEntrySchema>
 export type ContentType = ContentFrontmatter['type']
 export type ContentSource = z.infer<typeof contentSourceSchema>
