@@ -255,6 +255,9 @@ export function buildContentCatalog(entries: ContentEntry[]) {
     ...theory,
     link: theory.url,
     works: theory.workSlugs.map((slug) => relationLink(worksBySlug.get(slug)!)),
+    guideWorks: workEntries
+      .filter((work) => work.readingGuide?.theorySlug === theory.slug)
+      .map(relationLink),
     topics: theory.topicSlugs.map((slug) => relationLink(topicsBySlug.get(slug)!)),
     prerequisites: theory.prerequisiteSlugs.map((slug) => relationLink(theoriesBySlug.get(slug)!)),
     dependents: theoryEntries
@@ -268,6 +271,9 @@ export function buildContentCatalog(entries: ContentEntry[]) {
     ...technique,
     link: technique.url,
     works: technique.workSlugs.map((slug) => relationLink(worksBySlug.get(slug)!)),
+    guideWorks: workEntries
+      .filter((work) => work.readingGuide?.techniqueSlug === technique.slug)
+      .map(relationLink),
     topics: technique.topicSlugs.map((slug) => relationLink(topicsBySlug.get(slug)!)),
     theories: technique.theorySlugs.map((slug) => relationLink(theoriesBySlug.get(slug)!))
   }))

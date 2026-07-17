@@ -1090,6 +1090,44 @@ assert(new Set(guideQuestions).size === guideQuestions.length, 'work reading-gui
 assert(new Set(guideExercises).size === guideExercises.length, 'work reading-guide exercises must be unique')
 assert(guidedWorkSlugs.size === 76, 'work-side reading guides must cover all 76 works')
 
+const expectedTheoryGuideWorks = new Map(catalog.theories.map((theory) => [theory.slug, []]))
+const expectedTechniqueGuideWorks = new Map(catalog.techniques.map((technique) => [technique.slug, []]))
+for (const work of guidedWorks) {
+  expectedTheoryGuideWorks.get(work.readingGuide.theorySlug).push(work.slug)
+  expectedTechniqueGuideWorks.get(work.readingGuide.techniqueSlug).push(work.slug)
+}
+
+let theoryGuideReferenceCount = 0
+for (const theory of catalog.theories) {
+  const expected = expectedTheoryGuideWorks.get(theory.slug)
+    .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))
+  const actual = theory.guideWorks
+    .map((work) => work.slug)
+    .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))
+  theoryGuideReferenceCount += actual.length
+  assert(JSON.stringify(actual) === JSON.stringify(expected), `${theory.url} guideWorks were not derived from work reading guides`)
+}
+
+let techniqueGuideReferenceCount = 0
+for (const technique of catalog.techniques) {
+  const expected = expectedTechniqueGuideWorks.get(technique.slug)
+    .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))
+  const actual = technique.guideWorks
+    .map((work) => work.slug)
+    .sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))
+  techniqueGuideReferenceCount += actual.length
+  assert(JSON.stringify(actual) === JSON.stringify(expected), `${technique.url} guideWorks were not derived from work reading guides`)
+}
+
+const usedGuideTheories = catalog.theories.filter((theory) => theory.guideWorks.length)
+const usedGuideTechniques = catalog.techniques.filter((technique) => technique.guideWorks.length)
+assert(theoryGuideReferenceCount === 76, `expected 76 theory guide references, found ${theoryGuideReferenceCount}`)
+assert(techniqueGuideReferenceCount === 76, `expected 76 technique guide references, found ${techniqueGuideReferenceCount}`)
+assert(usedGuideTheories.length === 27, `expected 27 guide theories, found ${usedGuideTheories.length}`)
+assert(usedGuideTechniques.length === 22, `expected 22 guide techniques, found ${usedGuideTechniques.length}`)
+assert(catalog.theories.find((theory) => theory.slug === '女性主义叙事学')?.guideWorks.length === 5, 'feminist narratology guide filter must contain 5 works')
+assert(catalog.techniques.find((technique) => technique.slug === '重复与变奏')?.guideWorks.length === 12, 'repetition and variation guide filter must contain 12 works')
+
 for (const theory of catalog.theories) {
   const declaredWorks = [...theory.workSlugs].sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))
   const relatedWorks = catalog.relationsByUrl[`/theory/${theory.slug}`].works
@@ -1247,12 +1285,22 @@ const topicRelationsSource = fs.readFileSync(path.join(docsDir, '.vitepress', 't
 const theoryExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'TheoryExplorer.vue'), 'utf8')
 const techniqueExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'TechniqueExplorer.vue'), 'utf8')
 const workReadingGuideSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'WorkReadingGuide.vue'), 'utf8')
+const methodGroupsSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'data', 'method-groups.ts'), 'utf8')
 assert(workExplorerSource.includes('const pageSize = 20'), 'work index must paginate at 20 items')
 assert(authorExplorerSource.includes('const pageSize = 20'), 'author index must paginate at 20 items')
-assert(workExplorerSource.includes('const { topics, works } = catalog'), 'work index must use curated topics')
+assert(workExplorerSource.includes('const { techniques, theories, topics, works } = catalog'), 'work index must use works, topics, theories and techniques')
 assert(!workExplorerSource.includes('works.flatMap((work) => work.tags)'), 'work index still exposes raw tags as filter options')
 assert(workExplorerSource.includes("params.set('topic'"), 'work topic filter is not persisted in the URL')
+assert(workExplorerSource.includes("params.set('mode', 'guide')"), 'work guide mode is not persisted in the URL')
+assert(workExplorerSource.includes("params.set('theory'"), 'work theory filter is not persisted in the URL')
+assert(workExplorerSource.includes("params.set('technique'"), 'work technique filter is not persisted in the URL')
+assert(workExplorerSource.includes("mode.value === 'guide'"), 'work index does not separate catalog and guide modes')
+assert(workExplorerSource.includes('entry.guideWorks.length'), 'work guide filters do not exclude unused methods')
+assert(!workExplorerSource.includes('readingGuide.exercise'), 'work guide search must not index hidden exercise text')
 assert(workExplorerSource.includes('<optgroup v-for="group in topicGroups"'), 'work topic filter is not grouped')
+assert(workExplorerSource.includes('<optgroup v-for="group in theoryGroups"'), 'work theory filter is not grouped')
+assert(workExplorerSource.includes('<optgroup v-for="group in techniqueGroups"'), 'work technique filter is not grouped')
+assert(workExplorerSource.includes('class="kb-guide-row"'), 'work guide mode does not render guide rows')
 assert(topicExplorerSource.includes('kb-topic-index__group'), 'topic index is not grouped')
 assert(authorExplorerSource.includes("params.set('view'"), 'author view mode is not persisted in the URL')
 assert(workExplorerSource.includes('ready.value = true\n  syncUrl()'), 'work index does not normalize URL state after hydration')
@@ -1273,10 +1321,18 @@ assert(theoryExplorerSource.includes('catalog.theories'), 'theory index does not
 assert(theoryExplorerSource.includes(".filter((group) => group.entries.length)"), 'theory index does not hide empty groups')
 assert(theoryExplorerSource.includes('建议先读：'), 'theory index does not label prerequisite reading')
 assert(theoryExplorerSource.includes('可直接开始'), 'theory index does not label direct starting points')
+assert(theoryExplorerSource.includes('<article v-for="entry in group.entries"'), 'theory index rows must use semantic articles')
+assert(theoryExplorerSource.includes('entry.guideWorks.length'), 'theory index does not expose guide applications')
 assert(techniqueExplorerSource.includes('catalog.techniques'), 'technique index does not use the structured catalog')
 assert(techniqueExplorerSource.includes(".filter((group) => group.entries.length)"), 'technique index does not hide empty groups')
 assert(techniqueExplorerSource.includes('entry.identifyBy.join'), 'technique index does not show identification clues')
 assert(techniqueExplorerSource.includes('entry.coreFunction'), 'technique index does not show core functions')
+assert(techniqueExplorerSource.includes('<article v-for="entry in group.entries"'), 'technique index rows must use semantic articles')
+assert(techniqueExplorerSource.includes('entry.guideWorks.length'), 'technique index does not expose guide applications')
+assert(theoryExplorerSource.includes("from '../data/method-groups'") && techniqueExplorerSource.includes("from '../data/method-groups'") && workExplorerSource.includes("from '../data/method-groups'"), 'method group definitions are not shared by all indexes')
+for (const group of [...Object.keys(expectedTheoryGroups), ...Object.keys(expectedTechniqueGroups)]) {
+  assert(methodGroupsSource.includes(`key: '${group}'`), `shared method groups are missing ${group}`)
+}
 assert(workReadingGuideSource.includes('catalog.works.find'), 'work reading guide does not resolve the current work from the catalog')
 assert(workReadingGuideSource.includes('guide && theory && technique'), 'work reading guide does not guard incomplete references')
 assert(!workReadingGuideSource.includes('relationsByUrl'), 'work reading guide must not reuse derived case-study relations')
@@ -1344,6 +1400,7 @@ for (const url of ['/', '/history/', '/authors/', '/works/', '/paths/', '/topics
 }
 
 const historyIndexBuild = fs.readFileSync(distTarget('/history/'), 'utf8')
+const homeIndexBuild = fs.readFileSync(distTarget('/'), 'utf8')
 const workIndexBuild = fs.readFileSync(distTarget('/works/'), 'utf8')
 const authorIndexBuild = fs.readFileSync(distTarget('/authors/'), 'utf8')
 const topicIndexBuild = fs.readFileSync(distTarget('/topics/'), 'utf8')
@@ -1360,7 +1417,10 @@ const theoryBuild = fs.readFileSync(distTarget('/theory/作者与文本意义'),
 const advancedTheoryBuild = fs.readFileSync(distTarget('/theory/意识形态批评'), 'utf8')
 const techniqueBuild = fs.readFileSync(distTarget('/techniques/不可靠叙述'), 'utf8')
 assert(historyIndexBuild.includes('世界文学四编') && historyIndexBuild.includes('跨期导读'), 'history index is missing overview or guide sections')
+assert(homeIndexBuild.includes('把方法带回作品') && homeIndexBuild.includes('32 个理论') && homeIndexBuild.includes('24 个技巧') && homeIndexBuild.includes('76 个抓手'), 'home page is missing the reading-method band')
+assert(homeIndexBuild.includes('href="/works/?mode=guide"'), 'home page is missing the guide-mode link')
 assert((workIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length === 20, 'work index SSR must render exactly 20 list rows')
+assert(!workIndexBuild.includes('class="kb-guide-row"'), 'default work index SSR must stay in catalog mode')
 assert((authorIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length === 20, 'author index SSR must render exactly 20 list rows')
 assert(!workIndexBuild.includes('<option value="尊严">'), 'work index still renders raw tag options')
 for (const topic of catalog.topics) assert(workIndexBuild.includes(`value="${topic.slug}"`), `work index is missing topic option: ${topic.slug}`)
@@ -1395,6 +1455,8 @@ assert(theoryIndexBuild.includes('经典叙事学') && theoryIndexBuild.includes
 for (const label of ['基础问题', '分析方法', '批评视角', '概念工具']) {
   assert(theoryIndexBuild.includes(label), `theory index is missing entry kind label: ${label}`)
 }
+assert((theoryIndexBuild.match(/查看 \d+ 部作品抓手/g) ?? []).length === 27, 'theory index must link all 27 used guide theories')
+assert((theoryIndexBuild.match(/暂未配置作品抓手/g) ?? []).length === 5, 'theory index must label 5 unused guide theories')
 assert(theoryBuild.includes('相关作品') && theoryBuild.includes('相关专题') && theoryBuild.includes('相关理论'), 'theory foundation is missing derived relations')
 assert(advancedTheoryBuild.includes('相关理论') && advancedTheoryBuild.includes('形式分析与细读'), 'advanced theory page is missing prerequisite relations')
 assert(theoryBuild.includes('ISBN 978-7-5760-0444-1') && !theoryBuild.includes('href="undefined"'), 'theory sample does not render book references safely')
@@ -1406,6 +1468,8 @@ for (const group of Object.keys(expectedTechniqueGroups).filter((group) => expec
   assert(!techniqueIndexBuild.includes(`technique-group-${group}`), `technique index renders an empty group: ${group}`)
 }
 assert(techniqueIndexBuild.includes('主要作用') && techniqueIndexBuild.includes('识别：'), 'technique index is missing practical metadata')
+assert((techniqueIndexBuild.match(/查看 \d+ 部作品抓手/g) ?? []).length === 22, 'technique index must link all 22 used guide techniques')
+assert((techniqueIndexBuild.match(/暂未配置作品抓手/g) ?? []).length === 2, 'technique index must label 2 unused guide techniques')
 assert(techniqueBuild.includes('相关作品') && techniqueBuild.includes('相关专题') && techniqueBuild.includes('相关理论') && techniqueBuild.includes('相关技巧'), 'technique page is missing derived relations')
 assert(techniqueBuild.includes('ISBN 978-7-5760-0444-1') && !techniqueBuild.includes('href="undefined"'), 'technique page does not render book references safely')
 for (const group of Object.keys(expectedPathGroups)) assert(pathIndexBuild.includes(group), `path index is missing group: ${group}`)
@@ -1443,6 +1507,7 @@ assert(configSource.includes("link: '/style-test/', target: '_self'"), 'top navi
 assert(configSource.includes("text: '阅读方法'") && configSource.includes("text: '文学理论', link: '/theory/'") && configSource.includes("text: '文学技巧', link: '/techniques/'"), 'top navigation is missing the grouped theory and technique links')
 assert(configSource.includes('_render(src, env, md)') && configSource.includes('kb-work-reading-guide-title'), 'local search does not index work reading guides')
 assert(homeSource.includes('href="/style-test/" target="_self"'), 'home page can route the standalone style test through VitePress')
+assert(homeSource.includes('class="kb-band kb-home-methods"') && homeSource.includes('href="/works/?mode=guide"'), 'home source is missing the reading-method discovery links')
 assert(styleTestSource.includes('href="#home" data-route="home">入口</a>'), 'style test internal home route changed')
 assert(styleTestSource.includes('const routeAliases = { library: "map", knowledge: "map" }'), 'legacy style-test library routes no longer resolve to the reading map')
 assert(!styleTestSource.includes('data-page="knowledge"'), 'style test still contains a duplicate knowledge page')

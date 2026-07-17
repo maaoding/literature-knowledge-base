@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { data as catalog } from '../data/catalog.data'
 
-const { authors, historyEntries, readingPaths, works } = catalog
+const { authors, historyEntries, readingPaths, techniques, theories, works } = catalog
 const byHomeOrder = <T extends { homeOrder: number | null }>(entries: T[]) => entries
   .filter((entry): entry is T & { homeOrder: number } => entry.homeOrder !== null)
   .sort((a, b) => a.homeOrder - b.homeOrder)
@@ -50,6 +50,31 @@ const formatIndex = (index: number) => String(index + 1).padStart(2, '0')
         <span>推荐路径</span>
       </a>
     </nav>
+
+    <section class="kb-band kb-home-methods" aria-labelledby="kb-home-methods-title">
+      <div class="kb-home-methods__intro">
+        <p class="kb-eyebrow">阅读方法</p>
+        <h2 id="kb-home-methods-title">把方法带回作品</h2>
+        <p>先学会提出问题和识别形式，再到作品页完成一次细读练习。</p>
+      </div>
+      <nav class="kb-home-methods__links" aria-label="阅读方法入口">
+        <a href="/theory/">
+          <span>解释问题</span>
+          <strong>{{ theories.length }} 个理论</strong>
+          <p>从解释依据、历史语境和方法边界开始。</p>
+        </a>
+        <a href="/techniques/">
+          <span>识别形式</span>
+          <strong>{{ techniques.length }} 个技巧</strong>
+          <p>从语言、叙述、人物、诗歌和舞台线索开始。</p>
+        </a>
+        <a href="/works/?mode=guide">
+          <span>作品练习</span>
+          <strong>{{ works.length }} 个抓手</strong>
+          <p>按问题、理论和技巧选择一部作品。</p>
+        </a>
+      </nav>
+    </section>
 
     <section class="kb-band kb-home-reading" aria-label="精选阅读">
       <div class="kb-home-reading__paths">

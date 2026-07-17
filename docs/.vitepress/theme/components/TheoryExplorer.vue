@@ -1,26 +1,8 @@
 <script setup lang="ts">
 import { data as catalog } from '../data/catalog.data'
+import { theoryGroupDefinitions } from '../data/method-groups'
 
-const groupDefinitions = [
-  {
-    key: '批评基础',
-    description: '先区分描述、解释和判断，建立讨论作品时最基本的证据意识。'
-  },
-  {
-    key: '文本细读',
-    description: '从语言、形式、叙述和文体出发，观察作品怎样产生意义。'
-  },
-  {
-    key: '文化与历史',
-    description: '把文学放回身份、权力、制度和历史经验之中重新理解。'
-  },
-  {
-    key: '概念工具',
-    description: '解释理论阅读中反复出现、又容易被口号化的核心概念。'
-  }
-]
-
-const theoryGroups = groupDefinitions
+const theoryGroups = theoryGroupDefinitions
   .map((group) => ({
     ...group,
     entries: catalog.theories.filter((entry) => entry.theoryGroup === group.key)
@@ -33,6 +15,8 @@ const entryKindLabels = {
   lens: '批评视角',
   concept: '概念工具'
 } as const
+
+const guideHref = (slug: string) => `/works/?mode=guide&theory=${encodeURIComponent(slug)}`
 </script>
 
 <template>
@@ -47,13 +31,13 @@ const entryKindLabels = {
         <p>{{ group.description }}</p>
       </header>
       <div class="kb-theory-list" :aria-labelledby="`theory-group-${group.key}`">
-        <a v-for="entry in group.entries" :key="entry.slug" :href="entry.link" class="kb-theory-row">
+        <article v-for="entry in group.entries" :key="entry.slug" class="kb-theory-row">
           <div class="kb-theory-row__body">
             <div class="kb-theory-row__topline">
               <span>{{ entry.difficulty }}</span>
               <span>{{ entryKindLabels[entry.entryKind] }}</span>
             </div>
-            <h3>{{ entry.title }}</h3>
+            <h3><a :href="entry.link">{{ entry.title }}</a></h3>
             <p>{{ entry.summary }}</p>
           </div>
           <div class="kb-theory-row__question">
@@ -63,9 +47,13 @@ const entryKindLabels = {
               建议先读：{{ entry.prerequisites.map((item) => item.title).join('、') }}
             </small>
             <small v-else>可直接开始</small>
-            <small>{{ entry.works.length }} 部作品 · {{ entry.topics.length }} 个专题</small>
+            <small>正文案例 {{ entry.works.length }} 部 · {{ entry.topics.length }} 个专题</small>
+            <a v-if="entry.guideWorks.length" class="kb-method-guide-link" :href="guideHref(entry.slug)">
+              查看 {{ entry.guideWorks.length }} 部作品抓手
+            </a>
+            <small v-else class="kb-method-guide-empty">暂未配置作品抓手</small>
           </div>
-        </a>
+        </article>
       </div>
     </section>
   </section>

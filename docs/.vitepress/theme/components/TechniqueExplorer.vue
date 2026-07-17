@@ -1,35 +1,15 @@
 <script setup lang="ts">
 import { data as catalog } from '../data/catalog.data'
+import { techniqueGroupDefinitions } from '../data/method-groups'
 
-const groupDefinitions = [
-  {
-    key: '语言与修辞',
-    description: '辨认词语、意象和修辞关系怎样改变句子的力度、距离与含义。'
-  },
-  {
-    key: '叙述与结构',
-    description: '观察谁在讲述、信息怎样分配，以及次序和重复如何组织阅读经验。'
-  },
-  {
-    key: '人物与场景',
-    description: '从行动、对话、物件和空间线索理解人物怎样被塑造，场景怎样承载关系。'
-  },
-  {
-    key: '诗歌与节奏',
-    description: '从声音、停顿、格律和诗行结构进入诗歌。'
-  },
-  {
-    key: '戏剧与舞台',
-    description: '从台词、行动、场面和观演关系理解戏剧的舞台效果。'
-  }
-]
-
-const techniqueGroups = groupDefinitions
+const techniqueGroups = techniqueGroupDefinitions
   .map((group) => ({
     ...group,
     entries: catalog.techniques.filter((entry) => entry.techniqueGroup === group.key)
   }))
   .filter((group) => group.entries.length)
+
+const guideHref = (slug: string) => `/works/?mode=guide&technique=${encodeURIComponent(slug)}`
 </script>
 
 <template>
@@ -40,22 +20,26 @@ const techniqueGroups = groupDefinitions
         <p>{{ group.description }}</p>
       </header>
       <div class="kb-technique-list" :aria-labelledby="`technique-group-${group.key}`">
-        <a v-for="entry in group.entries" :key="entry.slug" :href="entry.link" class="kb-technique-row">
+        <article v-for="entry in group.entries" :key="entry.slug" class="kb-technique-row">
           <div class="kb-technique-row__body">
             <div class="kb-technique-row__topline">
               <span>{{ entry.difficulty }}</span>
               <span>{{ entry.techniqueGroup }}</span>
             </div>
-            <h3>{{ entry.title }}</h3>
+            <h3><a :href="entry.link">{{ entry.title }}</a></h3>
             <p>{{ entry.summary }}</p>
           </div>
           <div class="kb-technique-row__practice">
             <span>主要作用</span>
             <strong>{{ entry.coreFunction }}</strong>
             <small>识别：{{ entry.identifyBy.join('、') }}</small>
-            <small>{{ entry.works.length }} 部作品 · {{ entry.theories.length }} 个理论入口</small>
+            <small>正文案例 {{ entry.works.length }} 部 · {{ entry.theories.length }} 个理论入口</small>
+            <a v-if="entry.guideWorks.length" class="kb-method-guide-link" :href="guideHref(entry.slug)">
+              查看 {{ entry.guideWorks.length }} 部作品抓手
+            </a>
+            <small v-else class="kb-method-guide-empty">暂未配置作品抓手</small>
           </div>
-        </a>
+        </article>
       </div>
     </section>
   </section>
