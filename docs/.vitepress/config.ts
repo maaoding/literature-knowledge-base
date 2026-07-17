@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { defineConfig } from 'vitepress'
 import { createSidebar, loadContentCatalog } from './content/catalog.node'
+import { SITE_ORIGIN, transformKnowledgePageData } from './content/seo'
 
 const catalog = loadContentCatalog()
 const styleTestIndex = path.resolve(process.cwd(), 'docs/public/style-test/index.html')
@@ -23,6 +24,25 @@ export default defineConfig({
   description: '文学史、文学名著与文学作家推荐',
   cleanUrls: true,
   lastUpdated: true,
+  sitemap: {
+    hostname: SITE_ORIGIN,
+    transformItems(items) {
+      if (!items.some((item) => item.url.replace(/^\//, '') === 'style-test/')) {
+        items.push({ url: 'style-test/' })
+      }
+      return items
+    }
+  },
+  transformPageData: transformKnowledgePageData,
+  transformHtml(html, _id, context) {
+    if (!context.pageData.isNotFound) return
+    return html
+      .replace(
+        /<meta name="description" content="[^"]*">/,
+        '<meta name="description" content="请求的页面不存在，请返回文学知识库继续浏览。">'
+      )
+      .replace('</head>', '    <meta name="robots" content="noindex,follow">\n  </head>')
+  },
   vite: {
     plugins: [{
       name: 'serve-style-test-index',
@@ -111,9 +131,13 @@ export default defineConfig({
     darkModeSwitchTitle: '切换到深色模式',
     sidebarMenuLabel: '菜单',
     returnToTopLabel: '返回顶部',
-    footer: {
-      message: '以文学史为线索，以作家和作品为节点。',
-      copyright: 'Copyright © 2026 文学知识库'
+    skipToContentLabel: '跳到正文',
+    notFound: {
+      code: '404',
+      title: '页面未找到',
+      quote: '请求的页面不存在，请从稳定入口继续浏览。',
+      linkLabel: '返回文学知识库首页',
+      linkText: '返回首页'
     }
   }
 })

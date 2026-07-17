@@ -8,11 +8,13 @@ import ContentSources from './components/ContentSources.vue'
 import HistoryIndex from './components/HistoryIndex.vue'
 import KnowledgeHome from './components/KnowledgeHome.vue'
 import MethodExplorer from './components/MethodExplorer.vue'
+import NotFoundPage from './components/NotFoundPage.vue'
 import ReadingPathGoal from './components/ReadingPathGoal.vue'
 import ReadingPathList from './components/ReadingPathList.vue'
 import ReadingPathNext from './components/ReadingPathNext.vue'
 import ReadingPathSteps from './components/ReadingPathSteps.vue'
 import RelatedContent from './components/RelatedContent.vue'
+import SiteFooter from './components/SiteFooter.vue'
 import TimelineView from './components/TimelineView.vue'
 import TheoryExplorer from './components/TheoryExplorer.vue'
 import TechniqueExplorer from './components/TechniqueExplorer.vue'
@@ -25,11 +27,13 @@ export default {
   extends: DefaultTheme,
   Layout() {
     return h(DefaultTheme.Layout, null, {
+      'not-found': () => h(NotFoundPage),
       'doc-footer-before': () => h('div', { class: 'kb-doc-footer-extras' }, [
         h(WorkReadingGuide),
         h(RelatedContent),
         h(ContentSources)
-      ])
+      ]),
+      'layout-bottom': () => h(SiteFooter)
     })
   },
   enhanceApp({ app }) {

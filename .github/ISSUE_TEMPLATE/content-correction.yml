@@ -1,0 +1,53 @@
+name: 内容纠错
+description: 报告文学史、作家、作品或阅读方法页面中的事实、来源、链接与表述问题
+title: "[内容纠错] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢协助校订。请尽量提供准确页面、具体位置和可核对依据；不要提交受版权限制的长段原文。
+  - type: dropdown
+    id: content-type
+    attributes:
+      label: 内容类型
+      options:
+        - 文学史
+        - 作家
+        - 作品
+        - 阅读路径或专题
+        - 文学理论或技巧
+        - 搜索、导航或链接
+        - 其他
+    validations:
+      required: true
+  - type: input
+    id: page-url
+    attributes:
+      label: 页面地址
+      placeholder: https://literature-knowledge-base.maaoding.icu/works/作品名
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题说明
+      description: 请指出具体段落、字段或链接，以及为什么需要修正。
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: 建议修正
+      description: 可提供建议写法；若不确定，可留空。
+  - type: input
+    id: evidence
+    attributes:
+      label: 核对依据
+      description: 优先填写档案馆、大学、图书馆、出版社或专业研究资料的链接或书目信息。
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: 提交确认
+      options:
+        - label: 我没有粘贴受版权限制的长段原文，也没有提交私人信息。
+          required: true

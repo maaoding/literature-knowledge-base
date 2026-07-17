@@ -1416,6 +1416,101 @@ for (const url of ['/', '/history/', '/authors/', '/works/', '/paths/', '/topics
   assert(fs.existsSync(distTarget(url)), `missing built index URL: ${url}`)
 }
 
+const siteOrigin = 'https://literature-knowledge-base.maaoding.icu'
+const shareImageUrl = `${siteOrigin}/images/literature-share.png`
+const shareImagePath = path.join(docsDir, 'public', 'images', 'literature-share.png')
+assert(fs.existsSync(shareImagePath), 'missing global social share image')
+if (fs.existsSync(shareImagePath)) {
+  const shareImage = fs.readFileSync(shareImagePath)
+  assert(shareImage.readUInt32BE(16) === 1200 && shareImage.readUInt32BE(20) === 630, 'social share image must be exactly 1200x630')
+}
+
+const staticSeoPages = [
+  ['/', 'CollectionPage'],
+  ['/history/', 'CollectionPage'],
+  ['/authors/', 'CollectionPage'],
+  ['/works/', 'CollectionPage'],
+  ['/methods/', 'CollectionPage'],
+  ['/paths/', 'CollectionPage'],
+  ['/topics/', 'CollectionPage'],
+  ['/theory/', 'CollectionPage'],
+  ['/techniques/', 'CollectionPage'],
+  ['/about/', 'WebPage']
+]
+const contentSeoPages = catalog.entries.map((entry) => [
+  entry.url,
+  entry.type === 'author' ? 'ProfilePage' : 'Article',
+  entry
+])
+for (const [url, expectedType, entry] of [...staticSeoPages, ...contentSeoPages]) {
+  const builtPage = fs.readFileSync(distTarget(url), 'utf8')
+  const canonical = new URL(url, siteOrigin).href
+  assert(/<meta name="description" content="[^"]+">/.test(builtPage), `${url} is missing a page description`)
+  assert(builtPage.includes(`<link rel="canonical" href="${canonical}">`), `${url} has an invalid canonical URL`)
+  assert(builtPage.includes(`<meta property="og:url" content="${canonical}">`), `${url} has an invalid Open Graph URL`)
+  assert(builtPage.includes('<meta property="og:title" content="'), `${url} is missing an Open Graph title`)
+  assert(builtPage.includes('<meta property="og:description" content="'), `${url} is missing an Open Graph description`)
+  assert(builtPage.includes(`<meta property="og:image" content="${shareImageUrl}">`), `${url} is missing the global Open Graph image`)
+  assert(builtPage.includes('<meta name="twitter:card" content="summary_large_image">'), `${url} is missing Twitter card metadata`)
+  assert(builtPage.includes(`<meta name="twitter:image" content="${shareImageUrl}">`), `${url} is missing the Twitter image`)
+
+  const jsonLdSource = builtPage.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1]
+  assert(Boolean(jsonLdSource), `${url} is missing JSON-LD`)
+  if (!jsonLdSource) continue
+  try {
+    const jsonLd = JSON.parse(jsonLdSource)
+    const graph = jsonLd['@graph'] ?? []
+    const primary = graph[0]
+    const breadcrumbs = graph.find((item) => item['@type'] === 'BreadcrumbList')
+    assert(jsonLd['@context'] === 'https://schema.org', `${url} has an invalid JSON-LD context`)
+    assert(primary?.['@type'] === expectedType, `${url} expected JSON-LD ${expectedType}, found ${primary?.['@type']}`)
+    assert(primary?.url === canonical, `${url} JSON-LD URL does not match canonical`)
+    assert(Array.isArray(breadcrumbs?.itemListElement) && breadcrumbs.itemListElement.length >= 1, `${url} is missing JSON-LD breadcrumbs`)
+    if (entry?.type === 'work') {
+      assert(primary.mainEntity?.['@type'] === 'Book', `${url} does not describe its work as a Book`)
+    }
+    if (entry?.type === 'author') {
+      assert(primary.mainEntity?.['@type'] === 'Person', `${url} does not describe its author as a Person`)
+    }
+    if (entry?.contentVersion === 2) {
+      assert(primary.dateModified === entry.reviewedAt, `${url} JSON-LD dateModified does not match reviewedAt`)
+    }
+  } catch (error) {
+    assert(false, `${url} contains invalid JSON-LD: ${String(error)}`)
+  }
+}
+
+const sitemapPath = path.join(distDir, 'sitemap.xml')
+assert(fs.existsSync(sitemapPath), 'missing sitemap.xml')
+if (fs.existsSync(sitemapPath)) {
+  const sitemapSource = fs.readFileSync(sitemapPath, 'utf8')
+  const sitemapUrls = [...sitemapSource.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
+  assert(sitemapUrls.length === 274, `expected 274 sitemap URLs, found ${sitemapUrls.length}`)
+  assert(new Set(sitemapUrls).size === sitemapUrls.length, 'sitemap contains duplicate URLs')
+  for (const [url] of [...staticSeoPages, ...contentSeoPages]) {
+    assert(sitemapUrls.includes(new URL(url, siteOrigin).href), `sitemap is missing ${url}`)
+  }
+  assert(sitemapUrls.includes(`${siteOrigin}/style-test/`), 'sitemap is missing the standalone style test')
+}
+
+assert(fs.existsSync(distTarget('/about/')), 'missing built editorial policy page')
+const aboutBuild = fs.readFileSync(distTarget('/about/'), 'utf8')
+for (const section of ['选目原则', '内容怎样组织', '来源与校订', '工具使用', '版权边界', '更新与纠错']) {
+  assert(aboutBuild.includes(section), `editorial policy page is missing section: ${section}`)
+}
+assert(aboutBuild.includes('content-correction.yml'), 'editorial policy page is missing its correction link')
+
+const notFoundBuild = fs.readFileSync(path.join(distDir, '404.html'), 'utf8')
+assert(notFoundBuild.includes('content="请求的页面不存在，请返回文学知识库继续浏览。"'), '404 page has a non-Chinese description')
+assert(notFoundBuild.includes('<meta name="robots" content="noindex,follow">'), '404 page is missing noindex metadata')
+const themeAssetSource = filesUnder(path.join(distDir, 'assets'), new Set(['.js']))
+  .map((file) => fs.readFileSync(file, 'utf8'))
+  .join('\n')
+for (const text of ['这一页暂时不在书架上', '返回首页', '浏览文学史', '查找名著', '使用阅读方法']) {
+  assert(themeAssetSource.includes(text), `custom Chinese 404 is missing: ${text}`)
+}
+assert(themeAssetSource.includes('编辑说明') && themeAssetSource.includes('内容纠错'), 'site footer is missing trust and correction links')
+
 const historyIndexBuild = fs.readFileSync(distTarget('/history/'), 'utf8')
 const homeIndexBuild = fs.readFileSync(distTarget('/'), 'utf8')
 const workIndexBuild = fs.readFileSync(distTarget('/works/'), 'utf8')
