@@ -46,13 +46,7 @@ export default defineConfig({
       { text: '文学史', link: '/history/' },
       { text: '作家', link: '/authors/' },
       { text: '名著', link: '/works/' },
-      {
-        text: '阅读方法',
-        items: [
-          { text: '文学理论', link: '/theory/' },
-          { text: '文学技巧', link: '/techniques/' }
-        ]
-      },
+      { text: '阅读方法', link: '/methods/' },
       { text: '推荐阅读', link: '/paths/' },
       { text: '专题', link: '/topics/' },
       { text: '文学风格测试', link: '/style-test/', target: '_self' }

@@ -58,17 +58,17 @@ const formatIndex = (index: number) => String(index + 1).padStart(2, '0')
         <p>先学会提出问题和识别形式，再到作品页完成一次细读练习。</p>
       </div>
       <nav class="kb-home-methods__links" aria-label="阅读方法入口">
-        <a href="/theory/">
+        <a href="/methods/">
           <span>解释问题</span>
           <strong>{{ theories.length }} 个理论</strong>
           <p>从解释依据、历史语境和方法边界开始。</p>
         </a>
-        <a href="/techniques/">
+        <a href="/methods/?mode=technique">
           <span>识别形式</span>
           <strong>{{ techniques.length }} 个技巧</strong>
           <p>从语言、叙述、人物、诗歌和舞台线索开始。</p>
         </a>
-        <a href="/works/?mode=guide">
+        <a href="/methods/?mode=practice">
           <span>作品练习</span>
           <strong>{{ works.length }} 个抓手</strong>
           <p>按问题、理论和技巧选择一部作品。</p>

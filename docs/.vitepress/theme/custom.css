@@ -1059,6 +1059,10 @@ body::before {
   background: var(--kb-control-bg);
 }
 
+.kb-mode-switch--three {
+  grid-template-columns: repeat(3, minmax(96px, 1fr));
+}
+
 .kb-mode-switch button {
   min-height: 36px;
   padding: 0 14px;
@@ -1927,6 +1931,86 @@ body::before {
   margin-top: 10px;
 }
 
+.kb-method-list {
+  border-bottom: 1px solid var(--kb-line);
+}
+
+.kb-method-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(270px, 0.48fr);
+  gap: 28px;
+  min-width: 0;
+  padding: 22px 0;
+  border-top: 1px solid var(--kb-line);
+}
+
+.kb-method-row__body,
+.kb-method-row__focus {
+  min-width: 0;
+}
+
+.kb-method-row__topline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  color: var(--kb-teal);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.kb-method-row h3 {
+  margin: 8px 0 6px;
+  border: 0;
+  font-family: Georgia, "Times New Roman", "SimSun", serif;
+  font-size: 23px;
+  line-height: 1.35;
+}
+
+.kb-method-row h3 a {
+  color: var(--kb-ink);
+  text-decoration: none;
+}
+
+.kb-method-row h3 a:hover,
+.kb-method-row__focus a:hover {
+  color: var(--kb-red);
+}
+
+.kb-method-row__body p {
+  margin: 0;
+  color: var(--kb-muted);
+  line-height: 1.7;
+}
+
+.kb-method-row__focus {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 24px;
+  border-left: 1px solid var(--kb-line);
+}
+
+.kb-method-row__focus span,
+.kb-method-row__focus small {
+  color: var(--kb-muted);
+  font-size: 12px;
+}
+
+.kb-method-row__focus strong {
+  margin: 6px 0 12px;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+
+.kb-method-row__focus a {
+  width: fit-content;
+  margin-top: 10px;
+  color: var(--kb-red);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
 .kb-theory-index__group {
   margin-top: 38px;
 }
@@ -2030,6 +2114,11 @@ body::before {
     gap: 12px;
   }
 
+  .kb-method-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
   .kb-theory-row__question {
     padding: 14px 0 0;
     border-top: 1px solid var(--kb-line);
@@ -2037,6 +2126,12 @@ body::before {
   }
 
   .kb-technique-row__practice {
+    padding: 14px 0 0;
+    border-top: 1px solid var(--kb-line);
+    border-left: 0;
+  }
+
+  .kb-method-row__focus {
     padding: 14px 0 0;
     border-top: 1px solid var(--kb-line);
     border-left: 0;

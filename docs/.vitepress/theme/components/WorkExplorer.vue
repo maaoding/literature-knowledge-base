@@ -3,6 +3,8 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import type { Difficulty } from '../../content/schema'
 import { data as catalog } from '../data/catalog.data'
 import { techniqueGroupDefinitions, theoryGroupDefinitions } from '../data/method-groups'
+import { createGuideWorks, matchesGuideQuery } from '../data/method-practice'
+import MethodPracticeRows from './MethodPracticeRows.vue'
 
 const { techniques, theories, topics, works } = catalog
 const pageSize = 20
@@ -28,8 +30,6 @@ const topicGroups = ['文学传统', '社会经验', '现代转型'].map((group)
   group,
   topics: topics.filter((topic) => topic.sidebarGroup === group)
 }))
-const theoryBySlug = new Map(theories.map((entry) => [entry.slug, entry]))
-const techniqueBySlug = new Map(techniques.map((entry) => [entry.slug, entry]))
 const usedTheorySlugs = new Set(theories.filter((entry) => entry.guideWorks.length).map((entry) => entry.slug))
 const usedTechniqueSlugs = new Set(techniques.filter((entry) => entry.guideWorks.length).map((entry) => entry.slug))
 const theoryGroups = theoryGroupDefinitions
@@ -44,11 +44,7 @@ const techniqueGroups = techniqueGroupDefinitions
     entries: techniques.filter((entry) => entry.techniqueGroup === group.key && entry.guideWorks.length)
   }))
   .filter((group) => group.entries.length)
-const indexedWorks = works.map((work) => ({
-  ...work,
-  guideTheory: theoryBySlug.get(work.readingGuide.theorySlug),
-  guideTechnique: techniqueBySlug.get(work.readingGuide.techniqueSlug)
-}))
+const indexedWorks = createGuideWorks(catalog)
 
 const countryOptions = computed(() => [
   '全部',
@@ -64,19 +60,7 @@ const selectedTopicWorkSlugs = computed(() => {
 const filteredWorks = computed(() => {
   const keyword = query.value.trim().toLowerCase()
   const result = indexedWorks.filter((work) => {
-    const keywordFields = mode.value === 'guide'
-      ? [
-          work.title,
-          work.author,
-          work.country,
-          work.period,
-          ...work.tags,
-          ...work.genres,
-          work.readingGuide.question,
-          work.guideTheory?.title ?? '',
-          work.guideTechnique?.title ?? ''
-        ]
-      : [
+    const keywordFields = [
           work.title,
           work.author,
           work.country,
@@ -85,7 +69,9 @@ const filteredWorks = computed(() => {
           ...work.tags,
           ...work.genres
         ]
-    const matchesKeyword = !keyword || keywordFields.join(' ').toLowerCase().includes(keyword)
+    const matchesKeyword = mode.value === 'guide'
+      ? matchesGuideQuery(work, keyword)
+      : !keyword || keywordFields.join(' ').toLowerCase().includes(keyword)
     const matchesDifficulty = selectedDifficulty.value === '全部' || work.difficulty === selectedDifficulty.value
 
     if (mode.value === 'guide') {
@@ -316,26 +302,7 @@ watch(pageCount, (count) => {
 
     <p v-if="!filteredWorks.length" class="kb-empty-state">没有符合当前条件的作品。</p>
 
-    <div v-if="filteredWorks.length && mode === 'guide'" class="kb-guide-list">
-      <article v-for="work in visibleWorks" :key="work.slug" class="kb-guide-row">
-        <div class="kb-guide-row__coordinate">
-          <span class="kb-pill">{{ work.difficulty }}</span>
-          <span>{{ work.country }} · {{ work.period }}</span>
-        </div>
-        <div class="kb-guide-row__body">
-          <h3><a :href="work.link">{{ work.title }}</a></h3>
-          <span class="kb-guide-row__author">
-            {{ work.author }}
-          </span>
-          <p><strong>核心问题</strong>{{ work.readingGuide.question }}</p>
-        </div>
-        <div class="kb-guide-row__methods">
-          <span>建议方法</span>
-          <a v-if="work.guideTheory" :href="work.guideTheory.link">{{ work.guideTheory.title }}</a>
-          <a v-if="work.guideTechnique" :href="work.guideTechnique.link">{{ work.guideTechnique.title }}</a>
-        </div>
-      </article>
-    </div>
+    <MethodPracticeRows v-if="filteredWorks.length && mode === 'guide'" :works="visibleWorks" />
 
     <div v-else-if="filteredWorks.length && viewMode === 'list'" class="kb-catalog-list">
       <article v-for="work in visibleWorks" :key="work.slug" class="kb-catalog-row">

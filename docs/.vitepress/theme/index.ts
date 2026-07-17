@@ -7,6 +7,7 @@ import AuthorGrid from './components/AuthorGrid.vue'
 import ContentSources from './components/ContentSources.vue'
 import HistoryIndex from './components/HistoryIndex.vue'
 import KnowledgeHome from './components/KnowledgeHome.vue'
+import MethodExplorer from './components/MethodExplorer.vue'
 import ReadingPathGoal from './components/ReadingPathGoal.vue'
 import ReadingPathList from './components/ReadingPathList.vue'
 import ReadingPathNext from './components/ReadingPathNext.vue'
@@ -35,6 +36,7 @@ export default {
     app.component('AuthorGrid', AuthorGrid)
     app.component('HistoryIndex', HistoryIndex)
     app.component('KnowledgeHome', KnowledgeHome)
+    app.component('MethodExplorer', MethodExplorer)
     app.component('ReadingPathGoal', ReadingPathGoal)
     app.component('ReadingPathList', ReadingPathList)
     app.component('ReadingPathNext', ReadingPathNext)

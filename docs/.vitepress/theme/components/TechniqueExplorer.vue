@@ -9,7 +9,7 @@ const techniqueGroups = techniqueGroupDefinitions
   }))
   .filter((group) => group.entries.length)
 
-const guideHref = (slug: string) => `/works/?mode=guide&technique=${encodeURIComponent(slug)}`
+const guideHref = (slug: string) => `/methods/?mode=practice&technique=${encodeURIComponent(slug)}`
 </script>
 
 <template>

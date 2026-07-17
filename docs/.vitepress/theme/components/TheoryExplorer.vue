@@ -16,7 +16,7 @@ const entryKindLabels = {
   concept: '概念工具'
 } as const
 
-const guideHref = (slug: string) => `/works/?mode=guide&theory=${encodeURIComponent(slug)}`
+const guideHref = (slug: string) => `/methods/?mode=practice&theory=${encodeURIComponent(slug)}`
 </script>
 
 <template>
