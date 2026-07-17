@@ -8,6 +8,7 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs --host 127.0.0.1",
     "docs:check": "node scripts/validate-knowledge-base.mjs",
+    "docs:quality:audit": "node scripts/audit-content-quality.mjs",
     "docs:sources:check": "node scripts/check-external-sources.mjs"
   },
   "devDependencies": {
