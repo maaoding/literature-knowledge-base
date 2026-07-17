@@ -2684,6 +2684,19 @@ body::before {
     width: 100%;
   }
 
+  .kb-mode-switch--three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .kb-mode-switch button {
+    min-width: 0;
+    padding: 0 8px;
+  }
+
+  .kb-methods-explorer .kb-select-grid {
+    grid-template-columns: 1fr;
+  }
+
   .kb-path-filter {
     width: 100%;
     grid-auto-columns: minmax(0, 1fr);

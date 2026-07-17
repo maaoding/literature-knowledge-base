@@ -177,9 +177,8 @@ onMounted(async () => {
   }
 
   const page = Number.parseInt(params.get('page') ?? '1', 10)
-  currentPage.value = Number.isFinite(page) && page > 0 ? page : 1
   await nextTick()
-  currentPage.value = Math.min(currentPage.value, pageCount.value)
+  currentPage.value = Number.isFinite(page) && page > 0 && page <= pageCount.value ? page : 1
   await nextTick()
   ready.value = true
   syncUrl()
