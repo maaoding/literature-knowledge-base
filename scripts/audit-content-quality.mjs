@@ -6,6 +6,7 @@ const root = process.cwd()
 const docsDir = path.join(root, 'docs')
 const reportPath = path.join(root, 'content-sources', 'quality-audit.json')
 const refreshQueue = process.argv.includes('--refresh-queue')
+const reviewBaseline = '2026-07-17'
 const professionalKinds = new Set(['archive', 'institution', 'scholarship', 'book'])
 const sections = [
   ['history', 'history'],
@@ -38,6 +39,14 @@ function readEntries() {
 
 function unique(values) {
   return [...new Set(values.filter(Boolean))]
+}
+
+function normalizeReviewedAt(value) {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString().slice(0, 10)
+  if (typeof value !== 'string') return null
+  const match = value.match(/^(\d{4}-\d{2}-\d{2})/)
+  if (!match || Number.isNaN(Date.parse(`${match[1]}T00:00:00Z`))) return null
+  return match[1]
 }
 
 function sourceFlags(entry) {
@@ -143,6 +152,8 @@ for (const { source } of externalSourceReferences) {
 const pageAudits = entries.map((entry) => {
   const sources = entry.sources ?? []
   const flags = sourceFlags(entry)
+  const reviewedAt = normalizeReviewedAt(entry.reviewedAt)
+  const deepPage = entry.contentVersion === 2
   return {
     slug: entry.slug,
     title: entry.title,
@@ -151,7 +162,9 @@ const pageAudits = entries.map((entry) => {
     file: entry.file,
     featured: entry.featured === true,
     homeOrder: entry.homeOrder ?? null,
-    reviewedAt: entry.reviewedAt ?? null,
+    reviewedAt,
+    deepPage,
+    meetsReviewBaseline: deepPage && reviewedAt !== null && reviewedAt >= reviewBaseline,
     sourceCount: sources.length,
     sourceKinds: unique(sources.map((source) => source.kind)),
     sourcePublishers: unique(sources.map((source) => source.publisher)),
@@ -205,8 +218,19 @@ const reviewQueue = frozenSlugs.map((slug) => {
   }
 })
 
+const baselineReviewedPages = pageAudits.filter((entry) => entry.meetsReviewBaseline)
+const baselineRemainingPages = pageAudits.filter((entry) => entry.deepPage && !entry.meetsReviewBaseline)
+const reviewProgressByType = Object.fromEntries(
+  unique(deepEntries.map((entry) => entry.type)).sort().map((type) => {
+    const typePages = pageAudits.filter((entry) => entry.deepPage && entry.type === type)
+    const reviewed = typePages.filter((entry) => entry.meetsReviewBaseline).length
+    return [type, { reviewed, total: typePages.length, remaining: typePages.length - reviewed }]
+  })
+)
+
 const report = {
   generatedAt: new Date().toISOString(),
+  reviewBaseline,
   queueRefreshed: refreshQueue || !previousReport,
   counts: {
     entries: entries.length,
@@ -218,8 +242,12 @@ const report = {
     highExposurePages: pageAudits.filter((entry) => entry.featured || entry.homeOrder !== null).length,
     sourceRiskPages: pageAudits.filter((entry) => entry.sourceFlags.some((flag) => selectionFlags.has(flag))).length,
     reviewQueue: reviewQueue.length,
+    reviewedAtBaselinePages: baselineReviewedPages.length,
+    remainingReviewPages: baselineRemainingPages.length,
     hardIssues: hardIssues.length
   },
+  reviewProgressByType,
+  remainingReviewSlugs: baselineRemainingPages.map((entry) => entry.slug),
   sourceKindCounts,
   sourceDomainCounts: Object.fromEntries(Object.entries(sourceDomainCounts).sort((left, right) => right[1] - left[1])),
   hardIssues,
@@ -233,5 +261,6 @@ fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`)
 console.log(`audited ${entries.length} entries, ${deepEntries.length} deep pages and ${relationCount} relation references`)
 console.log(`found ${sourceReferences.length} source references and ${report.counts.uniqueExternalUrls} unique external URLs`)
 console.log(`review queue: ${reviewQueue.length}; hard issues: ${hardIssues.length}`)
+console.log(`reviewed at ${reviewBaseline} baseline: ${baselineReviewedPages.length}/${deepEntries.length}; remaining: ${baselineRemainingPages.length}`)
 console.log(`report: ${path.relative(root, reportPath)}`)
 if (hardIssues.length) process.exit(1)
