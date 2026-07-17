@@ -124,6 +124,12 @@ for (const entry of catalog.entries.filter((entry) => deepContentRules[entry.typ
   assert(new Set(sourceKeys).size === sourceKeys.length, `${entry.url} has duplicate sources`)
   assert(sources.filter((source) => source.kind === 'wikipedia').length <= 1, `${entry.url} has more than one Wikipedia source`)
   assert(sources.some((source) => source.kind !== 'wikipedia'), `${entry.url} must include a non-Wikipedia source`)
+  if (entry.type === 'history' || entry.type === 'author' || entry.type === 'work') {
+    assert(
+      sources.some((source) => ['archive', 'institution', 'scholarship', 'book'].includes(source.kind)),
+      `${entry.url} must include an archive, institution, scholarship or book source`
+    )
+  }
   if (entry.type === 'theory' || entry.type === 'technique') {
     assert(sources.length >= 3, `${entry.url} must have 3-5 sources`)
     assert(sources.some((source) => source.kind === 'book'), `${entry.url} must include a published book source`)
