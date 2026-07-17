@@ -113,10 +113,12 @@ const deepContentRules = {
   }
 }
 const contentDirectory = { author: 'authors', work: 'works', history: 'history', theory: 'theory', technique: 'techniques' }
+const reviewBaseline = '2026-07-17'
 let deepContentCount = 0
 for (const entry of catalog.entries.filter((entry) => deepContentRules[entry.type])) {
   assert(entry.contentVersion === 2, `${entry.url} has incomplete contentVersion metadata`)
   assert(/^\d{4}-\d{2}-\d{2}$/.test(entry.reviewedAt ?? ''), `${entry.url} has invalid reviewedAt`)
+  assert(entry.reviewedAt >= reviewBaseline, `${entry.url} was not reviewed at or after ${reviewBaseline}`)
   assert(Array.isArray(entry.sources) && entry.sources.length >= 2 && entry.sources.length <= 5, `${entry.url} must have 2-5 sources`)
 
   const sources = entry.sources ?? []
