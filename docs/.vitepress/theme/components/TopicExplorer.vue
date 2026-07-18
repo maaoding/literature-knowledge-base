@@ -37,9 +37,9 @@ const topicGroups = [
           <h3>{{ topic.title }}</h3>
           <p>{{ topic.summary }}</p>
           <div class="kb-topic-card__counts">
-            <span>{{ topic.works.length }} 部作品</span>
-            <span>{{ topic.authors.length }} 位作家</span>
-            <span>{{ topic.paths.length }} 条路径</span>
+            <span>{{ topic.workCount }} 部作品</span>
+            <span>{{ topic.authorCount }} 位作家</span>
+            <span>{{ topic.pathCount }} 条路径</span>
           </div>
         </a>
       </div>

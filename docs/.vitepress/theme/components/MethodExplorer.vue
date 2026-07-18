@@ -254,7 +254,7 @@ watch(pageCount, (count) => {
             <select v-model="selectedTheory">
               <option value="全部">全部</option>
               <optgroup v-for="group in theoryGroups" :key="group.key" :label="group.key">
-                <option v-for="entry in group.entries" :key="entry.slug" :value="entry.slug">{{ entry.title }}（{{ entry.guideWorks.length }}）</option>
+                <option v-for="entry in group.entries" :key="entry.slug" :value="entry.slug">{{ entry.title }}（{{ entry.guideWorkCount }}）</option>
               </optgroup>
             </select>
           </label>
@@ -263,7 +263,7 @@ watch(pageCount, (count) => {
             <select v-model="selectedTechnique">
               <option value="全部">全部</option>
               <optgroup v-for="group in techniqueGroups" :key="group.key" :label="group.key">
-                <option v-for="entry in group.entries" :key="entry.slug" :value="entry.slug">{{ entry.title }}（{{ entry.guideWorks.length }}）</option>
+                <option v-for="entry in group.entries" :key="entry.slug" :value="entry.slug">{{ entry.title }}（{{ entry.guideWorkCount }}）</option>
               </optgroup>
             </select>
           </label>
@@ -286,7 +286,7 @@ watch(pageCount, (count) => {
           <strong>{{ entry.coreQuestion }}</strong>
           <small v-if="entry.prerequisites.length">建议先读：{{ entry.prerequisites.map((item) => item.title).join('、') }}</small>
           <small v-else>可直接开始</small>
-          <a :href="`/methods/?mode=practice&theory=${encodeURIComponent(entry.slug)}`">{{ entry.guideWorks.length }} 部作品抓手</a>
+          <a :href="`/methods/?mode=practice&theory=${encodeURIComponent(entry.slug)}`">{{ entry.guideWorkCount }} 部作品抓手</a>
         </div>
       </article>
     </div>
@@ -302,7 +302,7 @@ watch(pageCount, (count) => {
           <span>主要作用</span>
           <strong>{{ entry.coreFunction }}</strong>
           <small>识别：{{ entry.identifyBy.join('、') }}</small>
-          <a :href="`/methods/?mode=practice&technique=${encodeURIComponent(entry.slug)}`">{{ entry.guideWorks.length }} 部作品抓手</a>
+          <a :href="`/methods/?mode=practice&technique=${encodeURIComponent(entry.slug)}`">{{ entry.guideWorkCount }} 部作品抓手</a>
         </div>
       </article>
     </div>

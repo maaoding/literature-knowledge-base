@@ -1,11 +1,11 @@
-import type { ContentCatalog } from '../../content/catalog'
+import type { ClientCatalog } from '../../content/client-catalog'
 
-export type GuideWork = ContentCatalog['works'][number] & {
-  guideTheory: ContentCatalog['theories'][number]
-  guideTechnique: ContentCatalog['techniques'][number]
+export type GuideWork = ClientCatalog['works'][number] & {
+  guideTheory: ClientCatalog['theories'][number]
+  guideTechnique: ClientCatalog['techniques'][number]
 }
 
-export function createGuideWorks(catalog: ContentCatalog): GuideWork[] {
+export function createGuideWorks(catalog: ClientCatalog): GuideWork[] {
   const theoryBySlug = new Map(catalog.theories.map((entry) => [entry.slug, entry]))
   const techniqueBySlug = new Map(catalog.techniques.map((entry) => [entry.slug, entry]))
 

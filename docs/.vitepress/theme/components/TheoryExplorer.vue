@@ -47,9 +47,9 @@ const guideHref = (slug: string) => `/methods/?mode=practice&theory=${encodeURIC
               建议先读：{{ entry.prerequisites.map((item) => item.title).join('、') }}
             </small>
             <small v-else>可直接开始</small>
-            <small>正文案例 {{ entry.works.length }} 部 · {{ entry.topics.length }} 个专题</small>
-            <a v-if="entry.guideWorks.length" class="kb-method-guide-link" :href="guideHref(entry.slug)">
-              查看 {{ entry.guideWorks.length }} 部作品抓手
+            <small>正文案例 {{ entry.workCount }} 部 · {{ entry.topicCount }} 个专题</small>
+            <a v-if="entry.guideWorkCount" class="kb-method-guide-link" :href="guideHref(entry.slug)">
+              查看 {{ entry.guideWorkCount }} 部作品抓手
             </a>
             <small v-else class="kb-method-guide-empty">暂未配置作品抓手</small>
           </div>

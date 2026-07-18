@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vitepress'
-import { data as catalog } from '../data/catalog.data'
+import { useData } from 'vitepress'
+import type { ContentCatalog } from '../../content/catalog'
 
-const route = useRoute()
+const { frontmatter } = useData()
+type RelationGroups = ContentCatalog['relationsByUrl'][string]
 const groupDefinitions = [
   { key: 'histories', title: '文学史' },
   { key: 'authors', title: '作家' },
@@ -12,20 +13,11 @@ const groupDefinitions = [
   { key: 'topics', title: '相关专题' }
 ] as const
 
-const currentUrl = computed(() => {
-  const path = route.path.split(/[?#]/)[0].replace(/\.html$/, '').replace(/\/$/, '')
-  try {
-    return decodeURIComponent(path)
-  } catch {
-    return path
-  }
-})
-
-const currentTopic = computed(() => catalog.topics.find((entry) => entry.link === currentUrl.value))
-const primaryPathSlug = computed(() => currentTopic.value?.pathSlugs[0])
+const pathSlugs = computed<string[]>(() => frontmatter.value.pathSlugs ?? [])
+const primaryPathSlug = computed(() => pathSlugs.value[0])
 
 const groups = computed(() => {
-  const related = catalog.relationsByUrl[currentUrl.value]
+  const related = frontmatter.value.relatedContent as RelationGroups | undefined
   if (!related) return []
   return groupDefinitions
     .map((definition) => ({ ...definition, items: related[definition.key] }))

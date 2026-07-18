@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useData, useRoute } from 'vitepress'
-import { data as catalog } from '../data/catalog.data'
+import { useData } from 'vitepress'
+import type { ContentCatalog } from '../../content/catalog'
 
-const route = useRoute()
 const { frontmatter } = useData()
+type RelationGroups = ContentCatalog['relationsByUrl'][string]
 
 const groupDefinitions = [
   { key: 'histories', title: '文学史坐标' },
@@ -16,25 +16,18 @@ const groupDefinitions = [
   { key: 'techniques', title: '相关技巧' }
 ] as const
 
-const currentUrl = computed(() => {
-  const path = route.path.split(/[?#]/)[0].replace(/\.html$/, '').replace(/\/$/, '')
-  try {
-    return decodeURIComponent(path)
-  } catch {
-    return path
-  }
-})
+const relatedContent = computed(() => frontmatter.value.relatedContent as RelationGroups | undefined)
 
 const groups = computed(() => {
   if (frontmatter.value.type === 'topic') {
-    const related = catalog.relationsByUrl[currentUrl.value]
+    const related = relatedContent.value
     if (!related) return []
     return groupDefinitions
       .filter((definition) => ['theories', 'techniques'].includes(definition.key))
       .map((definition) => ({ ...definition, items: related[definition.key].slice(0, 8) }))
       .filter((group) => group.items.length)
   }
-  const related = catalog.relationsByUrl[currentUrl.value]
+  const related = relatedContent.value
   if (!related) return []
   const definitions = frontmatter.value.type === 'path'
     ? groupDefinitions.filter((definition) => !['works', 'paths'].includes(definition.key))

@@ -1377,8 +1377,16 @@ const legacyFiles = [
 for (const file of legacyFiles) assert(!fs.existsSync(path.join(root, file)), `legacy content source still exists: ${file}`)
 
 const loaderSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'data', 'catalog.data.ts'), 'utf8')
+const clientCatalogSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'content', 'client-catalog.ts'), 'utf8')
+const seoSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'content', 'seo.ts'), 'utf8')
 assert(/includeSrc:\s*false/.test(loaderSource), 'content loader must not expose Markdown source')
 assert(/render:\s*false/.test(loaderSource), 'content loader must not render Markdown body into catalog data')
+assert(loaderSource.includes('buildClientCatalog(buildContentCatalog(entries))'), 'content loader must emit the compact client catalog')
+for (const field of ['sources', 'reviewedAt', 'contentVersion', 'recommendedFor']) {
+  assert(!clientCatalogSource.includes(`${field}:`), `client catalog must not expose unused field: ${field}`)
+}
+assert(!clientCatalogSource.includes('relationsByUrl'), 'client catalog must not ship the global relation table')
+assert(seoSource.includes('relatedContent?:') && seoSource.includes('{ relatedContent }'), 'page transform must inject route-scoped relations')
 const workExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'WorkExplorer.vue'), 'utf8')
 const authorExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'AuthorGrid.vue'), 'utf8')
 const topicExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'TopicExplorer.vue'), 'utf8')
@@ -1403,7 +1411,7 @@ assert(workExplorerSource.includes("params.set('mode', 'guide')"), 'work guide m
 assert(workExplorerSource.includes("params.set('theory'"), 'work theory filter is not persisted in the URL')
 assert(workExplorerSource.includes("params.set('technique'"), 'work technique filter is not persisted in the URL')
 assert(workExplorerSource.includes("mode.value === 'guide'"), 'work index does not separate catalog and guide modes')
-assert(workExplorerSource.includes('entry.guideWorks.length'), 'work guide filters do not exclude unused methods')
+assert(workExplorerSource.includes('entry.guideWorkCount'), 'work guide filters do not exclude unused methods')
 assert(!workExplorerSource.includes('readingGuide.exercise'), 'work guide search must not index hidden exercise text')
 assert(workExplorerSource.includes('work.bibliography.originalTitle') && workExplorerSource.includes('...work.aliases'), 'work index does not search aliases and bibliography metadata')
 assert(workExplorerSource.includes('<optgroup v-for="group in topicGroups"'), 'work topic filter is not grouped')
@@ -1424,20 +1432,20 @@ assert(pathExplorerSource.includes('path.pathKind'), 'path cards do not show the
 assert(pathExplorerSource.includes('work.stage'), 'path cards do not show reading stages')
 assert(pathStepsSource.includes("const stages = ['起点', '转折', '深化', '延伸']"), 'path step component does not render the four stages')
 assert(pathNextSource.includes('readingPath.nextPaths'), 'next path component does not use structured next paths')
-assert(topicRelationsSource.includes('pathSlugs[0]'), 'topic relations do not treat the first path as the suggested start')
+assert(topicRelationsSource.includes('pathSlugs.value[0]'), 'topic relations do not treat the first path as the suggested start')
 assert(topicRelationsSource.includes('建议起点'), 'topic relations do not label the suggested start')
 assert(theoryExplorerSource.includes('catalog.theories'), 'theory index does not use the structured catalog')
 assert(theoryExplorerSource.includes(".filter((group) => group.entries.length)"), 'theory index does not hide empty groups')
 assert(theoryExplorerSource.includes('建议先读：'), 'theory index does not label prerequisite reading')
 assert(theoryExplorerSource.includes('可直接开始'), 'theory index does not label direct starting points')
 assert(theoryExplorerSource.includes('<article v-for="entry in group.entries"'), 'theory index rows must use semantic articles')
-assert(theoryExplorerSource.includes('entry.guideWorks.length'), 'theory index does not expose guide applications')
+assert(theoryExplorerSource.includes('entry.guideWorkCount'), 'theory index does not expose guide applications')
 assert(techniqueExplorerSource.includes('catalog.techniques'), 'technique index does not use the structured catalog')
 assert(techniqueExplorerSource.includes(".filter((group) => group.entries.length)"), 'technique index does not hide empty groups')
 assert(techniqueExplorerSource.includes('entry.identifyBy.join'), 'technique index does not show identification clues')
 assert(techniqueExplorerSource.includes('entry.coreFunction'), 'technique index does not show core functions')
 assert(techniqueExplorerSource.includes('<article v-for="entry in group.entries"'), 'technique index rows must use semantic articles')
-assert(techniqueExplorerSource.includes('entry.guideWorks.length'), 'technique index does not expose guide applications')
+assert(techniqueExplorerSource.includes('entry.guideWorkCount'), 'technique index does not expose guide applications')
 assert(theoryExplorerSource.includes("from '../data/method-groups'") && techniqueExplorerSource.includes("from '../data/method-groups'") && workExplorerSource.includes("from '../data/method-groups'") && methodExplorerSource.includes("from '../data/method-groups'"), 'method group definitions are not shared by all indexes')
 assert(methodExplorerSource.includes("type MethodMode = 'theory' | 'technique' | 'practice'"), 'method center is missing one of its three modes')
 assert(methodExplorerSource.includes("params.set('mode', mode.value)") && methodExplorerSource.includes("params.set('group'") && methodExplorerSource.includes("params.set('kind'") && methodExplorerSource.includes("params.set('theory'") && methodExplorerSource.includes("params.set('technique'"), 'method center does not persist its mode-specific filters')
@@ -1741,12 +1749,23 @@ for (const file of sourceFiles) {
 const styleTestSourcePath = path.join(docsDir, 'public', 'style-test', 'index.html')
 const styleTestSource = fs.readFileSync(styleTestSourcePath, 'utf8')
 const configSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'config.ts'), 'utf8')
+const workflowSource = fs.readFileSync(path.join(root, '.github', 'workflows', 'deploy-pages.yml'), 'utf8')
 const homeSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'KnowledgeHome.vue'), 'utf8')
 assert(styleTestSource.includes('class="brand" href="#home" data-route-link="home"'), 'style test brand does not return to its own entrance')
 assert(configSource.includes("link: '/style-test/', target: '_self'"), 'top navigation can route the standalone style test through VitePress')
 assert(configSource.includes("{ text: '阅读方法', link: '/methods/' }"), 'top navigation does not link directly to the method center')
 assert(configSource.includes('_render(src, env, md)') && configSource.includes('kb-work-reading-guide-title'), 'local search does not index work reading guides')
 assert(configSource.includes('env.frontmatter?.aliases') && configSource.includes('env.frontmatter?.bibliography'), 'local search does not index aliases and bibliography metadata')
+assert(configSource.includes('chunkSizeWarningLimit: 1700'), 'Vite must keep the explicit lazy-search chunk threshold')
+for (const action of [
+  'actions/checkout@v7',
+  'actions/setup-node@v7',
+  'actions/configure-pages@v6',
+  'actions/upload-pages-artifact@v5',
+  'actions/deploy-pages@v5'
+]) {
+  assert(workflowSource.includes(action), `Pages workflow is not using the Node 24 action: ${action}`)
+}
 assert(homeSource.includes('href="/style-test/" target="_self"'), 'home page can route the standalone style test through VitePress')
 assert(homeSource.includes('class="kb-band kb-home-methods"') && homeSource.includes('href="/methods/?mode=practice"'), 'home source is missing the method-center discovery links')
 assert(styleTestSource.includes('href="#home" data-route="home">入口</a>'), 'style test internal home route changed')
@@ -1859,6 +1878,14 @@ const searchIndexFiles = distFiles.filter((file) => path.basename(file).includes
 const searchIndexSource = searchIndexFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n')
 const normalizedSearchIndexSource = searchIndexSource.normalize('NFC').toLowerCase()
 assert(searchIndexFiles.length > 0, 'missing VitePress local search index')
+const javascriptAssets = distFiles.filter((file) => path.extname(file) === '.js')
+const eagerJavaScriptAssets = javascriptAssets.filter((file) => !path.basename(file).includes('localSearchIndex'))
+for (const file of eagerJavaScriptAssets) {
+  const size = fs.statSync(file).size
+  assert(size <= 500_000, `eager JavaScript chunk exceeds 500 kB: ${path.relative(distDir, file)} (${size} bytes)`)
+}
+const searchIndexBytes = searchIndexFiles.reduce((total, file) => total + fs.statSync(file).size, 0)
+assert(searchIndexBytes <= 1_700_000, `lazy local search index exceeds 1.7 MB (${searchIndexBytes} bytes)`)
 const forbiddenChecks = [
   ...(sourceMap?.forbiddenPublicText ?? []).map((value) => ({
     label: 'private source marker',

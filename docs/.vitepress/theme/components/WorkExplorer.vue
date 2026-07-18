@@ -30,18 +30,18 @@ const topicGroups = ['文学传统', '社会经验', '现代转型'].map((group)
   group,
   topics: topics.filter((topic) => topic.sidebarGroup === group)
 }))
-const usedTheorySlugs = new Set(theories.filter((entry) => entry.guideWorks.length).map((entry) => entry.slug))
-const usedTechniqueSlugs = new Set(techniques.filter((entry) => entry.guideWorks.length).map((entry) => entry.slug))
+const usedTheorySlugs = new Set(theories.filter((entry) => entry.guideWorkCount).map((entry) => entry.slug))
+const usedTechniqueSlugs = new Set(techniques.filter((entry) => entry.guideWorkCount).map((entry) => entry.slug))
 const theoryGroups = theoryGroupDefinitions
   .map((group) => ({
     ...group,
-    entries: theories.filter((entry) => entry.theoryGroup === group.key && entry.guideWorks.length)
+    entries: theories.filter((entry) => entry.theoryGroup === group.key && entry.guideWorkCount)
   }))
   .filter((group) => group.entries.length)
 const techniqueGroups = techniqueGroupDefinitions
   .map((group) => ({
     ...group,
-    entries: techniques.filter((entry) => entry.techniqueGroup === group.key && entry.guideWorks.length)
+    entries: techniques.filter((entry) => entry.techniqueGroup === group.key && entry.guideWorkCount)
   }))
   .filter((group) => group.entries.length)
 const indexedWorks = createGuideWorks(catalog)
@@ -267,7 +267,7 @@ watch(pageCount, (count) => {
               <option value="全部">全部</option>
               <optgroup v-for="group in theoryGroups" :key="group.key" :label="group.key">
                 <option v-for="entry in group.entries" :key="entry.slug" :value="entry.slug">
-                  {{ entry.title }}（{{ entry.guideWorks.length }}）
+                  {{ entry.title }}（{{ entry.guideWorkCount }}）
                 </option>
               </optgroup>
             </select>
@@ -278,7 +278,7 @@ watch(pageCount, (count) => {
               <option value="全部">全部</option>
               <optgroup v-for="group in techniqueGroups" :key="group.key" :label="group.key">
                 <option v-for="entry in group.entries" :key="entry.slug" :value="entry.slug">
-                  {{ entry.title }}（{{ entry.guideWorks.length }}）
+                  {{ entry.title }}（{{ entry.guideWorkCount }}）
                 </option>
               </optgroup>
             </select>

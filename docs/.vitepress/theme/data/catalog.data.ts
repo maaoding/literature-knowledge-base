@@ -1,5 +1,6 @@
 import { createContentLoader } from 'vitepress'
 import { buildContentCatalog } from '../../content/catalog'
+import { buildClientCatalog } from '../../content/client-catalog'
 import { parseContentEntry } from '../../content/schema'
 
 export default createContentLoader(
@@ -11,7 +12,7 @@ export default createContentLoader(
       const entries = data
         .filter((item) => ['history', 'author', 'work', 'path', 'topic', 'theory', 'technique'].includes(item.frontmatter.type))
         .map((item) => parseContentEntry(item.frontmatter, item.url))
-      return buildContentCatalog(entries)
+      return buildClientCatalog(buildContentCatalog(entries))
     }
   }
 )

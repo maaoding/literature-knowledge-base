@@ -1,4 +1,5 @@
 import type { HeadConfig, PageData } from 'vitepress'
+import type { ContentCatalog } from './catalog'
 
 export const SITE_NAME = '文学知识库'
 export const SITE_ORIGIN = 'https://literature-knowledge-base.maaoding.icu'
@@ -29,7 +30,7 @@ const indexDescriptions: Record<string, string> = {
   '/about/': '了解文学知识库的选目原则、编辑流程、来源标准、版权边界与纠错方式。'
 }
 
-function routeFromRelativePath(relativePath: string) {
+export function contentRouteFromRelativePath(relativePath: string) {
   const normalized = relativePath.replace(/\\/g, '/')
   if (normalized === 'index.md') return '/'
   if (normalized.endsWith('/index.md')) {
@@ -144,19 +145,22 @@ function primaryStructuredData(pageData: PageData, canonical: string, descriptio
   }
 
   return {
-    '@type': frontmatter.type === 'index' || routeFromRelativePath(pageData.relativePath) === '/'
+    '@type': frontmatter.type === 'index' || contentRouteFromRelativePath(pageData.relativePath) === '/'
       ? 'CollectionPage'
       : 'WebPage',
     ...shared
   }
 }
 
-export function transformKnowledgePageData(pageData: PageData) {
+export function transformKnowledgePageData(
+  pageData: PageData,
+  relatedContent?: ContentCatalog['relationsByUrl'][string]
+) {
   if (pageData.isNotFound) {
     return { description: '请求的页面不存在，请返回文学知识库继续浏览。' }
   }
 
-  const route = routeFromRelativePath(pageData.relativePath)
+  const route = contentRouteFromRelativePath(pageData.relativePath)
   const canonical = absoluteUrl(route)
   const description = pageDescription(pageData, route)
   const shareImage = absoluteUrl(SHARE_IMAGE_PATH)
@@ -207,6 +211,7 @@ export function transformKnowledgePageData(pageData: PageData) {
     description,
     frontmatter: {
       ...pageData.frontmatter,
+      ...(relatedContent ? { relatedContent } : {}),
       head: [...(pageData.frontmatter.head ?? []), ...seoHead]
     }
   }

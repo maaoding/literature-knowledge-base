@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { defineConfig } from 'vitepress'
 import { createSidebar, loadContentCatalog } from './content/catalog.node'
-import { SITE_ORIGIN, transformKnowledgePageData } from './content/seo'
+import { contentRouteFromRelativePath, SITE_ORIGIN, transformKnowledgePageData } from './content/seo'
 
 const catalog = loadContentCatalog()
 const styleTestIndex = path.resolve(process.cwd(), 'docs/public/style-test/index.html')
@@ -33,7 +33,10 @@ export default defineConfig({
       return items
     }
   },
-  transformPageData: transformKnowledgePageData,
+  transformPageData(pageData) {
+    const route = contentRouteFromRelativePath(pageData.relativePath)
+    return transformKnowledgePageData(pageData, catalog.relationsByUrl[route])
+  },
   transformHtml(html, _id, context) {
     if (!context.pageData.isNotFound) return
     return html
@@ -44,6 +47,10 @@ export default defineConfig({
       .replace('</head>', '    <meta name="robots" content="noindex,follow">\n  </head>')
   },
   vite: {
+    build: {
+      // The local search index is lazy-loaded; docs:check enforces separate eager and search budgets.
+      chunkSizeWarningLimit: 1700
+    },
     plugins: [{
       name: 'serve-style-test-index',
       configureServer(server) {
