@@ -88,6 +88,88 @@ for (const [key, count] of Object.entries(expectedCounts)) {
   assert(catalog[key].length === count, `expected ${count} ${key}, found ${catalog[key].length}`)
 }
 
+function normalizeLookupTitle(value) {
+  return value
+    .normalize('NFKC')
+    .toLocaleLowerCase('zh-Hans-CN')
+    .replace(/[\s“”"'‘’《》：:·、，。！？!?,.\-—（）()；;\/\\]/g, '')
+}
+
+const canonicalTitleOwners = new Map()
+for (const entry of catalog.entries) {
+  const normalizedTitle = normalizeLookupTitle(entry.title)
+  const owners = canonicalTitleOwners.get(normalizedTitle) ?? []
+  owners.push(entry)
+  canonicalTitleOwners.set(normalizedTitle, owners)
+}
+
+const aliasOwners = new Map()
+for (const entry of catalog.entries) {
+  assert(Array.isArray(entry.aliases), `${entry.url} is missing its normalized aliases array`)
+  const aliases = entry.aliases ?? []
+  assert(new Set(aliases).size === aliases.length, `${entry.url} has duplicate aliases`)
+  for (const alias of aliases) {
+    const normalizedAlias = normalizeLookupTitle(alias)
+    assert(normalizedAlias !== normalizeLookupTitle(entry.title), `${entry.url} repeats its canonical title as an alias: ${alias}`)
+    const canonicalOwners = canonicalTitleOwners.get(normalizedAlias) ?? []
+    assert(!canonicalOwners.length, `${entry.url} alias collides with canonical title ${canonicalOwners[0]?.url}: ${alias}`)
+    const aliasOwner = aliasOwners.get(normalizedAlias)
+    assert(!aliasOwner, `${entry.url} alias collides with alias on ${aliasOwner?.url}: ${alias}`)
+    aliasOwners.set(normalizedAlias, entry)
+  }
+}
+
+const expectedWorkAliases = {
+  红楼梦: '石头记',
+  奥德赛: '奥德修纪',
+  局外人: '异乡人',
+  恶之花: '恶之华',
+  追忆似水年华: '追忆逝水年华'
+}
+for (const [slug, alias] of Object.entries(expectedWorkAliases)) {
+  const work = catalog.works.find((entry) => entry.slug === slug)
+  assert(work?.aliases.includes(alias), `${slug} is missing expected alias: ${alias}`)
+}
+
+const expectedOriginalTitles = {
+  奥德赛: 'Ὀδύσσεια',
+  沙恭达罗: 'अभिज्ञानशाकुन्तलम्',
+  白鲸: 'Moby-Dick; or, The Whale'
+}
+for (const [slug, originalTitle] of Object.entries(expectedOriginalTitles)) {
+  const work = catalog.works.find((entry) => entry.slug === slug)
+  assert(work?.bibliography.originalTitle === originalTitle, `${slug} has an invalid original-language title`)
+}
+
+for (const work of catalog.works) {
+  const bibliography = work.bibliography
+  assert(Boolean(bibliography), `${work.url} is missing bibliography metadata`)
+  if (!bibliography) continue
+  assert(
+    bibliography.originalTitle === null || bibliography.originalTitle.trim().length > 0,
+    `${work.url} has an invalid original title`
+  )
+  assert(
+    Array.isArray(bibliography.originalLanguages) && bibliography.originalLanguages.length >= 1,
+    `${work.url} must declare at least one original language`
+  )
+  assert(
+    new Set(bibliography.originalLanguages.map((language) => language.code.toLowerCase())).size === bibliography.originalLanguages.length,
+    `${work.url} has duplicate original language codes`
+  )
+  assert(bibliography.compositionLabel.trim().length >= 2, `${work.url} has an invalid composition label`)
+  assert(
+    bibliography.firstPublishedYear === null || Number.isInteger(bibliography.firstPublishedYear),
+    `${work.url} has an invalid first publication year`
+  )
+}
+assert(
+  catalog.works.filter((work) => ['古代', '中古'].includes(work.eraGroup)).length === 26,
+  'expected 26 ancient and medieval works in bibliography migration batch 1'
+)
+assert(catalog.works.filter((work) => work.eraGroup === '近代').length === 32, 'expected 32 modern works in bibliography migration batch 2')
+assert(catalog.works.filter((work) => work.eraGroup === '现当代').length === 18, 'expected 18 contemporary works in bibliography migration batch 3')
+
 const deepContentRules = {
   author: {
     minimumCharacters: 800,
@@ -158,6 +240,20 @@ for (const entry of catalog.entries.filter((entry) => deepContentRules[entry.typ
   const headings = [...markdownBody(source).matchAll(/^##\s+(.+)$/gm)].map((match) => normalizeOutlineTitle(match[1]))
   for (const heading of rule.headings) {
     assert(headings.includes(normalizeOutlineTitle(heading)), `${entry.url} is missing required heading: ${heading}`)
+  }
+  if (entry.type === 'work') {
+    const body = markdownBody(source)
+    const markers = [...body.matchAll(/^<WorkBibliography \/>$/gm)]
+    assert(markers.length === 1, `${entry.url} must contain exactly one WorkBibliography component`)
+    const markerIndex = markers[0]?.index ?? -1
+    const firstSectionIndex = body.search(/^##\s+/m)
+    assert(markerIndex > 0 && markerIndex < firstSectionIndex, `${entry.url} must place WorkBibliography before its first section`)
+    const lead = body
+      .slice(0, markerIndex)
+      .replace(/^#\s+.+$/gm, '')
+      .replace(/^\*\*作者：\*\*.*$/gm, '')
+      .trim()
+    assert(visibleCharacterCount(lead) >= 15, `${entry.url} must place WorkBibliography after its lead paragraph`)
   }
   deepContentCount += 1
 }
@@ -1295,6 +1391,7 @@ const techniqueExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress',
 const methodExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'MethodExplorer.vue'), 'utf8')
 const methodPracticeRowsSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'MethodPracticeRows.vue'), 'utf8')
 const methodPracticeSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'data', 'method-practice.ts'), 'utf8')
+const workBibliographySource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'WorkBibliography.vue'), 'utf8')
 const workReadingGuideSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'WorkReadingGuide.vue'), 'utf8')
 const methodGroupsSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'data', 'method-groups.ts'), 'utf8')
 assert(workExplorerSource.includes('const pageSize = 20'), 'work index must paginate at 20 items')
@@ -1308,6 +1405,7 @@ assert(workExplorerSource.includes("params.set('technique'"), 'work technique fi
 assert(workExplorerSource.includes("mode.value === 'guide'"), 'work index does not separate catalog and guide modes')
 assert(workExplorerSource.includes('entry.guideWorks.length'), 'work guide filters do not exclude unused methods')
 assert(!workExplorerSource.includes('readingGuide.exercise'), 'work guide search must not index hidden exercise text')
+assert(workExplorerSource.includes('work.bibliography.originalTitle') && workExplorerSource.includes('...work.aliases'), 'work index does not search aliases and bibliography metadata')
 assert(workExplorerSource.includes('<optgroup v-for="group in topicGroups"'), 'work topic filter is not grouped')
 assert(workExplorerSource.includes('<optgroup v-for="group in theoryGroups"'), 'work theory filter is not grouped')
 assert(workExplorerSource.includes('<optgroup v-for="group in techniqueGroups"'), 'work technique filter is not grouped')
@@ -1347,10 +1445,14 @@ assert(methodExplorerSource.includes('ready.value = true\n  syncUrl()'), 'method
 assert(methodExplorerSource.includes('const pageSize = 20'), 'method center must paginate at 20 items')
 assert(methodExplorerSource.includes('<MethodPracticeRows') && methodPracticeSource.includes('createGuideWorks'), 'method center and work index do not share practice data')
 assert(!methodExplorerSource.includes('readingGuide.exercise') && !methodPracticeSource.includes('readingGuide.exercise'), 'method center search must not index hidden exercise text')
+assert(methodPracticeSource.includes('work.bibliography.originalTitle') && methodPracticeSource.includes('...work.aliases'), 'method practice search does not include work aliases and bibliography metadata')
 for (const group of [...Object.keys(expectedTheoryGroups), ...Object.keys(expectedTechniqueGroups)]) {
   assert(methodGroupsSource.includes(`key: '${group}'`), `shared method groups are missing ${group}`)
 }
 assert(workReadingGuideSource.includes('catalog.works.find'), 'work reading guide does not resolve the current work from the catalog')
+assert(workBibliographySource.includes('frontmatter.value.bibliography'), 'work bibliography does not read the current page frontmatter')
+assert(workBibliographySource.includes('原作语言') && workBibliographySource.includes('首次出版'), 'work bibliography is missing required labels')
+assert(authorExplorerSource.includes('...author.aliases'), 'author index does not support aliases')
 assert(workReadingGuideSource.includes('guide && theory && technique'), 'work reading guide does not guard incomplete references')
 assert(!workReadingGuideSource.includes('relationsByUrl'), 'work reading guide must not reuse derived case-study relations')
 
@@ -1468,6 +1570,28 @@ for (const [url, expectedType, entry] of [...staticSeoPages, ...contentSeoPages]
     assert(Array.isArray(breadcrumbs?.itemListElement) && breadcrumbs.itemListElement.length >= 1, `${url} is missing JSON-LD breadcrumbs`)
     if (entry?.type === 'work') {
       assert(primary.mainEntity?.['@type'] === 'Book', `${url} does not describe its work as a Book`)
+      const expectedLanguages = entry.bibliography.originalLanguages.map((language) => language.code)
+      assert(
+        JSON.stringify(primary.mainEntity?.inLanguage) === JSON.stringify(expectedLanguages),
+        `${url} JSON-LD original languages do not match bibliography metadata`
+      )
+      const expectedAlternateNames = [
+        ...entry.aliases,
+        entry.bibliography.originalTitle
+      ].filter((name) => Boolean(name) && name !== entry.title)
+      assert(
+        JSON.stringify(primary.mainEntity?.alternateName ?? []) === JSON.stringify(expectedAlternateNames),
+        `${url} JSON-LD alternate names do not match bibliography metadata`
+      )
+      if (entry.bibliography.firstPublishedYear) {
+        assert(
+          primary.mainEntity?.datePublished === String(entry.bibliography.firstPublishedYear),
+          `${url} JSON-LD first publication year does not match bibliography metadata`
+        )
+      } else {
+        assert(!primary.mainEntity?.datePublished, `${url} JSON-LD invents a first publication year`)
+      }
+      assert(builtPage.includes('class="kb-work-bibliography"'), `${url} does not render visible bibliography metadata`)
     }
     if (entry?.type === 'author') {
       assert(primary.mainEntity?.['@type'] === 'Person', `${url} does not describe its author as a Person`)
@@ -1622,6 +1746,7 @@ assert(styleTestSource.includes('class="brand" href="#home" data-route-link="hom
 assert(configSource.includes("link: '/style-test/', target: '_self'"), 'top navigation can route the standalone style test through VitePress')
 assert(configSource.includes("{ text: '阅读方法', link: '/methods/' }"), 'top navigation does not link directly to the method center')
 assert(configSource.includes('_render(src, env, md)') && configSource.includes('kb-work-reading-guide-title'), 'local search does not index work reading guides')
+assert(configSource.includes('env.frontmatter?.aliases') && configSource.includes('env.frontmatter?.bibliography'), 'local search does not index aliases and bibliography metadata')
 assert(homeSource.includes('href="/style-test/" target="_self"'), 'home page can route the standalone style test through VitePress')
 assert(homeSource.includes('class="kb-band kb-home-methods"') && homeSource.includes('href="/methods/?mode=practice"'), 'home source is missing the method-center discovery links')
 assert(styleTestSource.includes('href="#home" data-route="home">入口</a>'), 'style test internal home route changed')
@@ -1718,11 +1843,21 @@ const requiredSearchTerms = [
   '一本正经的旅行叙述怎样把社会常识转化为可疑的意识形态',
   '人物在空旷舞台上的站位',
   '战争与历史创伤',
-  '二十世纪战争文学'
+  '二十世纪战争文学',
+  '石头记',
+  '奥德修纪',
+  '异乡人',
+  '恶之华',
+  '追忆逝水年华',
+  'Ὀδύσσεια',
+  'अभिज्ञानशाकुन्तलम्',
+  'moby',
+  'whale'
 ]
 const foundTerms = new Set()
 const searchIndexFiles = distFiles.filter((file) => path.basename(file).includes('localSearchIndex'))
 const searchIndexSource = searchIndexFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n')
+const normalizedSearchIndexSource = searchIndexSource.normalize('NFC').toLowerCase()
 assert(searchIndexFiles.length > 0, 'missing VitePress local search index')
 const forbiddenChecks = [
   ...(sourceMap?.forbiddenPublicText ?? []).map((value) => ({
@@ -1741,14 +1876,20 @@ const forbiddenChecks = [
 
 for (const file of distFiles) {
   const source = fs.readFileSync(file, 'utf8')
-  for (const term of requiredSearchTerms) if (source.includes(term)) foundTerms.add(term)
+  const normalizedSource = source.normalize('NFC').toLowerCase()
+  for (const term of requiredSearchTerms) {
+    if (normalizedSource.includes(term.normalize('NFC').toLowerCase())) foundTerms.add(term)
+  }
   for (const check of forbiddenChecks) {
     assert(!check.matches(source), `forbidden build content '${check.label}' in ${path.relative(root, file)}`)
   }
 }
 for (const term of requiredSearchTerms) {
   assert(foundTerms.has(term), `search term missing from build: ${term}`)
-  assert(searchIndexSource.includes(term), `search term missing from local search index: ${term}`)
+  assert(
+    normalizedSearchIndexSource.includes(term.normalize('NFC').toLowerCase()),
+    `search term missing from local search index: ${term}`
+  )
 }
 
 if (failures.length) {

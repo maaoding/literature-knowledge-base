@@ -87,6 +87,10 @@ function primaryStructuredData(pageData: PageData, canonical: string, descriptio
     const authorUrl = frontmatter.authorSlug
       ? absoluteUrl(`/authors/${frontmatter.authorSlug}`)
       : undefined
+    const alternateNames = [
+      ...(frontmatter.aliases ?? []),
+      frontmatter.bibliography?.originalTitle
+    ].filter((name): name is string => Boolean(name) && name !== title)
     return {
       '@type': 'Article',
       ...shared,
@@ -96,6 +100,15 @@ function primaryStructuredData(pageData: PageData, canonical: string, descriptio
       mainEntity: {
         '@type': 'Book',
         name: title,
+        ...(alternateNames.length ? { alternateName: alternateNames } : {}),
+        ...(frontmatter.bibliography
+          ? {
+              inLanguage: frontmatter.bibliography.originalLanguages.map((language: { code: string }) => language.code),
+              ...(frontmatter.bibliography.firstPublishedYear
+                ? { datePublished: String(frontmatter.bibliography.firstPublishedYear) }
+                : {})
+            }
+          : {}),
         author: frontmatter.author
           ? {
               '@type': 'Person',

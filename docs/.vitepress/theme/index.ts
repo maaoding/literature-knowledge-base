@@ -21,6 +21,7 @@ import TechniqueExplorer from './components/TechniqueExplorer.vue'
 import TopicExplorer from './components/TopicExplorer.vue'
 import TopicRelations from './components/TopicRelations.vue'
 import WorkExplorer from './components/WorkExplorer.vue'
+import WorkBibliography from './components/WorkBibliography.vue'
 import WorkReadingGuide from './components/WorkReadingGuide.vue'
 
 export default {
@@ -50,6 +51,7 @@ export default {
     app.component('TechniqueExplorer', TechniqueExplorer)
     app.component('TopicExplorer', TopicExplorer)
     app.component('TopicRelations', TopicRelations)
+    app.component('WorkBibliography', WorkBibliography)
     app.component('WorkExplorer', WorkExplorer)
   }
 } satisfies Theme

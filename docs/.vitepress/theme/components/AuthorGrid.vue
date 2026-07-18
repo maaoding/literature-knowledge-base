@@ -31,6 +31,7 @@ const filteredAuthors = computed(() => {
       author.summary,
       author.country,
       author.period,
+      ...author.aliases,
       ...author.tags,
       ...author.works
     ].join(' ').toLowerCase().includes(keyword)

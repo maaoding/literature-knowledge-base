@@ -66,6 +66,10 @@ const filteredWorks = computed(() => {
           work.country,
           work.period,
           work.whyRead,
+          ...work.aliases,
+          work.bibliography.originalTitle ?? '',
+          work.bibliography.compositionLabel,
+          ...work.bibliography.originalLanguages.map((language) => language.label),
           ...work.tags,
           ...work.genres
         ]

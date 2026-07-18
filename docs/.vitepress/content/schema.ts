@@ -12,6 +12,10 @@ export const techniqueGroupSchema = z.enum(['语言与修辞', '叙述与结构'
 
 const baseContentFields = {
   title: z.string().trim().min(1),
+  aliases: z.array(z.string().trim().min(1)).default([]).refine(
+    (aliases) => new Set(aliases).size === aliases.length,
+    { message: 'aliases must be unique' }
+  ),
   summary: z.string().trim().min(1),
   tags: z.array(z.string().trim().min(1)),
   difficulty: difficultySchema,
@@ -113,6 +117,21 @@ export const workReadingGuideSchema = z.object({
   exercise: z.string().trim().min(20).max(120)
 })
 
+export const workLanguageSchema = z.object({
+  code: z.string().trim().regex(/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/),
+  label: z.string().trim().min(1).max(24)
+})
+
+export const workBibliographySchema = z.object({
+  originalTitle: z.string().trim().min(1).nullable(),
+  originalLanguages: z.array(workLanguageSchema).min(1).max(3).refine(
+    (languages) => new Set(languages.map((language) => language.code.toLowerCase())).size === languages.length,
+    { message: 'original language codes must be unique' }
+  ),
+  compositionLabel: z.string().trim().min(2).max(100),
+  firstPublishedYear: z.number().int().min(1000).max(2100).nullable()
+})
+
 export const workEntrySchema = z.object({
   ...commonFields,
   ...deepContentFields,
@@ -123,6 +142,7 @@ export const workEntrySchema = z.object({
   eraGroup: eraGroupSchema,
   historySlugs: z.array(z.string().trim().min(1)),
   whyRead: z.string().trim().min(1),
+  bibliography: workBibliographySchema,
   readingGuide: workReadingGuideSchema
 })
 
@@ -199,6 +219,7 @@ export type TheoryEntryKind = z.infer<typeof theoryEntryKindSchema>
 export type TheoryGroup = z.infer<typeof theoryGroupSchema>
 export type TechniqueGroup = z.infer<typeof techniqueGroupSchema>
 export type WorkReadingGuide = z.infer<typeof workReadingGuideSchema>
+export type WorkBibliography = z.infer<typeof workBibliographySchema>
 export type ContentFrontmatter = z.infer<typeof contentEntrySchema>
 export type ContentType = ContentFrontmatter['type']
 export type ContentSource = z.infer<typeof contentSourceSchema>

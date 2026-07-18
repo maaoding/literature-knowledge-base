@@ -79,18 +79,38 @@ export default defineConfig({
           const html = md.render(src, env)
           if (env.frontmatter?.search === false) return ''
 
-          const guide = env.frontmatter?.readingGuide
-          if (!guide) return html
-          const theory = catalog.theories.find((entry) => entry.slug === guide.theorySlug)
-          const technique = catalog.techniques.find((entry) => entry.slug === guide.techniqueSlug)
-          if (!theory || !technique) return html
+          const additions: string[] = []
+          const aliases = env.frontmatter?.aliases
+          if (Array.isArray(aliases) && aliases.length) {
+            additions.push(`<p>常见异名：${aliases.map((alias) => escapeSearchHtml(String(alias))).join('、')}</p>`)
+          }
 
-          return `${html}
-            <h2 id="kb-work-reading-guide-title">阅读抓手</h2>
-            <p>核心问题：${escapeSearchHtml(guide.question)}</p>
-            <p>理论视角：${escapeSearchHtml(theory.title)}。${escapeSearchHtml(theory.summary)}</p>
-            <p>文本技巧：${escapeSearchHtml(technique.title)}。${escapeSearchHtml(technique.summary)}</p>
-            <p>动手练习：${escapeSearchHtml(guide.exercise)}</p>`
+          const bibliography = env.frontmatter?.bibliography
+          if (bibliography) {
+            const languages = Array.isArray(bibliography.originalLanguages)
+              ? bibliography.originalLanguages.map((language) => escapeSearchHtml(String(language.label))).join('、')
+              : ''
+            additions.push(`<h2 id="kb-work-bibliography-search">书目信息</h2>
+              ${bibliography.originalTitle ? `<p>原题：${escapeSearchHtml(String(bibliography.originalTitle))}</p>` : ''}
+              <p>原作语言：${languages}</p>
+              <p>成书或写作：${escapeSearchHtml(String(bibliography.compositionLabel))}</p>
+              ${bibliography.firstPublishedYear ? `<p>首次出版：${bibliography.firstPublishedYear} 年</p>` : ''}`)
+          }
+
+          const guide = env.frontmatter?.readingGuide
+          if (guide) {
+            const theory = catalog.theories.find((entry) => entry.slug === guide.theorySlug)
+            const technique = catalog.techniques.find((entry) => entry.slug === guide.techniqueSlug)
+            if (theory && technique) {
+              additions.push(`<h2 id="kb-work-reading-guide-title">阅读抓手</h2>
+                <p>核心问题：${escapeSearchHtml(guide.question)}</p>
+                <p>理论视角：${escapeSearchHtml(theory.title)}。${escapeSearchHtml(theory.summary)}</p>
+                <p>文本技巧：${escapeSearchHtml(technique.title)}。${escapeSearchHtml(technique.summary)}</p>
+                <p>动手练习：${escapeSearchHtml(guide.exercise)}</p>`)
+            }
+          }
+
+          return additions.length ? `${html}\n${additions.join('\n')}` : html
         },
         translations: {
           button: {
