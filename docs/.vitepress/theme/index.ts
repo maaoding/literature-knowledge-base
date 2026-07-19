@@ -10,6 +10,7 @@ import HistoryIndex from './components/HistoryIndex.vue'
 import KnowledgeHome from './components/KnowledgeHome.vue'
 import MethodExplorer from './components/MethodExplorer.vue'
 import NotFoundPage from './components/NotFoundPage.vue'
+import ReadingGuideExplorer from './components/ReadingGuideExplorer.vue'
 import ReadingPathGoal from './components/ReadingPathGoal.vue'
 import ReadingPathList from './components/ReadingPathList.vue'
 import ReadingPathNext from './components/ReadingPathNext.vue'
@@ -45,6 +46,7 @@ export default {
     app.component('HistoryIndex', HistoryIndex)
     app.component('KnowledgeHome', KnowledgeHome)
     app.component('MethodExplorer', MethodExplorer)
+    app.component('ReadingGuideExplorer', ReadingGuideExplorer)
     app.component('ReadingPathGoal', ReadingPathGoal)
     app.component('ReadingPathList', ReadingPathList)
     app.component('ReadingPathNext', ReadingPathNext)

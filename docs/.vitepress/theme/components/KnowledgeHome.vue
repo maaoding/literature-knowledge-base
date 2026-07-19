@@ -26,7 +26,7 @@ const formatIndex = (index: number) => String(index + 1).padStart(2, '0')
         </p>
         <div class="kb-hero__actions" aria-label="主要入口">
           <a class="kb-primary-link" href="/works/">浏览名著</a>
-          <a class="kb-secondary-link" href="/paths/">查看阅读路径</a>
+          <a class="kb-secondary-link" href="/reading/">查看阅读指南</a>
           <a class="kb-secondary-link" href="/style-test/" target="_self">测试文学风格</a>
         </div>
       </div>
@@ -45,9 +45,9 @@ const formatIndex = (index: number) => String(index + 1).padStart(2, '0')
         <strong>{{ works.length }}</strong>
         <span>文学名著</span>
       </a>
-      <a class="kb-stat" href="/paths/">
+      <a class="kb-stat" href="/reading/">
         <strong>{{ readingPaths.length }}</strong>
-        <span>推荐路径</span>
+        <span>阅读路径</span>
       </a>
     </nav>
 
@@ -83,7 +83,7 @@ const formatIndex = (index: number) => String(index + 1).padStart(2, '0')
             <p class="kb-eyebrow">阅读路径</p>
             <h2>从一条路径开始</h2>
           </div>
-          <a class="kb-section-more" href="/paths/">全部路径</a>
+          <a class="kb-section-more" href="/reading/">进入阅读指南</a>
         </div>
         <div class="kb-home-paths">
           <a

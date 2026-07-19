@@ -1,5 +1,5 @@
 ---
-title: 推荐阅读
+title: 阅读路径
 type: index
 period: 总览
 country: 世界
@@ -12,8 +12,8 @@ aside: false
 pageClass: kb-index-page
 ---
 
-# 推荐阅读
+# 阅读路径
 
-按主题与难度组织的渐进书单，每条路径都从明确的问题出发。
+按主题与难度组织的渐进书单，每条路径都从明确的问题出发。也可以回到[阅读指南](/reading/)，在顺序阅读和主题探索之间切换。
 
 <ReadingPathList />

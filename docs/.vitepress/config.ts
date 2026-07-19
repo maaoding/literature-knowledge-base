@@ -79,8 +79,7 @@ export default defineConfig({
       { text: '作家', link: '/authors/' },
       { text: '名著', link: '/works/' },
       { text: '阅读方法', link: '/methods/' },
-      { text: '推荐阅读', link: '/paths/' },
-      { text: '专题', link: '/topics/' },
+      { text: '阅读指南', link: '/reading/' },
       { text: '文学风格测试', link: '/style-test/', target: '_self' }
     ],
     sidebar: createSidebar(catalog),

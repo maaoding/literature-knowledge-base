@@ -1508,6 +1508,7 @@ assert(workExplorerSource.includes('changePage(currentPage + 1)'), 'work paginat
 assert(authorExplorerSource.includes('changePage(currentPage + 1)'), 'author pagination does not use the normalized page handler')
 assert(pathExplorerSource.includes("params.set('kind'"), 'path kind filter is not persisted in the URL')
 assert(pathExplorerSource.includes("params.set('level'"), 'path level filter is not persisted in the URL')
+assert(pathExplorerSource.includes("currentParams.get('mode') === 'topics'"), 'path filters do not preserve the parent reading-guide mode during hydration')
 assert(pathExplorerSource.includes("const selectedKind = ref<KindFilter>('全部')"), 'path kind filter does not default to all')
 assert(pathExplorerSource.includes("const selectedLevel = ref<LevelFilter>('全部')"), 'path level filter does not default to all')
 assert(pathExplorerSource.includes('path.pathKind'), 'path cards do not show their classification')
@@ -1608,7 +1609,7 @@ for (const entry of catalog.entries.filter((item) => item.contentVersion === 2))
   assert(builtPage.includes(`资料校订：${entry.reviewedAt}</span>`), `${entry.url} has an invalid visible reviewedAt value`)
   assert(!builtPage.includes(`资料校订：${entry.reviewedAt}T`), `${entry.url} exposes an ISO timestamp instead of a date`)
 }
-for (const url of ['/', '/history/', '/authors/', '/works/', '/paths/', '/topics/', '/theory/', '/techniques/', '/methods/', '/style-test/']) {
+for (const url of ['/', '/history/', '/authors/', '/works/', '/reading/', '/paths/', '/topics/', '/theory/', '/techniques/', '/methods/', '/style-test/']) {
   assert(fs.existsSync(distTarget(url)), `missing built index URL: ${url}`)
 }
 
@@ -1627,6 +1628,7 @@ const staticSeoPages = [
   ['/authors/', 'CollectionPage'],
   ['/works/', 'CollectionPage'],
   ['/methods/', 'CollectionPage'],
+  ['/reading/', 'CollectionPage'],
   ['/paths/', 'CollectionPage'],
   ['/topics/', 'CollectionPage'],
   ['/theory/', 'CollectionPage'],
@@ -1724,7 +1726,7 @@ assert(fs.existsSync(sitemapPath), 'missing sitemap.xml')
 if (fs.existsSync(sitemapPath)) {
   const sitemapSource = fs.readFileSync(sitemapPath, 'utf8')
   const sitemapUrls = [...sitemapSource.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
-  assert(sitemapUrls.length === 274, `expected 274 sitemap URLs, found ${sitemapUrls.length}`)
+  assert(sitemapUrls.length === 275, `expected 275 sitemap URLs, found ${sitemapUrls.length}`)
   assert(new Set(sitemapUrls).size === sitemapUrls.length, 'sitemap contains duplicate URLs')
   for (const [url] of [...staticSeoPages, ...contentSeoPages]) {
     assert(sitemapUrls.includes(new URL(url, siteOrigin).href), `sitemap is missing ${url}`)
@@ -1758,6 +1760,7 @@ const topicIndexBuild = fs.readFileSync(distTarget('/topics/'), 'utf8')
 const theoryIndexBuild = fs.readFileSync(distTarget('/theory/'), 'utf8')
 const techniqueIndexBuild = fs.readFileSync(distTarget('/techniques/'), 'utf8')
 const methodIndexBuild = fs.readFileSync(distTarget('/methods/'), 'utf8')
+const readingIndexBuild = fs.readFileSync(distTarget('/reading/'), 'utf8')
 const pathIndexBuild = fs.readFileSync(distTarget('/paths/'), 'utf8')
 const pathBuild = fs.readFileSync(distTarget('/paths/现代主义地图'), 'utf8')
 const warPathBuild = fs.readFileSync(distTarget('/paths/二十世纪战争文学'), 'utf8')
@@ -1771,9 +1774,13 @@ const techniqueBuild = fs.readFileSync(distTarget('/techniques/不可靠叙述')
 assert(historyIndexBuild.includes('世界文学四编') && historyIndexBuild.includes('跨期导读'), 'history index is missing overview or guide sections')
 assert(homeIndexBuild.includes('把方法带回作品') && homeIndexBuild.includes('32 个理论') && homeIndexBuild.includes('24 个技巧') && homeIndexBuild.includes('76 个抓手'), 'home page is missing the reading-method band')
 assert(homeIndexBuild.includes('href="/methods/"') && homeIndexBuild.includes('href="/methods/?mode=technique"') && homeIndexBuild.includes('href="/methods/?mode=practice"'), 'home page is missing the method-center links')
+assert(homeIndexBuild.includes('href="/reading/"') && homeIndexBuild.includes('查看阅读指南') && homeIndexBuild.includes('进入阅读指南'), 'home page is missing the unified reading-guide links')
 assert((methodIndexBuild.match(/class="kb-method-row"/g) ?? []).length === 20, 'method center SSR must render exactly 20 theory rows')
 assert(methodIndexBuild.includes('理论') && methodIndexBuild.includes('技巧') && methodIndexBuild.includes('作品练习'), 'method center is missing its three mode controls')
 assert(!methodIndexBuild.includes('class="kb-guide-row"'), 'default method center SSR must stay in theory mode')
+assert(readingIndexBuild.includes('阅读路径 · 18') && readingIndexBuild.includes('专题阅读 · 12'), 'reading guide is missing its two mode controls')
+assert((readingIndexBuild.match(/class="kb-path"/g) ?? []).length === 18, 'reading guide SSR must render all 18 paths by default')
+assert(!readingIndexBuild.includes('class="kb-topic-card"'), 'default reading guide SSR must stay in path mode')
 assert((workIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length === 20, 'work index SSR must render exactly 20 list rows')
 assert(!workIndexBuild.includes('class="kb-guide-row"'), 'default work index SSR must stay in catalog mode')
 assert((authorIndexBuild.match(/class="kb-catalog-row(?:\s|")/g) ?? []).length === 20, 'author index SSR must render exactly 20 list rows')
@@ -1858,9 +1865,14 @@ const styleTestSource = fs.readFileSync(styleTestSourcePath, 'utf8')
 const configSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'config.ts'), 'utf8')
 const workflowSource = fs.readFileSync(path.join(root, '.github', 'workflows', 'deploy-pages.yml'), 'utf8')
 const homeSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'KnowledgeHome.vue'), 'utf8')
+const readingGuideSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'ReadingGuideExplorer.vue'), 'utf8')
 assert(styleTestSource.includes('class="brand" href="#home" data-route-link="home"'), 'style test brand does not return to its own entrance')
 assert(configSource.includes("link: '/style-test/', target: '_self'"), 'top navigation can route the standalone style test through VitePress')
 assert(configSource.includes("{ text: '阅读方法', link: '/methods/' }"), 'top navigation does not link directly to the method center')
+assert(configSource.includes("{ text: '阅读指南', link: '/reading/' }"), 'top navigation does not link to the unified reading guide')
+assert(!configSource.includes("{ text: '推荐阅读', link: '/paths/' }") && !configSource.includes("{ text: '专题', link: '/topics/' }"), 'top navigation still exposes separate path and topic entries')
+assert(readingGuideSource.includes("type ReadingMode = 'paths' | 'topics'") && readingGuideSource.includes("params.set('mode', 'topics')"), 'reading guide does not preserve its two-mode URL contract')
+assert(homeSource.includes('href="/reading/"') && !homeSource.includes('href="/paths/"'), 'homepage still bypasses the unified reading guide')
 assert(configSource.includes('_render(src, env, md)') && configSource.includes('kb-work-reading-guide-title'), 'local search does not index work reading guides')
 assert(configSource.includes('env.frontmatter?.aliases') && configSource.includes('env.frontmatter?.bibliography'), 'local search does not index aliases and bibliography metadata')
 assert(configSource.includes('tokenizeKnowledgeSearch') && configSource.includes('miniSearch:'), 'local search does not use the shared Chinese tokenizer')

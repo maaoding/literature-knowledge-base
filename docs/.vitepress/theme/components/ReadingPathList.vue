@@ -19,7 +19,9 @@ const visiblePaths = computed(() => readingPaths.filter((path) => (
 
 function syncUrl() {
   if (!ready.value) return
+  const currentParams = new URLSearchParams(window.location.search)
   const params = new URLSearchParams()
+  if (currentParams.get('mode') === 'topics') params.set('mode', 'topics')
   if (selectedLevel.value !== '全部') params.set('level', selectedLevel.value)
   if (selectedKind.value !== '全部') params.set('kind', selectedKind.value)
   const search = params.toString()
