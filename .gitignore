@@ -9,3 +9,5 @@ yarn-debug.log*
 content-sources/*.pdf
 content-sources/*.json
 content-sources/extracted/
+playwright-report/
+test-results/

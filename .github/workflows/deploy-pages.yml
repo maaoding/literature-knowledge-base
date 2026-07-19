@@ -37,6 +37,23 @@ jobs:
       - name: Validate content and build output
         run: npm run docs:check
 
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser regression tests
+        run: npm run docs:test:e2e
+
+      - name: Upload browser test report
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Add Pages metadata
         run: |
           cp CNAME docs/.vitepress/dist/CNAME

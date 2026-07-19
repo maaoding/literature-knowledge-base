@@ -22,6 +22,7 @@ npm ci
 npm run docs:dev
 npm run docs:build
 npm run docs:check
+npm run docs:test:e2e
 npm run docs:sources:check
 ```
 
