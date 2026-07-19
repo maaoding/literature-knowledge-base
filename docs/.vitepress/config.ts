@@ -3,6 +3,11 @@ import path from 'node:path'
 import { defineConfig } from 'vitepress'
 import { createSidebar, loadContentCatalog } from './content/catalog.node'
 import { contentRouteFromRelativePath, SITE_ORIGIN, transformKnowledgePageData } from './content/seo'
+import {
+  fuzzyKnowledgeSearchTerm,
+  shouldPrefixKnowledgeSearchTerm,
+  tokenizeKnowledgeSearch
+} from './content/search-tokenizer.mjs'
 
 const catalog = loadContentCatalog()
 const styleTestIndex = path.resolve(process.cwd(), 'docs/public/style-test/index.html')
@@ -82,6 +87,16 @@ export default defineConfig({
     search: {
       provider: 'local',
       options: {
+        miniSearch: {
+          options: {
+            tokenize: tokenizeKnowledgeSearch
+          },
+          searchOptions: {
+            combineWith: 'AND',
+            prefix: shouldPrefixKnowledgeSearchTerm,
+            fuzzy: fuzzyKnowledgeSearchTerm
+          }
+        },
         _render(src, env, md) {
           const html = md.render(src, env)
           if (env.frontmatter?.search === false) return ''
@@ -102,6 +117,21 @@ export default defineConfig({
               <p>原作语言：${languages}</p>
               <p>成书或写作：${escapeSearchHtml(String(bibliography.compositionLabel))}</p>
               ${bibliography.firstPublishedYear ? `<p>首次出版：${bibliography.firstPublishedYear} 年</p>` : ''}`)
+          }
+
+          const identity = env.frontmatter?.identity
+          if (identity) {
+            additions.push(`<h2 id="kb-author-identity-search">作者信息</h2>
+              ${identity.originalName ? `<p>原文名：${escapeSearchHtml(String(identity.originalName))}</p>` : ''}
+              ${identity.romanizedName ? `<p>拉丁转写：${escapeSearchHtml(String(identity.romanizedName))}</p>` : ''}
+              <p>生卒或时代：${escapeSearchHtml(String(identity.lifeLabel))}</p>`)
+          }
+
+          const editionGuide = env.frontmatter?.editionGuide
+          if (editionGuide) {
+            additions.push(`<h2 id="kb-work-edition-guide-search">版本与译本</h2>
+              <p>文本形态：${editionGuide.textualFeatures.map((item) => escapeSearchHtml(String(item))).join('、')}</p>
+              <p>版本提示：${escapeSearchHtml(String(editionGuide.versionNote))}</p>`)
           }
 
           const guide = env.frontmatter?.readingGuide

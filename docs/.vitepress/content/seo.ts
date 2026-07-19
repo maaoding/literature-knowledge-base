@@ -122,6 +122,12 @@ function primaryStructuredData(pageData: PageData, canonical: string, descriptio
   }
 
   if (frontmatter.type === 'author') {
+    const identity = frontmatter.identity
+    const alternateNames = Array.from(new Set([
+      ...(frontmatter.aliases ?? []),
+      identity?.originalName,
+      identity?.romanizedName
+    ].filter((name): name is string => Boolean(name) && name !== title)))
     return {
       '@type': 'ProfilePage',
       ...shared,
@@ -129,7 +135,14 @@ function primaryStructuredData(pageData: PageData, canonical: string, descriptio
       mainEntity: {
         '@type': 'Person',
         name: title,
-        description
+        description,
+        ...(alternateNames.length ? { alternateName: alternateNames } : {}),
+        ...(identity?.birthYear && identity.birthYear > 0
+          ? { birthDate: String(identity.birthYear) }
+          : {}),
+        ...(identity?.deathYear && identity.deathYear > 0
+          ? { deathDate: String(identity.deathYear) }
+          : {})
       }
     }
   }

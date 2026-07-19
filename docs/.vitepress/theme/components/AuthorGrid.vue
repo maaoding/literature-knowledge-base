@@ -31,6 +31,9 @@ const filteredAuthors = computed(() => {
       author.summary,
       author.country,
       author.period,
+      author.identity.originalName ?? '',
+      author.identity.romanizedName ?? '',
+      author.identity.lifeLabel,
       ...author.aliases,
       ...author.tags,
       ...author.works
@@ -161,6 +164,9 @@ watch(pageCount, (count) => {
         </div>
         <div class="kb-catalog-row__body">
           <h3><a :href="author.link">{{ author.name }}</a></h3>
+          <p v-if="author.identity.originalName || author.identity.romanizedName" class="kb-catalog-row__identity">
+            {{ [author.identity.originalName, author.identity.romanizedName].filter(Boolean).join(' · ') }}
+          </p>
           <p>{{ author.summary }}</p>
         </div>
         <div class="kb-catalog-row__meta">
@@ -177,6 +183,9 @@ watch(pageCount, (count) => {
           <span>{{ author.period }}</span>
         </div>
         <h3><a :href="author.link">{{ author.name }}</a></h3>
+        <p v-if="author.identity.originalName || author.identity.romanizedName" class="kb-card__identity">
+          {{ [author.identity.originalName, author.identity.romanizedName].filter(Boolean).join(' · ') }}
+        </p>
         <p>{{ author.summary }}</p>
         <p v-if="author.works.length" class="kb-card__meta">代表作品：{{ author.works.join(' / ') }}</p>
       </article>

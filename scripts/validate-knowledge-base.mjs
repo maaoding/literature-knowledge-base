@@ -2,6 +2,12 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { build } from 'esbuild'
+import MiniSearch from 'minisearch'
+import {
+  fuzzyKnowledgeSearchTerm,
+  shouldPrefixKnowledgeSearchTerm,
+  tokenizeKnowledgeSearch
+} from '../docs/.vitepress/content/search-tokenizer.mjs'
 
 const root = process.cwd()
 const docsDir = path.join(root, 'docs')
@@ -141,6 +147,40 @@ for (const [slug, originalTitle] of Object.entries(expectedOriginalTitles)) {
   assert(work?.bibliography.originalTitle === originalTitle, `${slug} has an invalid original-language title`)
 }
 
+const expectedAuthorIdentities = {
+  莎士比亚: { originalName: 'William Shakespeare', romanizedName: null, birthYear: 1564, deathYear: 1616 },
+  荷马: { originalName: 'Ὅμηρος', romanizedName: 'Homer', birthYear: null, deathYear: null },
+  鲁迅: { originalName: null, romanizedName: 'Lu Xun', birthYear: 1881, deathYear: 1936 },
+  泰戈尔: { originalName: 'রবীন্দ্রনাথ ঠাকুর', romanizedName: 'Rabindranath Tagore', birthYear: 1861, deathYear: 1941 },
+  维吉尔: { originalName: 'Publius Vergilius Maro', romanizedName: null, birthYear: -70, deathYear: -19 }
+}
+for (const author of catalog.authors) {
+  const identity = author.identity
+  assert(Boolean(identity), `${author.url} is missing author identity metadata`)
+  if (!identity) continue
+  assert(Boolean(identity.originalName || identity.romanizedName), `${author.url} must declare an original name or romanization`)
+  assert(identity.lifeLabel.trim().length >= 2, `${author.url} has an invalid life label`)
+  assert(
+    identity.originalName === null || identity.originalName !== identity.romanizedName,
+    `${author.url} repeats its original name as a romanization`
+  )
+  assert(
+    identity.birthYear === null || identity.deathYear === null || identity.deathYear >= identity.birthYear,
+    `${author.url} has an invalid lifespan`
+  )
+  assert(author.reviewedAt === '2026-07-19', `${author.url} identity was not reviewed on 2026-07-19`)
+
+  const source = fs.readFileSync(path.join(docsDir, 'authors', `${author.slug}.md`), 'utf8')
+  assert((source.match(/<AuthorIdentity \/>/g) ?? []).length === 1, `${author.url} must render one author identity block`)
+}
+for (const [slug, expected] of Object.entries(expectedAuthorIdentities)) {
+  const author = catalog.authors.find((entry) => entry.slug === slug)
+  assert(Boolean(author), `missing author identity fixture: ${slug}`)
+  for (const [field, value] of Object.entries(expected)) {
+    assert(author?.identity?.[field] === value, `${slug} has an invalid identity ${field}`)
+  }
+}
+
 for (const work of catalog.works) {
   const bibliography = work.bibliography
   assert(Boolean(bibliography), `${work.url} is missing bibliography metadata`)
@@ -162,6 +202,45 @@ for (const work of catalog.works) {
     bibliography.firstPublishedYear === null || Number.isInteger(bibliography.firstPublishedYear),
     `${work.url} has an invalid first publication year`
   )
+
+  const editionGuide = work.editionGuide
+  assert(Boolean(editionGuide), `${work.url} is missing its edition and translation guide`)
+  if (editionGuide) {
+    assert(editionGuide.textualFeatures.length >= 1 && editionGuide.textualFeatures.length <= 3, `${work.url} has an invalid textual feature count`)
+    assert(new Set(editionGuide.textualFeatures).size === editionGuide.textualFeatures.length, `${work.url} has duplicate textual features`)
+    assert(editionGuide.versionNote.length >= 40 && editionGuide.versionNote.length <= 240, `${work.url} has an invalid version note`)
+    assert(editionGuide.translationNote.length >= 40 && editionGuide.translationNote.length <= 240, `${work.url} has an invalid translation note`)
+    assert(editionGuide.checklist.length >= 2 && editionGuide.checklist.length <= 4, `${work.url} has an invalid edition checklist`)
+  }
+  assert(work.reviewedAt === '2026-07-19', `${work.url} edition guide was not reviewed on 2026-07-19`)
+  const source = fs.readFileSync(path.join(docsDir, 'works', `${work.slug}.md`), 'utf8')
+  assert((source.match(/<WorkEditionGuide \/>/g) ?? []).length === 1, `${work.url} must render one edition guide block`)
+}
+const expectedTextualFeatures = [
+  '口传与演述',
+  '抄本与异文',
+  '多版本并存',
+  '作者修订',
+  '编订与选本',
+  '舞台文本',
+  '译本差异显著',
+  '通行文本较稳定'
+]
+const usedTextualFeatures = new Set(catalog.works.flatMap((work) => work.editionGuide.textualFeatures))
+for (const feature of expectedTextualFeatures) {
+  assert(usedTextualFeatures.has(feature), `edition guides do not use textual feature: ${feature}`)
+}
+assert(new Set(catalog.works.map((work) => work.editionGuide.versionNote)).size === 76, 'work version notes must be individually edited')
+assert(new Set(catalog.works.map((work) => work.editionGuide.translationNote)).size === 76, 'work translation notes must be individually edited')
+for (const [slug, features] of Object.entries({
+  红楼梦: ['抄本与异文', '多版本并存'],
+  哈姆雷特: ['多版本并存', '舞台文本', '译本差异显著'],
+  草叶集: ['作者修订', '多版本并存', '编订与选本'],
+  等待戈多: ['作者修订', '舞台文本', '译本差异显著'],
+  尤利西斯: ['作者修订', '多版本并存', '译本差异显著']
+})) {
+  const work = catalog.works.find((entry) => entry.slug === slug)
+  assert(JSON.stringify(work?.editionGuide.textualFeatures) === JSON.stringify(features), `${slug} has invalid textual features`)
 }
 assert(
   catalog.works.filter((work) => ['古代', '中古'].includes(work.eraGroup)).length === 26,
@@ -1382,10 +1461,11 @@ const seoSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'content', 's
 assert(/includeSrc:\s*false/.test(loaderSource), 'content loader must not expose Markdown source')
 assert(/render:\s*false/.test(loaderSource), 'content loader must not render Markdown body into catalog data')
 assert(loaderSource.includes('buildClientCatalog(buildContentCatalog(entries))'), 'content loader must emit the compact client catalog')
-for (const field of ['sources', 'reviewedAt', 'contentVersion', 'recommendedFor']) {
+for (const field of ['sources', 'reviewedAt', 'contentVersion', 'recommendedFor', 'editionGuide', 'birthYear', 'deathYear']) {
   assert(!clientCatalogSource.includes(`${field}:`), `client catalog must not expose unused field: ${field}`)
 }
 assert(!clientCatalogSource.includes('relationsByUrl'), 'client catalog must not ship the global relation table')
+assert(clientCatalogSource.includes('identity: {') && clientCatalogSource.includes('romanizedName: author.identity.romanizedName'), 'client catalog is missing compact author identity fields')
 assert(seoSource.includes('relatedContent?:') && seoSource.includes('{ relatedContent }'), 'page transform must inject route-scoped relations')
 const workExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'WorkExplorer.vue'), 'utf8')
 const authorExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'AuthorGrid.vue'), 'utf8')
@@ -1400,7 +1480,9 @@ const methodExplorerSource = fs.readFileSync(path.join(docsDir, '.vitepress', 't
 const methodPracticeRowsSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'MethodPracticeRows.vue'), 'utf8')
 const methodPracticeSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'data', 'method-practice.ts'), 'utf8')
 const workBibliographySource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'WorkBibliography.vue'), 'utf8')
+const workEditionGuideSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'WorkEditionGuide.vue'), 'utf8')
 const workReadingGuideSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'WorkReadingGuide.vue'), 'utf8')
+const authorIdentitySource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'AuthorIdentity.vue'), 'utf8')
 const methodGroupsSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'data', 'method-groups.ts'), 'utf8')
 assert(workExplorerSource.includes('const pageSize = 20'), 'work index must paginate at 20 items')
 assert(authorExplorerSource.includes('const pageSize = 20'), 'author index must paginate at 20 items')
@@ -1460,7 +1542,11 @@ for (const group of [...Object.keys(expectedTheoryGroups), ...Object.keys(expect
 assert(workReadingGuideSource.includes('catalog.works.find'), 'work reading guide does not resolve the current work from the catalog')
 assert(workBibliographySource.includes('frontmatter.value.bibliography'), 'work bibliography does not read the current page frontmatter')
 assert(workBibliographySource.includes('原作语言') && workBibliographySource.includes('首次出版'), 'work bibliography is missing required labels')
-assert(authorExplorerSource.includes('...author.aliases'), 'author index does not support aliases')
+assert(workEditionGuideSource.includes('frontmatter.value.editionGuide'), 'work edition guide does not read the current page frontmatter')
+assert(workEditionGuideSource.includes('版本提示') && workEditionGuideSource.includes('翻译提示') && workEditionGuideSource.includes('选择前检查'), 'work edition guide is missing required labels')
+assert(authorIdentitySource.includes('frontmatter.value.identity'), 'author identity does not read the current page frontmatter')
+assert(authorIdentitySource.includes('原文名') && authorIdentitySource.includes('拉丁转写') && authorIdentitySource.includes('生卒 / 时代'), 'author identity is missing required labels')
+assert(authorExplorerSource.includes('...author.aliases') && authorExplorerSource.includes('author.identity.originalName'), 'author index does not search aliases and identity names')
 assert(workReadingGuideSource.includes('guide && theory && technique'), 'work reading guide does not guard incomplete references')
 assert(!workReadingGuideSource.includes('relationsByUrl'), 'work reading guide must not reuse derived case-study relations')
 
@@ -1600,9 +1686,30 @@ for (const [url, expectedType, entry] of [...staticSeoPages, ...contentSeoPages]
         assert(!primary.mainEntity?.datePublished, `${url} JSON-LD invents a first publication year`)
       }
       assert(builtPage.includes('class="kb-work-bibliography"'), `${url} does not render visible bibliography metadata`)
+      assert(builtPage.includes('class="kb-work-edition-guide"'), `${url} does not render its edition and translation guide`)
     }
     if (entry?.type === 'author') {
       assert(primary.mainEntity?.['@type'] === 'Person', `${url} does not describe its author as a Person`)
+      const expectedAlternateNames = Array.from(new Set([
+        ...entry.aliases,
+        entry.identity.originalName,
+        entry.identity.romanizedName
+      ].filter((name) => Boolean(name) && name !== entry.title)))
+      assert(
+        JSON.stringify(primary.mainEntity?.alternateName ?? []) === JSON.stringify(expectedAlternateNames),
+        `${url} JSON-LD alternate names do not match author identity metadata`
+      )
+      if (entry.identity.birthYear && entry.identity.birthYear > 0) {
+        assert(primary.mainEntity?.birthDate === String(entry.identity.birthYear), `${url} JSON-LD birth date does not match author identity`)
+      } else {
+        assert(!primary.mainEntity?.birthDate, `${url} JSON-LD invents a positive birth date`)
+      }
+      if (entry.identity.deathYear && entry.identity.deathYear > 0) {
+        assert(primary.mainEntity?.deathDate === String(entry.identity.deathYear), `${url} JSON-LD death date does not match author identity`)
+      } else {
+        assert(!primary.mainEntity?.deathDate, `${url} JSON-LD invents a positive death date`)
+      }
+      assert(builtPage.includes('class="kb-author-identity"'), `${url} does not render visible author identity metadata`)
     }
     if (entry?.contentVersion === 2) {
       assert(primary.dateModified === entry.reviewedAt, `${url} JSON-LD dateModified does not match reviewedAt`)
@@ -1756,6 +1863,9 @@ assert(configSource.includes("link: '/style-test/', target: '_self'"), 'top navi
 assert(configSource.includes("{ text: '阅读方法', link: '/methods/' }"), 'top navigation does not link directly to the method center')
 assert(configSource.includes('_render(src, env, md)') && configSource.includes('kb-work-reading-guide-title'), 'local search does not index work reading guides')
 assert(configSource.includes('env.frontmatter?.aliases') && configSource.includes('env.frontmatter?.bibliography'), 'local search does not index aliases and bibliography metadata')
+assert(configSource.includes('tokenizeKnowledgeSearch') && configSource.includes('miniSearch:'), 'local search does not use the shared Chinese tokenizer')
+assert(configSource.includes('env.frontmatter?.identity') && configSource.includes('kb-author-identity-search'), 'local search does not index author identity names')
+assert(configSource.includes('env.frontmatter?.editionGuide') && configSource.includes('文本形态：'), 'local search does not index edition-guide categories')
 assert(configSource.includes('chunkSizeWarningLimit: 1700'), 'Vite must keep the explicit lazy-search chunk threshold')
 for (const action of [
   'actions/checkout@v7',
@@ -1871,12 +1981,20 @@ const requiredSearchTerms = [
   'Ὀδύσσεια',
   'अभिज्ञानशाकुन्तलम्',
   'moby',
-  'whale'
+  'whale',
+  '周树人',
+  'William Shakespeare',
+  'Ὅμηρος',
+  'Rabindranath Tagore',
+  '第一四开本',
+  '程甲',
+  '抄本与异文',
+  '作者修订',
+  '舞台文本',
+  '版本与译本'
 ]
 const foundTerms = new Set()
 const searchIndexFiles = distFiles.filter((file) => path.basename(file).includes('localSearchIndex'))
-const searchIndexSource = searchIndexFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n')
-const normalizedSearchIndexSource = searchIndexSource.normalize('NFC').toLowerCase()
 assert(searchIndexFiles.length > 0, 'missing VitePress local search index')
 const javascriptAssets = distFiles.filter((file) => path.extname(file) === '.js')
 const eagerJavaScriptAssets = javascriptAssets.filter((file) => !path.basename(file).includes('localSearchIndex'))
@@ -1886,6 +2004,71 @@ for (const file of eagerJavaScriptAssets) {
 }
 const searchIndexBytes = searchIndexFiles.reduce((total, file) => total + fs.statSync(file).size, 0)
 assert(searchIndexBytes <= 1_700_000, `lazy local search index exceeds 1.7 MB (${searchIndexBytes} bytes)`)
+
+const localSearchIndexes = []
+for (const file of searchIndexFiles) {
+  try {
+    const module = await import(`${pathToFileURL(file).href}?t=${fs.statSync(file).mtimeMs}`)
+    localSearchIndexes.push(MiniSearch.loadJSON(module.default, {
+      fields: ['title', 'titles', 'text'],
+      storeFields: ['title', 'titles'],
+      tokenize: tokenizeKnowledgeSearch,
+      searchOptions: {
+        combineWith: 'AND',
+        prefix: shouldPrefixKnowledgeSearchTerm,
+        fuzzy: fuzzyKnowledgeSearchTerm,
+        boost: { title: 4, text: 2, titles: 1 }
+      }
+    }))
+  } catch (error) {
+    assert(false, `cannot load local search index ${path.basename(file)}: ${String(error)}`)
+  }
+}
+
+const functionalSearchFixtures = [
+  ['鲁迅', '/authors/鲁迅'],
+  ['周树人', '/authors/鲁迅'],
+  ['William Shakespeare', '/authors/莎士比亚'],
+  ['Ὅμηρος', '/authors/荷马'],
+  ['Rabindranath Tagore', '/authors/泰戈尔'],
+  ['吉尔伽美什', '/works/吉尔伽美什'],
+  ['中古波斯文学', '/history/中古波斯文学'],
+  ['现实主义与自然主义', '/history/现实主义与自然主义'],
+  ['唐宋文学', '/history/唐宋文学'],
+  ['冰山理论', '/authors/海明威'],
+  ['奥涅金诗节', '/works/叶甫盖尼·奥涅金'],
+  ['作者之死', '/theory/作者与文本意义'],
+  ['描述阐释评价', '/theory/描述阐释与评价'],
+  ['性别表演', '/theory/性别与酷儿阅读'],
+  ['故事与话语', '/theory/故事话语与叙述行为'],
+  ['隐含作者', '/theory/作者与文本意义'],
+  ['受述者', '/theory/叙述者与视角'],
+  ['认知地图', '/theory/认知叙事学'],
+  ['阅读抓手', '/works/'],
+  ['疗养院怎样把短暂探访扩展为长期思想经验', '/works/魔山'],
+  ['比较译本的声音得失', '/works/万叶集'],
+  ['多线推进怎样把群雄行动组织为带有正统判断的历史因果', '/works/三国演义'],
+  ['一本正经的旅行叙述怎样把社会常识转化为可疑的意识形态', '/works/格列佛游记'],
+  ['人物在空旷舞台上的站位', '/works/等待戈多'],
+  ['奥德修纪', '/works/奥德赛'],
+  ['异乡人', '/works/局外人'],
+  ['恶之华', '/works/恶之花'],
+  ['追忆逝水年华', '/works/追忆似水年华'],
+  ['Ὀδύσσεια', '/works/奥德赛'],
+  ['अभिज्ञानशाकुन्तलम्', '/works/沙恭达罗'],
+  ['moby whale', '/works/白鲸'],
+  ['第一四开本', '/works/哈姆雷特'],
+  ['程甲本', '/works/红楼梦'],
+  ['版本演变', '/works/草叶集'],
+  ['抄本与异文', '/works/']
+]
+for (const [query, expectedUrl] of functionalSearchFixtures) {
+  const resultIds = localSearchIndexes.flatMap((index) => index.search(query).slice(0, 16).map((result) => String(result.id)))
+  assert(
+    resultIds.some((id) => id.startsWith(expectedUrl)),
+    `local search query '${query}' does not return ${expectedUrl} in its first 16 results`
+  )
+}
 const forbiddenChecks = [
   ...(sourceMap?.forbiddenPublicText ?? []).map((value) => ({
     label: 'private source marker',
@@ -1913,10 +2096,6 @@ for (const file of distFiles) {
 }
 for (const term of requiredSearchTerms) {
   assert(foundTerms.has(term), `search term missing from build: ${term}`)
-  assert(
-    normalizedSearchIndexSource.includes(term.normalize('NFC').toLowerCase()),
-    `search term missing from local search index: ${term}`
-  )
 }
 
 if (failures.length) {

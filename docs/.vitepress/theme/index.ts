@@ -4,6 +4,7 @@ import { h } from 'vue'
 import './custom.css'
 
 import AuthorGrid from './components/AuthorGrid.vue'
+import AuthorIdentity from './components/AuthorIdentity.vue'
 import ContentSources from './components/ContentSources.vue'
 import HistoryIndex from './components/HistoryIndex.vue'
 import KnowledgeHome from './components/KnowledgeHome.vue'
@@ -22,6 +23,7 @@ import TopicExplorer from './components/TopicExplorer.vue'
 import TopicRelations from './components/TopicRelations.vue'
 import WorkExplorer from './components/WorkExplorer.vue'
 import WorkBibliography from './components/WorkBibliography.vue'
+import WorkEditionGuide from './components/WorkEditionGuide.vue'
 import WorkReadingGuide from './components/WorkReadingGuide.vue'
 
 export default {
@@ -39,6 +41,7 @@ export default {
   },
   enhanceApp({ app }) {
     app.component('AuthorGrid', AuthorGrid)
+    app.component('AuthorIdentity', AuthorIdentity)
     app.component('HistoryIndex', HistoryIndex)
     app.component('KnowledgeHome', KnowledgeHome)
     app.component('MethodExplorer', MethodExplorer)
@@ -52,6 +55,7 @@ export default {
     app.component('TopicExplorer', TopicExplorer)
     app.component('TopicRelations', TopicRelations)
     app.component('WorkBibliography', WorkBibliography)
+    app.component('WorkEditionGuide', WorkEditionGuide)
     app.component('WorkExplorer', WorkExplorer)
   }
 } satisfies Theme

@@ -88,6 +88,29 @@ const slugListSchema = z.array(z.string().trim().min(1)).refine(
   { message: 'slug references must be unique' }
 )
 
+export const authorIdentitySchema = z.object({
+  originalName: z.string().trim().min(1).max(120).nullable(),
+  romanizedName: z.string().trim().min(1).max(120).nullable(),
+  lifeLabel: z.string().trim().min(2).max(100),
+  birthYear: z.number().int().min(-3000).max(2100).nullable(),
+  deathYear: z.number().int().min(-3000).max(2100).nullable()
+}).superRefine((identity, context) => {
+  if (identity.originalName && identity.romanizedName && identity.originalName === identity.romanizedName) {
+    context.addIssue({
+      code: 'custom',
+      path: ['romanizedName'],
+      message: 'romanizedName must add information beyond originalName'
+    })
+  }
+  if (identity.birthYear !== null && identity.deathYear !== null && identity.deathYear < identity.birthYear) {
+    context.addIssue({
+      code: 'custom',
+      path: ['deathYear'],
+      message: 'deathYear must not precede birthYear'
+    })
+  }
+})
+
 export const historyEntrySchema = z.object({
   ...commonFields,
   ...deepContentFields,
@@ -105,6 +128,7 @@ export const authorEntrySchema = z.object({
   ...commonFields,
   ...deepContentFields,
   type: z.literal('author'),
+  identity: authorIdentitySchema,
   track: trackSchema,
   eraGroup: eraGroupSchema,
   historySlugs: z.array(z.string().trim().min(1))
@@ -132,6 +156,30 @@ export const workBibliographySchema = z.object({
   firstPublishedYear: z.number().int().min(1000).max(2100).nullable()
 })
 
+export const textualFeatureSchema = z.enum([
+  '口传与演述',
+  '抄本与异文',
+  '多版本并存',
+  '作者修订',
+  '编订与选本',
+  '舞台文本',
+  '译本差异显著',
+  '通行文本较稳定'
+])
+
+export const workEditionGuideSchema = z.object({
+  textualFeatures: z.array(textualFeatureSchema).min(1).max(3).refine(
+    (features) => new Set(features).size === features.length,
+    { message: 'textual features must be unique' }
+  ),
+  versionNote: z.string().trim().min(40).max(240),
+  translationNote: z.string().trim().min(40).max(240),
+  checklist: z.array(z.string().trim().min(8).max(80)).min(2).max(4).refine(
+    (items) => new Set(items).size === items.length,
+    { message: 'edition checklist items must be unique' }
+  )
+})
+
 export const workEntrySchema = z.object({
   ...commonFields,
   ...deepContentFields,
@@ -143,6 +191,7 @@ export const workEntrySchema = z.object({
   historySlugs: z.array(z.string().trim().min(1)),
   whyRead: z.string().trim().min(1),
   bibliography: workBibliographySchema,
+  editionGuide: workEditionGuideSchema,
   readingGuide: workReadingGuideSchema
 })
 
@@ -220,6 +269,8 @@ export type TheoryGroup = z.infer<typeof theoryGroupSchema>
 export type TechniqueGroup = z.infer<typeof techniqueGroupSchema>
 export type WorkReadingGuide = z.infer<typeof workReadingGuideSchema>
 export type WorkBibliography = z.infer<typeof workBibliographySchema>
+export type AuthorIdentity = z.infer<typeof authorIdentitySchema>
+export type WorkEditionGuide = z.infer<typeof workEditionGuideSchema>
 export type ContentFrontmatter = z.infer<typeof contentEntrySchema>
 export type ContentType = ContentFrontmatter['type']
 export type ContentSource = z.infer<typeof contentSourceSchema>

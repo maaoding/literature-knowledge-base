@@ -36,6 +36,11 @@ export function buildClientCatalog(catalog: ContentCatalog) {
       country: author.country,
       period: author.period,
       aliases: author.aliases,
+      identity: {
+        originalName: author.identity.originalName,
+        romanizedName: author.identity.romanizedName,
+        lifeLabel: author.identity.lifeLabel
+      },
       tags: author.tags,
       works: author.works,
       eraGroup: author.eraGroup,
