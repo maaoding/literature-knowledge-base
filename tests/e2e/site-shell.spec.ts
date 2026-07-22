@@ -106,3 +106,65 @@ test('reading guide switches between paths and topics', async ({ page }) => {
   await expect(page.locator('.kb-path')).toHaveCount(18)
   await expectNoHorizontalOverflow(page)
 })
+
+test('history sidebar hierarchy and timeline stay compact', async ({ page }, testInfo) => {
+  const mobile = testInfo.project.name === 'mobile-dark'
+
+  await gotoRoute(page, '/history/')
+  await expect(page.locator('.kb-timeline-row')).toHaveCount(29)
+  await expect(page.locator('.kb-timeline-card, .kb-track-headings')).toHaveCount(0)
+
+  const firstRowColumns = await page.locator('.kb-timeline-row').first().evaluate((element) =>
+    getComputedStyle(element).gridTemplateColumns.split(' ').filter(Boolean).length
+  )
+  expect(firstRowColumns).toBe(mobile ? 1 : 3)
+
+  const filterPosition = await page.locator('.kb-timeline-filter').evaluate((element) =>
+    getComputedStyle(element).position
+  )
+  expect(filterPosition).toBe(mobile ? 'static' : 'sticky')
+
+  await page.getByRole('button', { name: '中国', exact: true }).click()
+  await expect(page.locator('.kb-timeline-row')).not.toHaveCount(0)
+  await expect(page.locator('.kb-timeline-row .kb-track-badge')).toHaveText(
+    await page.locator('.kb-timeline-row .kb-track-badge').evaluateAll((badges) => badges.map(() => '中国'))
+  )
+
+  await page.getByRole('button', { name: '世界', exact: true }).click()
+  await expect(page.locator('.kb-timeline-row')).not.toHaveCount(0)
+  await expect(page.locator('.kb-timeline-row .kb-track-badge')).toHaveText(
+    await page.locator('.kb-timeline-row .kb-track-badge').evaluateAll((badges) => badges.map(() => '世界'))
+  )
+
+  const sidebarGroups = page.locator('.VPSidebarItem.level-0')
+  const indexGroup = sidebarGroups.filter({ hasText: '文学史索引' }).first()
+  const chinaGroup = sidebarGroups.filter({ hasText: '中国文学史' }).first()
+  await expect(indexGroup.locator('a[href="/history/"]')).toHaveText('总览与时间线')
+  await expect(chinaGroup.locator('a[href="/history/"]')).toHaveCount(0)
+  await expectNoHorizontalOverflow(page)
+})
+
+test('author and work indexes use cards by default and retain list mode', async ({ page }) => {
+  for (const route of ['/authors/', '/works/']) {
+    await gotoRoute(page, route)
+    await expect(page.locator('.kb-grid--catalog > .kb-card')).toHaveCount(20)
+    await expect(page.locator('.kb-catalog-row')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: '卡片', exact: true })).toHaveAttribute('aria-pressed', 'true')
+
+    await page.getByRole('button', { name: '列表', exact: true }).click()
+    await expect(page).toHaveURL(new RegExp(`${route.replaceAll('/', '\\/')}\\?view=list$`))
+    await expect(page.locator('.kb-catalog-row')).toHaveCount(20)
+    await expect(page.locator('.kb-grid--catalog > .kb-card')).toHaveCount(0)
+
+    await page.reload()
+    await expect(page.locator('.kb-catalog-row')).toHaveCount(20)
+    await page.getByRole('button', { name: '卡片', exact: true }).click()
+    await expect(page).toHaveURL(new RegExp(`${route.replaceAll('/', '\\/')}$`))
+    await expect(page.locator('.kb-grid--catalog > .kb-card')).toHaveCount(20)
+
+    await gotoRoute(page, `${route}?view=cards`)
+    await expect(page).toHaveURL(new RegExp(`${route.replaceAll('/', '\\/')}$`))
+    await expect(page.locator('.kb-grid--catalog > .kb-card')).toHaveCount(20)
+    await expectNoHorizontalOverflow(page)
+  }
+})

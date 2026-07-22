@@ -20,7 +20,7 @@ const selectedTheory = ref('全部')
 const selectedTechnique = ref('全部')
 const selectedDifficulty = ref<Difficulty | '全部'>('全部')
 const selectedSort = ref<WorkSort>('history')
-const viewMode = ref<ViewMode>('list')
+const viewMode = ref<ViewMode>('cards')
 const currentPage = ref(1)
 const ready = ref(false)
 const explorerRef = ref<HTMLElement | null>(null)
@@ -124,7 +124,7 @@ function syncUrl() {
   } else {
     if (selectedCountry.value !== '全部') params.set('country', selectedCountry.value)
     if (selectedTopic.value !== '全部') params.set('topic', selectedTopic.value)
-    if (viewMode.value !== 'list') params.set('view', viewMode.value)
+    if (viewMode.value !== 'cards') params.set('view', viewMode.value)
   }
 
   if (currentPage.value > 1) params.set('page', String(currentPage.value))
@@ -299,8 +299,8 @@ watch(pageCount, (count) => {
     <div class="kb-index-summary">
       <p class="kb-result-count" aria-live="polite">{{ resultRange }}</p>
       <div v-if="mode === 'catalog'" class="kb-view-switch" role="group" aria-label="名著显示方式">
-        <button type="button" :class="{ 'is-active': viewMode === 'list' }" :aria-pressed="viewMode === 'list'" @click="viewMode = 'list'">列表</button>
         <button type="button" :class="{ 'is-active': viewMode === 'cards' }" :aria-pressed="viewMode === 'cards'" @click="viewMode = 'cards'">卡片</button>
+        <button type="button" :class="{ 'is-active': viewMode === 'list' }" :aria-pressed="viewMode === 'list'" @click="viewMode = 'list'">列表</button>
       </div>
     </div>
 

@@ -48,17 +48,10 @@ export function createSidebar(catalog: ContentCatalog) {
   const authorWorkGroups = ['中国文学', '世界文学 · 古代', '世界文学 · 中古', '世界文学 · 近代', '世界文学 · 现当代']
   const historyGroups = ['中国文学史', '世界文学 · 古代', '世界文学 · 中古', '世界文学 · 近代', '世界文学 · 现当代', '跨期导读']
 
-  const historySidebar = historyGroups.map((group, index) => ({
-    text: group,
-    collapsed: index !== 0,
-    items: [
-      ...(index === 0 ? [{ text: '总览', link: '/history/' }] : []),
-      ...catalog.historyPages
-        .filter((entry) => entry.sidebarGroup === group)
-        .sort((a, b) => a.sidebarOrder - b.sidebarOrder || a.startYear - b.startYear)
-        .map((entry) => ({ text: entry.title, link: entry.url }))
-    ]
-  }))
+  const historySidebar = groupedSidebar(catalog.historyPages, historyGroups, {
+    text: '文学史索引',
+    items: [{ text: '总览与时间线', link: '/history/' }]
+  })
 
   return {
     '/history/': historySidebar,

@@ -45,22 +45,17 @@ const entriesFor = (era: EraGroup) => visibleEntries.value.filter((entry) => ent
         <p>{{ era.note }}</p>
       </header>
 
-      <div v-if="selectedFilter === '全部'" class="kb-track-headings" aria-hidden="true">
-        <span>中国文学</span>
-        <span>世界文学</span>
-      </div>
-
-      <div class="kb-era-entries" :class="{ 'is-single': selectedFilter !== '全部' }">
+      <div class="kb-era-entries">
         <a
           v-for="entry in entriesFor(era.key)"
           :key="entry.slug"
-          class="kb-timeline-card"
-          :class="entry.track === '中国' ? 'kb-timeline-card--china' : 'kb-timeline-card--world'"
+          class="kb-timeline-row"
+          :class="entry.track === '中国' ? 'kb-timeline-row--china' : 'kb-timeline-row--world'"
           :href="entry.link"
         >
-          <div class="kb-timeline-card__topline">
+          <div class="kb-timeline-row__coordinate">
             <span class="kb-track-badge">{{ entry.track }}</span>
-            <span>{{ entry.timeLabel }}</span>
+            <span class="kb-time-label">{{ entry.timeLabel }}</span>
           </div>
           <h3>{{ entry.title }}</h3>
           <p>{{ entry.summary }}</p>

@@ -1347,7 +1347,8 @@ body::before {
 }
 
 .kb-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   min-height: 0;
   padding: 18px;
@@ -1388,10 +1389,15 @@ body::before {
 }
 
 .kb-card__meta {
-  display: block;
-  margin-top: 12px !important;
+  display: -webkit-box;
+  margin-top: auto !important;
+  padding-top: 12px;
+  overflow: hidden;
   color: var(--kb-blue) !important;
   font-size: 14px;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .kb-card .kb-card__identity {
@@ -2767,8 +2773,8 @@ body::before {
 }
 
 .kb-era-band {
-  margin-top: 40px;
-  padding-top: 24px;
+  margin-top: 32px;
+  padding-top: 20px;
   border-top: 1px solid var(--kb-line-strong);
 }
 
@@ -2777,7 +2783,7 @@ body::before {
   grid-template-columns: 72px minmax(170px, 240px) minmax(0, 1fr);
   gap: 16px;
   align-items: baseline;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .kb-era-band__header > span {
@@ -2799,68 +2805,49 @@ body::before {
   color: var(--kb-muted);
 }
 
-.kb-track-headings,
 .kb-era-entries {
+  border-bottom: 1px solid var(--kb-line);
+}
+
+.kb-timeline-row {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.kb-era-entries {
-  grid-auto-flow: row dense;
-  align-items: start;
-}
-
-.kb-track-headings {
-  margin-bottom: 10px;
-  color: var(--kb-muted);
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.kb-track-headings span {
-  padding-left: 16px;
-}
-
-.kb-era-entries.is-single {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.kb-timeline-card {
+  grid-template-columns: minmax(160px, 0.72fr) minmax(190px, 0.9fr) minmax(0, 1.8fr);
+  gap: 20px;
+  align-items: center;
   min-width: 0;
-  padding: 17px;
-  border: 1px solid var(--kb-line);
-  border-radius: var(--kb-radius);
-  background: var(--kb-panel);
+  padding: 14px 12px 14px 18px;
+  border-top: 1px solid var(--kb-line);
   color: var(--kb-ink) !important;
   text-decoration: none !important;
-  transition: border-color 0.16s ease, transform 0.16s ease;
+  transition: background-color 0.16s ease;
 }
 
-.kb-timeline-card:hover {
-  border-color: var(--kb-red);
-  transform: translateY(-2px);
+.kb-timeline-row::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 0;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--kb-red);
+  content: '';
 }
 
-.kb-timeline-card--china {
-  grid-column: 1;
-  border-left: 3px solid var(--kb-red);
+.kb-timeline-row:hover {
+  background: color-mix(in srgb, var(--kb-red) 6%, transparent);
 }
 
-.kb-timeline-card--world {
-  grid-column: 2;
-  border-left: 3px solid var(--kb-teal);
+.kb-timeline-row--world::before {
+  background: var(--kb-teal);
 }
 
-.kb-era-entries.is-single .kb-timeline-card {
-  grid-column: 1;
-}
-
-.kb-timeline-card__topline {
+.kb-timeline-row__coordinate {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 7px 10px;
+  min-width: 0;
   color: var(--kb-muted);
   font-size: 13px;
 }
@@ -2870,24 +2857,31 @@ body::before {
   font-weight: 800;
 }
 
-.kb-timeline-card--world .kb-track-badge {
+.kb-timeline-row--world .kb-track-badge {
   color: var(--kb-teal);
 }
 
-.kb-timeline-card h3 {
-  margin: 12px 0 8px;
-  font-size: 19px;
+.kb-time-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.kb-timeline-row h3 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", "SimSun", serif;
+  font-size: 18px;
   line-height: 1.35;
 }
 
-.kb-timeline-card p {
+.kb-timeline-row p {
   margin: 0;
-  color: var(--kb-muted);
   display: -webkit-box;
   overflow: hidden;
-  line-height: 1.65;
+  color: var(--kb-muted);
+  font-size: 14px;
+  line-height: 1.6;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
 }
 
 @media (max-width: 1180px) {
@@ -2941,17 +2935,9 @@ body::before {
     gap: 8px;
   }
 
-  .kb-track-headings {
-    display: none;
-  }
-
-  .kb-era-entries {
-    grid-template-columns: 1fr;
-  }
-
-  .kb-timeline-card--china,
-  .kb-timeline-card--world {
-    grid-column: 1;
+  .kb-timeline-row {
+    grid-template-columns: minmax(140px, 0.62fr) minmax(180px, 0.82fr) minmax(0, 1.56fr);
+    gap: 16px;
   }
 
   .kb-era-band__header {
@@ -3274,7 +3260,7 @@ body::before {
   }
 
   .kb-timeline-filter {
-    top: calc(var(--vp-nav-height) + 8px);
+    position: static;
     width: 100%;
   }
 
@@ -3287,9 +3273,17 @@ body::before {
     grid-column: auto;
   }
 
-  .kb-timeline-card__topline {
-    align-items: flex-start;
-    flex-direction: column;
+  .kb-timeline-row {
+    grid-template-columns: 1fr;
     gap: 5px;
+    padding: 13px 10px 13px 16px;
+  }
+
+  .kb-timeline-row__coordinate {
+    justify-content: space-between;
+  }
+
+  .kb-timeline-row h3 {
+    font-size: 18px;
   }
 }
