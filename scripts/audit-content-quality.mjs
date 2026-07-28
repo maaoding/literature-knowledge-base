@@ -258,9 +258,12 @@ const report = {
 fs.mkdirSync(path.dirname(reportPath), { recursive: true })
 fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`)
 
+const reviewedQueueCount = reviewQueue.filter((entry) => entry.reviewed).length
+const currentSourceRiskCount = pageAudits.filter((entry) => entry.sourceFlags.length > 0).length
+
 console.log(`audited ${entries.length} entries, ${deepEntries.length} deep pages and ${relationCount} relation references`)
 console.log(`found ${sourceReferences.length} source references and ${report.counts.uniqueExternalUrls} unique external URLs`)
-console.log(`review queue: ${reviewQueue.length}; hard issues: ${hardIssues.length}`)
+console.log(`review queue: ${reviewedQueueCount}/${reviewQueue.length} reviewed; current source-risk pages: ${currentSourceRiskCount}; hard issues: ${hardIssues.length}`)
 console.log(`reviewed at ${reviewBaseline} baseline: ${baselineReviewedPages.length}/${deepEntries.length}; remaining: ${baselineRemainingPages.length}`)
 console.log(`report: ${path.relative(root, reportPath)}`)
 if (hardIssues.length) process.exit(1)

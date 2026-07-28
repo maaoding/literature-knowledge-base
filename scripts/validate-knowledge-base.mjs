@@ -13,6 +13,8 @@ const root = process.cwd()
 const docsDir = path.join(root, 'docs')
 const distDir = path.join(docsDir, '.vitepress', 'dist')
 const failures = []
+const searchIndexWarningBytes = 1_600_000
+const searchIndexLimitBytes = 1_700_000
 
 function assert(condition, message) {
   if (!condition) failures.push(message)
@@ -1519,6 +1521,8 @@ assert(pathExplorerSource.includes("params.set('level'"), 'path level filter is 
 assert(pathExplorerSource.includes("currentParams.get('mode') === 'topics'"), 'path filters do not preserve the parent reading-guide mode during hydration')
 assert(pathExplorerSource.includes("const selectedKind = ref<KindFilter>('全部')"), 'path kind filter does not default to all')
 assert(pathExplorerSource.includes("const selectedLevel = ref<LevelFilter>('全部')"), 'path level filter does not default to all')
+assert(pathExplorerSource.includes('kb-path-kind-buttons') && pathExplorerSource.includes('kb-path-kind-select'), 'path kind filter is not responsive across desktop and mobile')
+assert(pathExplorerSource.includes('<select v-model="selectedKind" aria-label="阅读路径分类">'), 'mobile path kind filter does not share the selected kind state')
 assert(pathExplorerSource.includes('path.pathKind'), 'path cards do not show their classification')
 assert(pathExplorerSource.includes('work.stage'), 'path cards do not show reading stages')
 assert(pathStepsSource.includes("const stages = ['起点', '转折', '深化', '延伸']"), 'path step component does not render the four stages')
@@ -1543,6 +1547,7 @@ assert(methodExplorerSource.includes("params.set('mode', mode.value)") && method
 assert(methodExplorerSource.includes('ready.value = true\n  syncUrl()'), 'method center does not normalize URL state after hydration')
 assert(methodExplorerSource.includes('const pageSize = 20'), 'method center must paginate at 20 items')
 assert(methodExplorerSource.includes('<MethodPracticeRows') && methodPracticeSource.includes('createGuideWorks'), 'method center and work index do not share practice data')
+assert(methodExplorerSource.includes("theoryKindLabels[entry.entryKind] !== entry.theoryGroup"), 'method center does not suppress duplicate theory taxonomy labels')
 assert(!methodExplorerSource.includes('readingGuide.exercise') && !methodPracticeSource.includes('readingGuide.exercise'), 'method center search must not index hidden exercise text')
 assert(methodPracticeSource.includes('work.bibliography.originalTitle') && methodPracticeSource.includes('...work.aliases'), 'method practice search does not include work aliases and bibliography metadata')
 for (const group of [...Object.keys(expectedTheoryGroups), ...Object.keys(expectedTechniqueGroups)]) {
@@ -1889,6 +1894,7 @@ assert(!configSource.includes("{ text: '推荐阅读', link: '/paths/' }") && !c
 assert(readingGuideSource.includes("type ReadingMode = 'paths' | 'topics'") && readingGuideSource.includes("params.set('mode', 'topics')"), 'reading guide does not preserve its two-mode URL contract')
 assert(homeSource.includes('href="/reading/"') && !homeSource.includes('href="/paths/"'), 'homepage still bypasses the unified reading guide')
 assert(configSource.includes('_render(src, env, md)') && configSource.includes('kb-work-reading-guide-title'), 'local search does not index work reading guides')
+assert(!configSource.includes('theory.summary') && !configSource.includes('technique.summary'), 'work search metadata repeats theory or technique summaries')
 assert(configSource.includes('env.frontmatter?.aliases') && configSource.includes('env.frontmatter?.bibliography'), 'local search does not index aliases and bibliography metadata')
 assert(configSource.includes('tokenizeKnowledgeSearch') && configSource.includes('miniSearch:'), 'local search does not use the shared Chinese tokenizer')
 assert(configSource.includes('env.frontmatter?.identity') && configSource.includes('kb-author-identity-search'), 'local search does not index author identity names')
@@ -2030,7 +2036,10 @@ for (const file of eagerJavaScriptAssets) {
   assert(size <= 500_000, `eager JavaScript chunk exceeds 500 kB: ${path.relative(distDir, file)} (${size} bytes)`)
 }
 const searchIndexBytes = searchIndexFiles.reduce((total, file) => total + fs.statSync(file).size, 0)
-assert(searchIndexBytes <= 1_700_000, `lazy local search index exceeds 1.7 MB (${searchIndexBytes} bytes)`)
+assert(searchIndexBytes <= searchIndexLimitBytes, `lazy local search index exceeds 1.7 MB (${searchIndexBytes} bytes)`)
+if (searchIndexBytes > searchIndexWarningBytes) {
+  console.warn(`warning: lazy local search index exceeds 1.6 MB (${searchIndexBytes} bytes)`)
+}
 
 const localSearchIndexes = []
 for (const file of searchIndexFiles) {
@@ -2137,3 +2146,4 @@ console.log(`validated ${catalog.historyEntries.length} timeline nodes, ${catalo
 console.log(`validated ${catalog.readingPaths.length} paths, ${catalog.topics.length} topics, ${catalog.theories.length} theories, ${catalog.techniques.length} techniques, ${catalog.entries.length} unique slugs`)
 console.log(`validated ${deepContentCount} version 2 content pages and their sources`)
 console.log(`validated ${sourceFiles.length} source files, all built URLs, shared icon and style test`)
+console.log(`validated lazy local search index at ${searchIndexBytes} bytes; ${searchIndexLimitBytes - searchIndexBytes} bytes remain below the 1.7 MB limit`)

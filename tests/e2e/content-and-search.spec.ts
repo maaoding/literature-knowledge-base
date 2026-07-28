@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import {
-  collectAssetFailures,
+  collectPageFailures,
   expectNoHorizontalOverflow,
   expectTheme,
   gotoRoute,
@@ -61,7 +61,7 @@ async function expectSearchResult(page: Page, query: string, expectedPrefix: str
 
 test('local search resolves aliases and edition terms without broken assets', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-light', 'Search cold start only needs one browser project')
-  const failures = collectAssetFailures(page)
+  const failures = collectPageFailures(page)
 
   await gotoRoute(page, '/')
   await page.locator('.DocSearch-Button').click()

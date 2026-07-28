@@ -50,7 +50,7 @@ watch([selectedLevel, selectedKind], syncUrl)
     <div class="kb-path-filters">
       <div class="kb-path-filter-row">
         <span>分类</span>
-        <div class="kb-path-filter" role="group" aria-label="阅读路径分类">
+        <div class="kb-path-filter kb-path-kind-buttons" role="group" aria-label="阅读路径分类">
           <button
             v-for="filter in kindFilters"
             :key="filter"
@@ -61,6 +61,11 @@ watch([selectedLevel, selectedKind], syncUrl)
           >
             {{ filter }}
           </button>
+        </div>
+        <div class="kb-select-field kb-path-kind-select">
+          <select v-model="selectedKind" aria-label="阅读路径分类">
+            <option v-for="filter in kindFilters" :key="filter" :value="filter">{{ filter }}</option>
+          </select>
         </div>
       </div>
       <div class="kb-path-filter-row">

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import {
-  collectAssetFailures,
+  collectPageFailures,
   expectNoHorizontalOverflow,
   expectTheme,
   gotoRoute,
@@ -41,7 +41,7 @@ test('stable public routes return successfully', async ({ request }, testInfo) =
 })
 
 test('home renders navigation, media and current assets', async ({ page }, testInfo) => {
-  const failures = collectAssetFailures(page)
+  const failures = collectPageFailures(page)
   const theme = testInfo.project.name === 'mobile-dark' ? 'dark' : 'light'
 
   await gotoRoute(page, '/')
@@ -86,12 +86,31 @@ test('custom 404 keeps stable recovery links', async ({ page }) => {
   await expectNoHorizontalOverflow(page)
 })
 
-test('reading guide switches between paths and topics', async ({ page }) => {
+test('reading guide switches modes and keeps responsive path filters', async ({ page }, testInfo) => {
+  const mobile = testInfo.project.name === 'mobile-dark'
+
   await gotoRoute(page, '/reading/')
   await expect(page.locator('h1')).toHaveText('阅读指南')
   await expect(page.locator('[data-reading-mode="paths"]')).toHaveAttribute('aria-pressed', 'true')
   await expect(page.locator('.kb-path')).toHaveCount(18)
   await expect(page.locator('.kb-topic-card')).toHaveCount(0)
+
+  const kindButtons = page.locator('.kb-path-kind-buttons')
+  const kindSelect = page.locator('.kb-path-kind-select select')
+  await expect(kindButtons).toBeVisible({ visible: !mobile })
+  await expect(kindSelect).toBeVisible({ visible: mobile })
+
+  if (mobile) {
+    await kindSelect.selectOption('文学史进阶')
+  } else {
+    await kindButtons.getByRole('button', { name: '文学史进阶', exact: true }).click()
+  }
+  await expect.poll(() => new URL(page.url()).searchParams.get('kind')).toBe('文学史进阶')
+  await expect(page.locator('.kb-path')).toHaveCount(6)
+
+  await page.reload()
+  await expect(kindSelect).toHaveValue('文学史进阶')
+  await expect(page.locator('.kb-path')).toHaveCount(6)
 
   await page.locator('[data-reading-mode="topics"]').click()
   await expect(page).toHaveURL(/\/reading\/\?mode=topics$/)
@@ -122,7 +141,7 @@ test('history sidebar hierarchy and timeline stay compact', async ({ page }, tes
   const filterPosition = await page.locator('.kb-timeline-filter').evaluate((element) =>
     getComputedStyle(element).position
   )
-  expect(filterPosition).toBe(mobile ? 'static' : 'sticky')
+  expect(filterPosition).toBe('static')
 
   await page.getByRole('button', { name: '中国', exact: true }).click()
   await expect(page.locator('.kb-timeline-row')).not.toHaveCount(0)
@@ -141,6 +160,14 @@ test('history sidebar hierarchy and timeline stay compact', async ({ page }, tes
   const chinaGroup = sidebarGroups.filter({ hasText: '中国文学史' }).first()
   await expect(indexGroup.locator('a[href="/history/"]')).toHaveText('总览与时间线')
   await expect(chinaGroup.locator('a[href="/history/"]')).toHaveCount(0)
+  await expectNoHorizontalOverflow(page)
+})
+
+test('method center avoids duplicate taxonomy labels', async ({ page }) => {
+  await gotoRoute(page, '/methods/')
+
+  const conceptRow = page.locator('.kb-method-row').filter({ hasText: '结构与符号' }).first()
+  await expect(conceptRow.locator('.kb-method-row__topline span')).toHaveText(['进阶', '概念工具'])
   await expectNoHorizontalOverflow(page)
 })
 

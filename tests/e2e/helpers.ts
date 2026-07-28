@@ -14,11 +14,13 @@ export async function expectNoHorizontalOverflow(page: Page) {
   expect(overflow).toBeLessThanOrEqual(1)
 }
 
-export function collectAssetFailures(page: Page) {
+export function collectPageFailures(page: Page) {
   const failures: string[] = []
   const isSiteAsset = (url: string) => {
     const pathname = new URL(url).pathname
-    return pathname.startsWith('/assets/') || pathname.startsWith('/images/')
+    return pathname.startsWith('/assets/')
+      || pathname.startsWith('/images/')
+      || pathname.startsWith('/style-test/assets/')
   }
 
   page.on('response', (response) => {
@@ -30,6 +32,16 @@ export function collectAssetFailures(page: Page) {
   page.on('requestfailed', (request) => {
     if (isSiteAsset(request.url())) {
       failures.push(`${request.failure()?.errorText ?? 'request failed'} ${request.url()}`)
+    }
+  })
+
+  page.on('pageerror', (error) => {
+    failures.push(`pageerror ${error.message}`)
+  })
+
+  page.on('console', (message) => {
+    if (message.type() === 'error') {
+      failures.push(`console.error ${message.text()}`)
     }
   })
 

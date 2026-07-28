@@ -2145,6 +2145,7 @@
         .visual-caption > span {
           max-width: 112px;
           text-align: right;
+          white-space: nowrap;
         }
 
         .page-head {
@@ -2465,7 +2466,7 @@
                 <strong>5</strong>
                 <span>条倾向组合成一份可以继续验证的阅读画像。</span>
               </div>
-              <span id="savedStateText">尚未保存作答</span>
+              <span id="savedStateText">暂无结果</span>
             </div>
           </div>
         </div>
@@ -3542,7 +3543,7 @@
           ? "阅读画像已生成"
           : answered
             ? `已保存 ${answered} / ${questions.length}`
-            : "尚未保存作答";
+            : "暂无结果";
         startButton.textContent = latestScores ? "查看结果" : answered ? "继续测试" : "开始测试";
         startButton.dataset.routeLink = latestScores ? "result" : "quiz";
         startButton.setAttribute("href", latestScores ? "#result" : "#quiz");

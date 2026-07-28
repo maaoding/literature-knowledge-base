@@ -140,8 +140,8 @@ export default defineConfig({
             if (theory && technique) {
               additions.push(`<h2 id="kb-work-reading-guide-title">阅读抓手</h2>
                 <p>核心问题：${escapeSearchHtml(guide.question)}</p>
-                <p>理论视角：${escapeSearchHtml(theory.title)}。${escapeSearchHtml(theory.summary)}</p>
-                <p>文本技巧：${escapeSearchHtml(technique.title)}。${escapeSearchHtml(technique.summary)}</p>
+                <p>理论视角：${escapeSearchHtml(theory.title)}</p>
+                <p>文本技巧：${escapeSearchHtml(technique.title)}</p>
                 <p>动手练习：${escapeSearchHtml(guide.exercise)}</p>`)
             }
           }

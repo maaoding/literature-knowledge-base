@@ -277,7 +277,11 @@ watch(pageCount, (count) => {
     <div v-if="mode === 'theory' && visibleTheories.length" class="kb-method-list">
       <article v-for="entry in visibleTheories" :key="entry.slug" class="kb-method-row">
         <div class="kb-method-row__body">
-          <div class="kb-method-row__topline"><span>{{ entry.difficulty }}</span><span>{{ theoryKindLabels[entry.entryKind] }}</span><span>{{ entry.theoryGroup }}</span></div>
+          <div class="kb-method-row__topline">
+            <span>{{ entry.difficulty }}</span>
+            <span>{{ theoryKindLabels[entry.entryKind] }}</span>
+            <span v-if="theoryKindLabels[entry.entryKind] !== entry.theoryGroup">{{ entry.theoryGroup }}</span>
+          </div>
           <h3><a :href="entry.link">{{ entry.title }}</a></h3>
           <p>{{ entry.summary }}</p>
         </div>

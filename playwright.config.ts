@@ -55,6 +55,24 @@ export default defineConfig({
         hasTouch: true,
         isMobile: true
       }
+    },
+    {
+      name: 'desktop-dark',
+      testMatch: /visual-matrix\.spec\.ts/,
+      use: {
+        viewport: { width: 1440, height: 1000 },
+        colorScheme: 'dark'
+      }
+    },
+    {
+      name: 'mobile-light',
+      testMatch: /visual-matrix\.spec\.ts/,
+      use: {
+        viewport: { width: 390, height: 844 },
+        colorScheme: 'light',
+        hasTouch: true,
+        isMobile: true
+      }
     }
   ]
 })
