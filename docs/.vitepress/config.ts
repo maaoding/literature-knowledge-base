@@ -69,8 +69,8 @@ export default defineConfig({
     }]
   },
   head: [
-    ['link', { rel: 'icon', type: 'image/png', href: '/images/literary-icon.png?v=4' }],
-    ['link', { rel: 'apple-touch-icon', href: '/images/literary-icon.png?v=4' }]
+    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/images/literary-favicon-32.png?v=5' }],
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/images/literary-apple-touch-icon-180.png?v=5' }]
   ],
   themeConfig: {
     nav: [

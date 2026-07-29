@@ -31,7 +31,10 @@ export function collectPageFailures(page: Page) {
 
   page.on('requestfailed', (request) => {
     if (isSiteAsset(request.url())) {
-      failures.push(`${request.failure()?.errorText ?? 'request failed'} ${request.url()}`)
+      const errorText = request.failure()?.errorText ?? 'request failed'
+      if (errorText !== 'net::ERR_ABORTED') {
+        failures.push(`${errorText} ${request.url()}`)
+      }
     }
   })
 

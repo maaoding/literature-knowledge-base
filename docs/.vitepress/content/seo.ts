@@ -3,7 +3,7 @@ import type { ContentCatalog } from './catalog'
 
 export const SITE_NAME = '文学知识库'
 export const SITE_ORIGIN = 'https://literature-knowledge-base.maaoding.icu'
-export const SHARE_IMAGE_PATH = '/images/literature-share.png'
+export const SHARE_IMAGE_PATH = '/images/literature-share.jpg'
 
 const sectionLabels: Record<string, string> = {
   history: '文学史',

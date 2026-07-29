@@ -3,6 +3,7 @@ import type { Theme } from 'vitepress'
 import { h } from 'vue'
 import './custom.css'
 
+import DefaultThemeAccessibilitySync from './a11y'
 import AuthorGrid from './components/AuthorGrid.vue'
 import AuthorIdentity from './components/AuthorIdentity.vue'
 import ContentSources from './components/ContentSources.vue'
@@ -31,6 +32,7 @@ export default {
   extends: DefaultTheme,
   Layout() {
     return h(DefaultTheme.Layout, null, {
+      'layout-top': () => h(DefaultThemeAccessibilitySync),
       'not-found': () => h(NotFoundPage),
       'doc-footer-before': () => h('div', { class: 'kb-doc-footer-extras' }, [
         h(WorkReadingGuide),

@@ -29,6 +29,74 @@ function filesUnder(directory, extensions) {
   })
 }
 
+function readImageDimensions(filePath) {
+  const buffer = fs.readFileSync(filePath)
+  const extension = path.extname(filePath).toLowerCase()
+
+  if (extension === '.png') {
+    return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) }
+  }
+
+  if (extension === '.jpg' || extension === '.jpeg') {
+    let offset = 2
+    const startOfFrameMarkers = new Set([0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf])
+    while (offset + 9 < buffer.length) {
+      if (buffer[offset] !== 0xff) {
+        offset += 1
+        continue
+      }
+      const marker = buffer[offset + 1]
+      if (startOfFrameMarkers.has(marker)) {
+        return { width: buffer.readUInt16BE(offset + 7), height: buffer.readUInt16BE(offset + 5) }
+      }
+      if (marker === 0xd8 || marker === 0xd9 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
+        offset += 2
+        continue
+      }
+      const segmentLength = buffer.readUInt16BE(offset + 2)
+      offset += 2 + segmentLength
+    }
+  }
+
+  if (extension === '.webp' && buffer.toString('ascii', 0, 4) === 'RIFF') {
+    const chunkType = buffer.toString('ascii', 12, 16)
+    if (chunkType === 'VP8X') {
+      return {
+        width: 1 + buffer.readUIntLE(24, 3),
+        height: 1 + buffer.readUIntLE(27, 3)
+      }
+    }
+    if (chunkType === 'VP8L') {
+      const b1 = buffer[21]
+      const b2 = buffer[22]
+      const b3 = buffer[23]
+      const b4 = buffer[24]
+      return {
+        width: 1 + b1 + ((b2 & 0x3f) << 8),
+        height: 1 + (b2 >> 6) + (b3 << 2) + ((b4 & 0x0f) << 10)
+      }
+    }
+    if (chunkType === 'VP8 ') {
+      return {
+        width: buffer.readUInt16LE(26) & 0x3fff,
+        height: buffer.readUInt16LE(28) & 0x3fff
+      }
+    }
+  }
+
+  if (extension === '.avif') {
+    const ispeOffset = buffer.indexOf(Buffer.from('ispe'))
+    if (ispeOffset >= 4 && ispeOffset + 16 <= buffer.length) {
+      return {
+        width: buffer.readUInt32BE(ispeOffset + 8),
+        height: buffer.readUInt32BE(ispeOffset + 12)
+      }
+    }
+  }
+
+  throw new Error(`Unable to read image dimensions: ${filePath}`)
+}
+
 function normalizeOutlineTitle(title) {
   return title.normalize('NFKC').replace(/[\s“”"'‘’《》：:·、，。！？!?,.\-—（）()]/g, '')
 }
@@ -1627,12 +1695,12 @@ for (const url of ['/', '/history/', '/authors/', '/works/', '/reading/', '/path
 }
 
 const siteOrigin = 'https://literature-knowledge-base.maaoding.icu'
-const shareImageUrl = `${siteOrigin}/images/literature-share.png`
-const shareImagePath = path.join(docsDir, 'public', 'images', 'literature-share.png')
+const shareImageUrl = `${siteOrigin}/images/literature-share.jpg`
+const shareImagePath = path.join(docsDir, 'public', 'images', 'literature-share.jpg')
 assert(fs.existsSync(shareImagePath), 'missing global social share image')
 if (fs.existsSync(shareImagePath)) {
-  const shareImage = fs.readFileSync(shareImagePath)
-  assert(shareImage.readUInt32BE(16) === 1200 && shareImage.readUInt32BE(20) === 630, 'social share image must be exactly 1200x630')
+  const shareImage = readImageDimensions(shareImagePath)
+  assert(shareImage.width === 1200 && shareImage.height === 630, 'social share image must be exactly 1200x630')
 }
 
 const staticSeoPages = [
@@ -1911,6 +1979,9 @@ for (const action of [
 }
 assert(homeSource.includes('href="/style-test/" target="_self"'), 'home page can route the standalone style test through VitePress')
 assert(homeSource.includes('class="kb-band kb-home-methods"') && homeSource.includes('href="/methods/?mode=practice"'), 'home source is missing the method-center discovery links')
+assert(homeSource.includes('<main class="kb-home">') && homeSource.includes('</main>'), 'homepage must expose a main landmark')
+assert(homeSource.includes('<picture>') && homeSource.includes('type="image/avif"') && homeSource.includes('type="image/webp"'), 'homepage hero is missing responsive modern image sources')
+assert(homeSource.includes('width="1672"') && homeSource.includes('height="941"') && homeSource.includes('fetchpriority="high"'), 'homepage hero is missing stable intrinsic dimensions or high loading priority')
 assert(styleTestSource.includes('href="#home" data-route="home">入口</a>'), 'style test internal home route changed')
 assert(styleTestSource.includes('const routeAliases = { library: "map", knowledge: "map" }'), 'legacy style-test library routes no longer resolve to the reading map')
 assert(!styleTestSource.includes('data-page="knowledge"'), 'style test still contains a duplicate knowledge page')
@@ -1954,11 +2025,39 @@ const iconPath = path.join(docsDir, 'public', 'images', 'literary-icon.png')
 const icon = fs.readFileSync(iconPath)
 assert(icon.readUInt32BE(16) === 512 && icon.readUInt32BE(20) === 512, 'brand icon must be the 512px simplified version')
 assert(!fs.existsSync(path.join(docsDir, 'public', 'style-test', 'assets', 'literary-style-icon.png')), 'duplicate style-test icon still exists')
-assert((styleTestSource.match(/\/images\/literary-icon\.png\?v=4/g) ?? []).length === 3, 'style test icon references are not unified')
+assert((styleTestSource.match(/\/images\/literary-icon\.png\?v=4/g) ?? []).length === 1, 'style test visible brand icon must retain the shared 512px source')
+assert(styleTestSource.includes('/images/literary-favicon-32.png?v=5'), 'style test favicon does not use the optimized icon')
+assert(styleTestSource.includes('/images/literary-apple-touch-icon-180.png?v=5'), 'style test Apple Touch Icon does not use the optimized icon')
+assert(configSource.includes('/images/literary-favicon-32.png?v=5'), 'main site favicon does not use the optimized icon')
+assert(configSource.includes('/images/literary-apple-touch-icon-180.png?v=5'), 'main site Apple Touch Icon does not use the optimized icon')
 assert(!styleTestSource.includes('class="result-mark"'), 'style test result heading still contains the brand icon')
+
+const optimizedImages = [
+  { file: 'library-hero-modern-640.avif', width: 640, height: 360, maxBytes: 120_000 },
+  { file: 'library-hero-modern-640.webp', width: 640, height: 360, maxBytes: 180_000 },
+  { file: 'library-hero-modern-1120.avif', width: 1120, height: 630, maxBytes: 250_000 },
+  { file: 'library-hero-modern-1120.webp', width: 1120, height: 630, maxBytes: 350_000 },
+  { file: 'library-hero-modern-1672.avif', width: 1672, height: 942, maxBytes: 450_000 },
+  { file: 'library-hero-modern-1672.webp', width: 1672, height: 942, maxBytes: 650_000 },
+  { file: 'literature-share.jpg', width: 1200, height: 630, maxBytes: 450_000 },
+  { file: 'literary-favicon-32.png', width: 32, height: 32, maxBytes: 15_000 },
+  { file: 'literary-apple-touch-icon-180.png', width: 180, height: 180, maxBytes: 80_000 }
+]
+for (const asset of optimizedImages) {
+  const assetPath = path.join(docsDir, 'public', 'images', asset.file)
+  assert(fs.existsSync(assetPath), `optimized image is missing: ${asset.file}`)
+  if (!fs.existsSync(assetPath)) continue
+  const dimensions = readImageDimensions(assetPath)
+  assert(
+    dimensions.width === asset.width && dimensions.height === asset.height,
+    `${asset.file} expected ${asset.width}x${asset.height}, found ${dimensions.width}x${dimensions.height}`
+  )
+  assert(fs.statSync(assetPath).size <= asset.maxBytes, `${asset.file} exceeds its ${asset.maxBytes}-byte budget`)
+}
 
 const sourceText = sourceFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n')
 assert(!sourceText.includes('literary-style-icon.png'), 'legacy icon reference remains in source')
+assert(!sourceText.includes('/images/literature-share.png'), 'source still references the unoptimized social image')
 assert(!sourceText.includes('cp -R style-test'), 'workflow still copies the old style-test directory')
 
 const distFiles = filesUnder(distDir, new Set(['.html', '.js', '.json', '.css']))

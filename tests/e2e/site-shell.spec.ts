@@ -46,8 +46,17 @@ test('home renders navigation, media and current assets', async ({ page }, testI
 
   await gotoRoute(page, '/')
   await expect(page.locator('#kb-home-title')).toHaveText('文学知识库')
+  await expect(page.locator('main.kb-home')).toHaveCount(1)
+  await expect(page.locator('.kb-hero picture source[type="image/avif"]')).toHaveCount(1)
+  await expect(page.locator('.kb-hero picture source[type="image/webp"]')).toHaveCount(1)
   await expect(page.locator('.kb-hero__image')).toBeVisible()
+  await expect(page.locator('.kb-hero__image')).toHaveAttribute('width', '1672')
+  await expect(page.locator('.kb-hero__image')).toHaveAttribute('height', '941')
+  await expect(page.locator('.kb-hero__image')).toHaveAttribute('fetchpriority', 'high')
   expect(await page.locator('.kb-hero__image').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0)
+  const expectedHeroWidth = testInfo.project.name === 'mobile-dark' ? 640 : 1672
+  await expect.poll(() => page.locator('.kb-hero__image').evaluate((image: HTMLImageElement) => image.currentSrc))
+    .toMatch(new RegExp(`library-hero-modern-${expectedHeroWidth}\\.(avif|webp)$`))
 
   for (const href of ['/history/', '/authors/', '/works/', '/methods/', '/reading/', '/style-test/']) {
     await expect(page.locator(`a[href="${href}"]`).first(), href).toBeAttached()

@@ -14,9 +14,37 @@ const formatIndex = (index: number) => String(index + 1).padStart(2, '0')
 </script>
 
 <template>
-  <div class="kb-home">
+  <main class="kb-home">
     <section class="kb-hero" aria-labelledby="kb-home-title">
-      <img class="kb-hero__image" src="/images/library-hero-modern.png" alt="书页、阅读路径与文学索引构成的知识库视觉图" />
+      <picture>
+        <source
+          type="image/avif"
+          srcset="
+            /images/library-hero-modern-640.avif 640w,
+            /images/library-hero-modern-1120.avif 1120w,
+            /images/library-hero-modern-1672.avif 1672w
+          "
+          sizes="(max-width: 640px) calc(100vw - 32px), (max-width: 1240px) calc(100vw - 64px), 1180px"
+        />
+        <source
+          type="image/webp"
+          srcset="
+            /images/library-hero-modern-640.webp 640w,
+            /images/library-hero-modern-1120.webp 1120w,
+            /images/library-hero-modern-1672.webp 1672w
+          "
+          sizes="(max-width: 640px) calc(100vw - 32px), (max-width: 1240px) calc(100vw - 64px), 1180px"
+        />
+        <img
+          class="kb-hero__image"
+          src="/images/library-hero-modern.png"
+          width="1672"
+          height="941"
+          fetchpriority="high"
+          decoding="async"
+          alt="书页、阅读路径与文学索引构成的知识库视觉图"
+        />
+      </picture>
       <div class="kb-hero__shade" />
       <div class="kb-hero__content">
         <p class="kb-eyebrow">文学史 · 名著 · 作家推荐</p>
@@ -157,5 +185,5 @@ const formatIndex = (index: number) => String(index + 1).padStart(2, '0')
         </div>
       </div>
     </section>
-  </div>
+  </main>
 </template>
