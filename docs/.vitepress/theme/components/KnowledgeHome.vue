@@ -55,7 +55,7 @@ const formatIndex = (index: number) => String(index + 1).padStart(2, '0')
         <div class="kb-hero__actions" aria-label="主要入口">
           <a class="kb-primary-link" href="/works/">浏览名著</a>
           <a class="kb-secondary-link" href="/reading/">查看阅读指南</a>
-          <a class="kb-secondary-link" href="/style-test/" target="_self">测试文学风格</a>
+          <a class="kb-secondary-link" href="https://style-test.maaoding.icu/" target="_self">测试文学风格</a>
         </div>
       </div>
     </section>

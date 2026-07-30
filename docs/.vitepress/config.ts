@@ -1,5 +1,3 @@
-import fs from 'node:fs'
-import path from 'node:path'
 import { defineConfig } from 'vitepress'
 import { createSidebar, loadContentCatalog } from './content/catalog.node'
 import { contentRouteFromRelativePath, SITE_ORIGIN, transformKnowledgePageData } from './content/seo'
@@ -10,7 +8,6 @@ import {
 } from './content/search-tokenizer.mjs'
 
 const catalog = loadContentCatalog()
-const styleTestIndex = path.resolve(process.cwd(), 'docs/public/style-test/index.html')
 const searchHtmlEntities: Record<string, string> = {
   '&': '&amp;',
   '<': '&lt;',
@@ -30,13 +27,7 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   sitemap: {
-    hostname: SITE_ORIGIN,
-    transformItems(items) {
-      if (!items.some((item) => item.url.replace(/^\//, '') === 'style-test/')) {
-        items.push({ url: 'style-test/' })
-      }
-      return items
-    }
+    hostname: SITE_ORIGIN
   },
   transformPageData(pageData) {
     const route = contentRouteFromRelativePath(pageData.relativePath)
@@ -55,18 +46,7 @@ export default defineConfig({
     build: {
       // The local search index is lazy-loaded; docs:check enforces separate eager and search budgets.
       chunkSizeWarningLimit: 1700
-    },
-    plugins: [{
-      name: 'serve-style-test-index',
-      configureServer(server) {
-        server.middlewares.use((request, response, next) => {
-          if (request.url?.split(/[?#]/)[0] !== '/style-test/') return next()
-          response.statusCode = 200
-          response.setHeader('Content-Type', 'text/html; charset=utf-8')
-          response.end(fs.readFileSync(styleTestIndex, 'utf8'))
-        })
-      }
-    }]
+    }
   },
   head: [
     ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/images/literary-favicon-32.png?v=5' }],
@@ -80,7 +60,7 @@ export default defineConfig({
       { text: '名著', link: '/works/' },
       { text: '阅读方法', link: '/methods/' },
       { text: '阅读指南', link: '/reading/' },
-      { text: '文学风格测试', link: '/style-test/', target: '_self' }
+      { text: '文学风格测试', link: 'https://style-test.maaoding.icu/', target: '_self' }
     ],
     sidebar: createSidebar(catalog),
     search: {

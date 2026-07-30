@@ -17,12 +17,9 @@ function projectProfile(projectName: string) {
 test.beforeEach(async ({ page }, testInfo) => {
   const { theme } = projectProfile(testInfo.project.name)
   await installTheme(page, theme)
-  await page.addInitScript((value) => {
-    localStorage.setItem('literaryStyleTest.theme', value)
-  }, theme)
 })
 
-test('main and style-test entry pages render across the visual matrix', async ({ page }, testInfo) => {
+test('main entry page renders across the visual matrix', async ({ page }, testInfo) => {
   const { mobile, theme } = projectProfile(testInfo.project.name)
   const failures = collectPageFailures(page)
 
@@ -31,19 +28,6 @@ test('main and style-test entry pages render across the visual matrix', async ({
   await expect(page.locator('.kb-hero__image')).toBeVisible()
   expect(await page.locator('.kb-hero__image').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0)
   await expect(page.locator(mobile ? '.VPNavBarHamburger' : '.VPNavBarMenu')).toBeVisible()
-  await expectNoHorizontalOverflow(page)
-
-  await gotoRoute(page, '/style-test/')
-  await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
-  await expect(page.locator('.brand-mark img')).toBeVisible()
-  await expect(page.locator('.visual-stage__image')).toBeVisible()
-  expect(await page.locator('.brand-mark img').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0)
-  expect(await page.locator('.visual-stage__image').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0)
-  await expect(page.locator(mobile ? '#menuButton' : '#siteNav')).toBeVisible()
-  await expect(page.locator('#savedStateText')).toHaveText('暂无结果')
-  if (mobile) {
-    await expect(page.locator('#savedStateText')).toHaveCSS('white-space', 'nowrap')
-  }
   await expectNoHorizontalOverflow(page)
   expect(failures).toEqual([])
 })

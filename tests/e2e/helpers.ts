@@ -20,7 +20,6 @@ export function collectPageFailures(page: Page) {
     const pathname = new URL(url).pathname
     return pathname.startsWith('/assets/')
       || pathname.startsWith('/images/')
-      || pathname.startsWith('/style-test/assets/')
   }
 
   page.on('response', (response) => {

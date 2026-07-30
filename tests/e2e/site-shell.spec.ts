@@ -18,7 +18,6 @@ const stableRoutes = [
   '/topics/',
   '/theory/',
   '/techniques/',
-  '/style-test/',
   '/authors/莎士比亚',
   '/works/红楼梦',
   '/paths/世界文学入门',
@@ -58,9 +57,10 @@ test('home renders navigation, media and current assets', async ({ page }, testI
   await expect.poll(() => page.locator('.kb-hero__image').evaluate((image: HTMLImageElement) => image.currentSrc))
     .toMatch(new RegExp(`library-hero-modern-${expectedHeroWidth}\\.(avif|webp)$`))
 
-  for (const href of ['/history/', '/authors/', '/works/', '/methods/', '/reading/', '/style-test/']) {
+  for (const href of ['/history/', '/authors/', '/works/', '/methods/', '/reading/']) {
     await expect(page.locator(`a[href="${href}"]`).first(), href).toBeAttached()
   }
+  await expect(page.locator('a[href="https://style-test.maaoding.icu/"]').first()).toBeAttached()
 
   await expect(page.locator('.VPNavBarMenu a[href="/reading/"]')).toHaveText('阅读指南')
   await expect(page.locator('.VPNavBarMenu a[href="/paths/"]')).toHaveCount(0)
@@ -69,6 +69,22 @@ test('home renders navigation, media and current assets', async ({ page }, testI
   await expectTheme(page, theme)
   await expectNoHorizontalOverflow(page)
   expect(failures).toEqual([])
+})
+
+test('legacy style-test route keeps redirect and migration compatibility', async ({ request }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-light', 'Compatibility audit only needs one browser project')
+
+  const redirect = await request.get('/style-test/')
+  expect(redirect.status()).toBe(200)
+  const redirectBody = await redirect.text()
+  expect(redirectBody).toContain('https://style-test.maaoding.icu/')
+  expect(redirectBody).toContain('noindex,follow')
+
+  const bridge = await request.get('/style-test/migrate.html')
+  expect(bridge.status()).toBe(200)
+  const bridgeBody = await bridge.text()
+  expect(bridgeBody).toContain('literary-style-migration-request')
+  expect(bridgeBody).toContain('https://style-test.maaoding.icu')
 })
 
 test('all homepage internal links resolve', async ({ page, request }, testInfo) => {

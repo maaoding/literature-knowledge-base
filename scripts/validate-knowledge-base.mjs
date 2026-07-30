@@ -1690,7 +1690,7 @@ for (const entry of catalog.entries.filter((item) => item.contentVersion === 2))
   assert(builtPage.includes(`资料校订：${entry.reviewedAt}</span>`), `${entry.url} has an invalid visible reviewedAt value`)
   assert(!builtPage.includes(`资料校订：${entry.reviewedAt}T`), `${entry.url} exposes an ISO timestamp instead of a date`)
 }
-for (const url of ['/', '/history/', '/authors/', '/works/', '/reading/', '/paths/', '/topics/', '/theory/', '/techniques/', '/methods/', '/style-test/']) {
+for (const url of ['/', '/history/', '/authors/', '/works/', '/reading/', '/paths/', '/topics/', '/theory/', '/techniques/', '/methods/', '/style-test/', '/style-test/migrate.html']) {
   assert(fs.existsSync(distTarget(url)), `missing built index URL: ${url}`)
 }
 
@@ -1807,12 +1807,12 @@ assert(fs.existsSync(sitemapPath), 'missing sitemap.xml')
 if (fs.existsSync(sitemapPath)) {
   const sitemapSource = fs.readFileSync(sitemapPath, 'utf8')
   const sitemapUrls = [...sitemapSource.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
-  assert(sitemapUrls.length === 275, `expected 275 sitemap URLs, found ${sitemapUrls.length}`)
+  assert(sitemapUrls.length === 274, `expected 274 sitemap URLs, found ${sitemapUrls.length}`)
   assert(new Set(sitemapUrls).size === sitemapUrls.length, 'sitemap contains duplicate URLs')
   for (const [url] of [...staticSeoPages, ...contentSeoPages]) {
     assert(sitemapUrls.includes(new URL(url, siteOrigin).href), `sitemap is missing ${url}`)
   }
-  assert(sitemapUrls.includes(`${siteOrigin}/style-test/`), 'sitemap is missing the standalone style test')
+  assert(!sitemapUrls.includes(`${siteOrigin}/style-test/`), 'sitemap still claims the migrated style test')
 }
 
 assert(fs.existsSync(distTarget('/about/')), 'missing built editorial policy page')
@@ -1948,14 +1948,29 @@ for (const file of sourceFiles) {
   }
 }
 
-const styleTestSourcePath = path.join(docsDir, 'public', 'style-test', 'index.html')
-const styleTestSource = fs.readFileSync(styleTestSourcePath, 'utf8')
+const styleTestRedirectPath = path.join(docsDir, 'public', 'style-test', 'index.html')
+const styleTestBridgePath = path.join(docsDir, 'public', 'style-test', 'migrate.html')
+const styleTestRedirect = fs.readFileSync(styleTestRedirectPath, 'utf8')
+const styleTestBridge = fs.readFileSync(styleTestBridgePath, 'utf8')
 const configSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'config.ts'), 'utf8')
 const workflowSource = fs.readFileSync(path.join(root, '.github', 'workflows', 'deploy-pages.yml'), 'utf8')
 const homeSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'KnowledgeHome.vue'), 'utf8')
 const readingGuideSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'ReadingGuideExplorer.vue'), 'utf8')
-assert(styleTestSource.includes('class="brand" href="#home" data-route-link="home"'), 'style test brand does not return to its own entrance')
-assert(configSource.includes("link: '/style-test/', target: '_self'"), 'top navigation can route the standalone style test through VitePress')
+const styleTestOrigin = 'https://style-test.maaoding.icu'
+assert(styleTestRedirect.includes(`<link rel="canonical" href="${styleTestOrigin}/"`), 'legacy style-test redirect has an invalid canonical')
+assert(styleTestRedirect.includes(`new URL("${styleTestOrigin}/")`), 'legacy style-test redirect has an invalid destination')
+assert(styleTestRedirect.includes('"library", "knowledge"'), 'legacy style-test redirect does not preserve old hash aliases')
+assert(styleTestRedirect.includes('<meta name="robots" content="noindex,follow"'), 'legacy style-test redirect must stay out of search')
+assert(styleTestBridge.includes(`const targetOrigin = "${styleTestOrigin}"`), 'migration bridge has an invalid target origin')
+assert(styleTestBridge.includes('literary-style-migration-request'), 'migration bridge request contract changed')
+assert(styleTestBridge.includes('literary-style-migration-response'), 'migration bridge response contract changed')
+assert(styleTestBridge.includes('literary-style-migration-ready'), 'migration bridge ready contract changed')
+assert(styleTestBridge.includes('event.origin !== targetOrigin') && styleTestBridge.includes('event.source !== window.parent'), 'migration bridge does not restrict callers')
+assert(styleTestBridge.includes('localStorage.getItem("literaryStyleTest.v4")'), 'migration bridge cannot read the old result')
+assert(styleTestBridge.includes('localStorage.getItem("literaryStyleTest.theme")'), 'migration bridge cannot read the old theme')
+assert(!fs.existsSync(path.join(docsDir, 'public', 'style-test', 'assets')), 'migrated style-test assets still exist in the main repository')
+assert(configSource.includes(`link: '${styleTestOrigin}/', target: '_self'`), 'top navigation does not link to the independent style test')
+assert(!configSource.includes('serve-style-test-index') && !configSource.includes('styleTestIndex'), 'VitePress still embeds the style-test application')
 assert(configSource.includes("{ text: '阅读方法', link: '/methods/' }"), 'top navigation does not link directly to the method center')
 assert(configSource.includes("{ text: '阅读指南', link: '/reading/' }"), 'top navigation does not link to the unified reading guide')
 assert(!configSource.includes("{ text: '推荐阅读', link: '/paths/' }") && !configSource.includes("{ text: '专题', link: '/topics/' }"), 'top navigation still exposes separate path and topic entries')
@@ -1977,60 +1992,17 @@ for (const action of [
 ]) {
   assert(workflowSource.includes(action), `Pages workflow is not using the Node 24 action: ${action}`)
 }
-assert(homeSource.includes('href="/style-test/" target="_self"'), 'home page can route the standalone style test through VitePress')
+assert(homeSource.includes(`href="${styleTestOrigin}/" target="_self"`), 'home page does not link to the independent style test')
 assert(homeSource.includes('class="kb-band kb-home-methods"') && homeSource.includes('href="/methods/?mode=practice"'), 'home source is missing the method-center discovery links')
 assert(homeSource.includes('<main class="kb-home">') && homeSource.includes('</main>'), 'homepage must expose a main landmark')
 assert(homeSource.includes('<picture>') && homeSource.includes('type="image/avif"') && homeSource.includes('type="image/webp"'), 'homepage hero is missing responsive modern image sources')
 assert(homeSource.includes('width="1672"') && homeSource.includes('height="941"') && homeSource.includes('fetchpriority="high"'), 'homepage hero is missing stable intrinsic dimensions or high loading priority')
-assert(styleTestSource.includes('href="#home" data-route="home">入口</a>'), 'style test internal home route changed')
-assert(styleTestSource.includes('const routeAliases = { library: "map", knowledge: "map" }'), 'legacy style-test library routes no longer resolve to the reading map')
-assert(!styleTestSource.includes('data-page="knowledge"'), 'style test still contains a duplicate knowledge page')
-assert((styleTestSource.match(/data-page="[^"]+"/g) ?? []).length === 5, 'style test must keep exactly five primary pages')
-assert(styleTestSource.includes('literaryStyleTest.v4'), 'style test result localStorage key changed')
-assert(styleTestSource.includes('literaryStyleTest.theme'), 'style test theme localStorage key changed')
-assert(!styleTestSource.includes('literary-style-icon.png'), 'style test still references its duplicate icon')
-const questionBlock = styleTestSource.match(/const questions = \[([\s\S]*?)\n\s*\];/)?.[1] ?? ''
-assert((questionBlock.match(/\{ text:/g) ?? []).length === 30, 'style test must keep all 30 questions')
-
-const styleTestArrays = {
-  dimensions: 5,
-  appealFactors: 5,
-  styleFamilies: 12,
-  readingSituations: 8,
-  comparisons: 9
-}
-for (const [name, expectedCount] of Object.entries(styleTestArrays)) {
-  const block = styleTestSource.match(new RegExp(`const ${name} = \\[([\\s\\S]*?)\\n\\s*\\];`))?.[1] ?? ''
-  const actualCount = (block.match(/\bid:\s*"[^"]+"/g) ?? []).length
-  assert(actualCount === expectedCount, `style test expected ${expectedCount} ${name}, found ${actualCount}`)
-}
-assert(styleTestArrays.appealFactors + styleTestArrays.styleFamilies + styleTestArrays.readingSituations + styleTestArrays.comparisons === 34, 'reading map index must keep 34 entries')
-assert(styleTestSource.includes('id="readingPlanGrid"'), 'style test result is missing the unified three-step reading plan')
-assert(!styleTestSource.includes('id="pathGrid"') && !styleTestSource.includes('id="recommendationGrid"'), 'style test still contains duplicate result recommendation grids')
-const readingPlanBlock = styleTestSource.match(/function renderReadingPlan\(scores\) \{([\s\S]*?)\n\s*function normalizeSearch/)?.[1] ?? ''
-for (const label of ['01 · 熟悉入口', '02 · 对照入口', '03 · 当前情境']) {
-  assert(readingPlanBlock.includes(label), `three-step reading plan missing: ${label}`)
-}
-assert((readingPlanBlock.match(/label:\s*"0[1-3] ·/g) ?? []).length === 3, 'three-step reading plan must contain exactly three entries')
-assert(styleTestSource.includes('getRankedDimensions(scores)\n          .map((dimension, index)'), 'dimension details are not sorted by preference strength')
-assert(styleTestSource.includes('index < 2 ? "open" : ""'), 'top two dimension details must open by default')
-assert(styleTestSource.includes('const methodGroups = ['), 'style test method content is not grouped')
-assert(!styleTestSource.includes('const methodNotes = ['), 'style test still contains the flat method notes structure')
-for (const title of ['作答与隐私', '计分与生成', '解读与验证']) {
-  assert(styleTestSource.includes(`title: "${title}"`), `method group missing: ${title}`)
-}
-assert(!styleTestSource.includes('风格知识库'), 'style test still contains legacy knowledge-base wording')
 
 const iconPath = path.join(docsDir, 'public', 'images', 'literary-icon.png')
 const icon = fs.readFileSync(iconPath)
 assert(icon.readUInt32BE(16) === 512 && icon.readUInt32BE(20) === 512, 'brand icon must be the 512px simplified version')
-assert(!fs.existsSync(path.join(docsDir, 'public', 'style-test', 'assets', 'literary-style-icon.png')), 'duplicate style-test icon still exists')
-assert((styleTestSource.match(/\/images\/literary-icon\.png\?v=4/g) ?? []).length === 1, 'style test visible brand icon must retain the shared 512px source')
-assert(styleTestSource.includes('/images/literary-favicon-32.png?v=5'), 'style test favicon does not use the optimized icon')
-assert(styleTestSource.includes('/images/literary-apple-touch-icon-180.png?v=5'), 'style test Apple Touch Icon does not use the optimized icon')
 assert(configSource.includes('/images/literary-favicon-32.png?v=5'), 'main site favicon does not use the optimized icon')
 assert(configSource.includes('/images/literary-apple-touch-icon-180.png?v=5'), 'main site Apple Touch Icon does not use the optimized icon')
-assert(!styleTestSource.includes('class="result-mark"'), 'style test result heading still contains the brand icon')
 
 const optimizedImages = [
   { file: 'library-hero-modern-640.avif', width: 640, height: 360, maxBytes: 120_000 },
@@ -2244,5 +2216,5 @@ console.log(sourceMap
 console.log(`validated ${catalog.historyEntries.length} timeline nodes, ${catalog.authors.length} authors, ${catalog.works.length} works`)
 console.log(`validated ${catalog.readingPaths.length} paths, ${catalog.topics.length} topics, ${catalog.theories.length} theories, ${catalog.techniques.length} techniques, ${catalog.entries.length} unique slugs`)
 console.log(`validated ${deepContentCount} version 2 content pages and their sources`)
-console.log(`validated ${sourceFiles.length} source files, all built URLs, shared icon and style test`)
+console.log(`validated ${sourceFiles.length} source files, all built URLs, shared icon and style-test migration compatibility`)
 console.log(`validated lazy local search index at ${searchIndexBytes} bytes; ${searchIndexLimitBytes - searchIndexBytes} bytes remain below the 1.7 MB limit`)

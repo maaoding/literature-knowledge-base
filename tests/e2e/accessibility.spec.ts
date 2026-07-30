@@ -11,8 +11,7 @@ const representativeRoutes = [
   '/history/',
   '/works/红楼梦',
   '/methods/',
-  '/reading/',
-  '/style-test/'
+  '/reading/'
 ]
 
 async function expectNamedVisibleControls(page: Page, route: string) {
@@ -44,21 +43,19 @@ test('representative routes keep basic accessibility semantics', async ({ page }
     await expectNamedVisibleControls(page, route)
     await expectNoHorizontalOverflow(page)
 
-    if (route !== '/style-test/') {
-      await expect(page.locator('#main-nav-aria-label')).toHaveText('主导航')
-      const sidebarLabel = page.locator('#sidebar-aria-label')
-      if (await sidebarLabel.count()) {
-        await expect(sidebarLabel).toHaveText('侧栏导航')
-      }
-      await expect(page.locator('.VPNavBarHamburger')).toHaveAttribute('aria-label', '移动导航')
-      await expect(page.locator('[aria-label="mobile navigation"], [aria-label="extra navigation"], [aria-label="toggle section"]')).toHaveCount(0)
-      await expect(page.locator('.header-anchor[aria-label^="Permalink to"]')).toHaveCount(0)
+    await expect(page.locator('#main-nav-aria-label')).toHaveText('主导航')
+    const sidebarLabel = page.locator('#sidebar-aria-label')
+    if (await sidebarLabel.count()) {
+      await expect(sidebarLabel).toHaveText('侧栏导航')
+    }
+    await expect(page.locator('.VPNavBarHamburger')).toHaveAttribute('aria-label', '移动导航')
+    await expect(page.locator('[aria-label="mobile navigation"], [aria-label="extra navigation"], [aria-label="toggle section"]')).toHaveCount(0)
+    await expect(page.locator('.header-anchor[aria-label^="Permalink to"]')).toHaveCount(0)
 
-      const headerAnchors = page.locator('.header-anchor')
-      for (let index = 0; index < await headerAnchors.count(); index += 1) {
-        await expect.soft(headerAnchors.nth(index), `${route} heading anchor ${index + 1}`)
-          .toHaveAttribute('aria-label', /^链接到“.+”$/)
-      }
+    const headerAnchors = page.locator('.header-anchor')
+    for (let index = 0; index < await headerAnchors.count(); index += 1) {
+      await expect.soft(headerAnchors.nth(index), `${route} heading anchor ${index + 1}`)
+        .toHaveAttribute('aria-label', /^链接到“.+”$/)
     }
   }
 
