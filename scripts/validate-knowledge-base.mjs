@@ -1690,7 +1690,7 @@ for (const entry of catalog.entries.filter((item) => item.contentVersion === 2))
   assert(builtPage.includes(`资料校订：${entry.reviewedAt}</span>`), `${entry.url} has an invalid visible reviewedAt value`)
   assert(!builtPage.includes(`资料校订：${entry.reviewedAt}T`), `${entry.url} exposes an ISO timestamp instead of a date`)
 }
-for (const url of ['/', '/history/', '/authors/', '/works/', '/reading/', '/paths/', '/topics/', '/theory/', '/techniques/', '/methods/', '/style-test/', '/style-test/migrate.html']) {
+for (const url of ['/', '/history/', '/authors/', '/works/', '/reading/', '/paths/', '/topics/', '/theory/', '/techniques/', '/methods/']) {
   assert(fs.existsSync(distTarget(url)), `missing built index URL: ${url}`)
 }
 
@@ -1948,27 +1948,18 @@ for (const file of sourceFiles) {
   }
 }
 
-const styleTestRedirectPath = path.join(docsDir, 'public', 'style-test', 'index.html')
-const styleTestBridgePath = path.join(docsDir, 'public', 'style-test', 'migrate.html')
-const styleTestRedirect = fs.readFileSync(styleTestRedirectPath, 'utf8')
-const styleTestBridge = fs.readFileSync(styleTestBridgePath, 'utf8')
+const legacyStyleTestDir = path.join(docsDir, 'public', 'style-test')
 const configSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'config.ts'), 'utf8')
 const workflowSource = fs.readFileSync(path.join(root, '.github', 'workflows', 'deploy-pages.yml'), 'utf8')
 const homeSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'KnowledgeHome.vue'), 'utf8')
 const readingGuideSource = fs.readFileSync(path.join(docsDir, '.vitepress', 'theme', 'components', 'ReadingGuideExplorer.vue'), 'utf8')
 const styleTestOrigin = 'https://style-test.maaoding.icu'
-assert(styleTestRedirect.includes(`<link rel="canonical" href="${styleTestOrigin}/"`), 'legacy style-test redirect has an invalid canonical')
-assert(styleTestRedirect.includes(`new URL("${styleTestOrigin}/")`), 'legacy style-test redirect has an invalid destination')
-assert(styleTestRedirect.includes('"library", "knowledge"'), 'legacy style-test redirect does not preserve old hash aliases')
-assert(styleTestRedirect.includes('<meta name="robots" content="noindex,follow"'), 'legacy style-test redirect must stay out of search')
-assert(styleTestBridge.includes(`const targetOrigin = "${styleTestOrigin}"`), 'migration bridge has an invalid target origin')
-assert(styleTestBridge.includes('literary-style-migration-request'), 'migration bridge request contract changed')
-assert(styleTestBridge.includes('literary-style-migration-response'), 'migration bridge response contract changed')
-assert(styleTestBridge.includes('literary-style-migration-ready'), 'migration bridge ready contract changed')
-assert(styleTestBridge.includes('event.origin !== targetOrigin') && styleTestBridge.includes('event.source !== window.parent'), 'migration bridge does not restrict callers')
-assert(styleTestBridge.includes('localStorage.getItem("literaryStyleTest.v4")'), 'migration bridge cannot read the old result')
-assert(styleTestBridge.includes('localStorage.getItem("literaryStyleTest.theme")'), 'migration bridge cannot read the old theme')
-assert(!fs.existsSync(path.join(docsDir, 'public', 'style-test', 'assets')), 'migrated style-test assets still exist in the main repository')
+assert(
+  !fs.existsSync(legacyStyleTestDir) || fs.readdirSync(legacyStyleTestDir).length === 0,
+  'legacy style-test source files still exist'
+)
+assert(!fs.existsSync(distTarget('/style-test/')), 'legacy style-test route still exists in build output')
+assert(!fs.existsSync(distTarget('/style-test/migrate.html')), 'legacy style-test migration bridge still exists in build output')
 assert(configSource.includes(`link: '${styleTestOrigin}/', target: '_self'`), 'top navigation does not link to the independent style test')
 assert(!configSource.includes('serve-style-test-index') && !configSource.includes('styleTestIndex'), 'VitePress still embeds the style-test application')
 assert(configSource.includes("{ text: '阅读方法', link: '/methods/' }"), 'top navigation does not link directly to the method center')
@@ -2216,5 +2207,5 @@ console.log(sourceMap
 console.log(`validated ${catalog.historyEntries.length} timeline nodes, ${catalog.authors.length} authors, ${catalog.works.length} works`)
 console.log(`validated ${catalog.readingPaths.length} paths, ${catalog.topics.length} topics, ${catalog.theories.length} theories, ${catalog.techniques.length} techniques, ${catalog.entries.length} unique slugs`)
 console.log(`validated ${deepContentCount} version 2 content pages and their sources`)
-console.log(`validated ${sourceFiles.length} source files, all built URLs, shared icon and style-test migration compatibility`)
+console.log(`validated ${sourceFiles.length} source files, all built URLs, shared icon and independent style-test links`)
 console.log(`validated lazy local search index at ${searchIndexBytes} bytes; ${searchIndexLimitBytes - searchIndexBytes} bytes remain below the 1.7 MB limit`)

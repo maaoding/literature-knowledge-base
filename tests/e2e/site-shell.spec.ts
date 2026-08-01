@@ -71,20 +71,13 @@ test('home renders navigation, media and current assets', async ({ page }, testI
   expect(failures).toEqual([])
 })
 
-test('legacy style-test route keeps redirect and migration compatibility', async ({ request }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop-light', 'Compatibility audit only needs one browser project')
+test('legacy style-test routes are no longer published', async ({ request }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-light', 'Removed route audit only needs one browser project')
 
-  const redirect = await request.get('/style-test/')
-  expect(redirect.status()).toBe(200)
-  const redirectBody = await redirect.text()
-  expect(redirectBody).toContain('https://style-test.maaoding.icu/')
-  expect(redirectBody).toContain('noindex,follow')
-
-  const bridge = await request.get('/style-test/migrate.html')
-  expect(bridge.status()).toBe(200)
-  const bridgeBody = await bridge.text()
-  expect(bridgeBody).toContain('literary-style-migration-request')
-  expect(bridgeBody).toContain('https://style-test.maaoding.icu')
+  for (const url of ['/style-test/', '/style-test/migrate.html']) {
+    const response = await request.get(url)
+    expect(response.status(), url).toBe(404)
+  }
 })
 
 test('all homepage internal links resolve', async ({ page, request }, testInfo) => {
